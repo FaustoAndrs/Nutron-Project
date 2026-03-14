@@ -1,0 +1,51 @@
+# --- JetBrains & Gradle ---
+.gradle/
+.idea/
+build/
+**/build/
+*.iml
+*.iws
+out/
+local.properties
+
+# --- Kotlin Multiplatform & Konan ---
+.kotlin/
+.konan/
+*.kexe
+*.klib
+*.kt.bc
+
+# --- Android ---
+*.apk
+*.aar
+*.ap_
+*.dex
+captures/
+.externalNativeBuild/
+.cxx/
+output.json
+
+# --- iOS (Xcode & CocoaPods) ---
+.DS_Store
+**/iosApp/DerivedData/
+**/iosApp/Build/
+**/iosApp/Index/
+**/iosApp.xcworkspace/xcuserdata/
+**/iosApp.xcworkspace/xcshareddata/
+*.moved-aside
+*.swp
+*.lock
+.metadata/
+
+# --- Conservar archivos de proyecto Xcode críticos ---
+# Esto asegura que la estructura del proyecto se mantenga
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+
+# --- Varios ---
+node_modules/
+*.log
+.temp/
+.tmp/
