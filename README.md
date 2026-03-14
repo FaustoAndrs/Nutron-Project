@@ -53,6 +53,10 @@ Este proyecto sigue una arquitectura de servicios desacoplados para asegurar la 
 
     Ejecuta la aplicación: [comando de ejecución]
 
+## Cómo ejecutar Docker
+
+Consulta el archivo DOCKERCOMPOSE-README para más detalles.    
+
 ## 📜 Licencia
 
 Este proyecto está bajo la licencia MIT. Consulta el archivo LICENSE para más detalles.
