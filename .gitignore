@@ -1,3 +1,17 @@
+
+# --- Backend (Tomcat) ---
+# Ignorar los artefactos compilados del servidor
+*.war
+*.jar
+nutron-api-rest/build/
+nutron-api-rest/out/
+
+# --- Nutron Docker & Persistencia ---
+# Evita subir los datos reales de tu MongoDB a Git
+nutron-docker/mongodb/data/
+nutron-docker/data/
+.env
+
 # --- JetBrains & Gradle ---
 .gradle/
 .idea/
@@ -25,11 +39,12 @@ captures/
 .cxx/
 output.json
 
-# --- iOS (Xcode & CocoaPods) ---
+# --- iOS (Xcode) ---
 .DS_Store
-**/iosApp/DerivedData/
-**/iosApp/Build/
-**/iosApp/Index/
+**/iosApp/
+DerivedData/
+Build/
+Index/
 **/iosApp.xcworkspace/xcuserdata/
 **/iosApp.xcworkspace/xcshareddata/
 *.moved-aside

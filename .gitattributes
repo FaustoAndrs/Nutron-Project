@@ -1,0 +1,12 @@
+# Handle line endings automatically for files detected as text
+# and leave binary files untouched.
+* text=auto
+
+# Standardize line endings to LF for the repository
+# This ensures consistency between Windows and macOS
+* text eol=lf
+
+# Specifically ensure shell scripts always use LF
+*.sh text eol=lf
+# Specifically ensure batch files always use CRLF
+*.bat text eol=crlf
