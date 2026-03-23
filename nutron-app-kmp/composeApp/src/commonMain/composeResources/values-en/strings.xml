@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Login Screen -->
+    <string name="title_welcome">WELCOME</string>
+    <string name="login_headline">Log In</string>
+    <string name="login_button_enter">Sign In</string>
+    <string name="login_signup_text">No account?</string>
+    <string name="login_button_signup">Sign Up</string>
+    <string name="login_button_skip">Continue as Guest</string>
+
+    <!-- SignUp Screen -->
+    <string name="title_signup">SIGN UP</string>
+    <string name="signup_headline">Create your account</string>
+    <string name="signup_button_continue">Complete Registration</string>
+
+    <!-- Setup Screen -->
+    <string name="title_setup">SETUP</string>
+    <string name="setup_welcome_user">Welcome!</string>
+    <string name="setup_welcome_guest">Guest Setup</string>
+    <string name="setup_desc_user">Thanks for registering. Let's set things up.</string>
+    <string name="setup_desc_guest">You're in guest mode. You can set up your profile now.</string>
+    <string name="setup_button_finish">Start</string>
+
+    <!-- Profile Screen -->
+    <string name="title_profile">PROFILE</string>
+    <string name="profile_headline">Profile Screen</string>
+    <string name="profile_button_details">View Details</string>
+
+    <!-- Targets Screen -->
+    <string name="title_targets">TARGETS</string>
+    <string name="targets_headline">Targets</string>
+
+    <!-- Diary Screen -->
+    <string name="title_diary">DIARY</string>
+    <string name="diary_headline">Your Diary</string>
+
+    <!-- Settings Screen -->
+    <string name="title_settings">SETTINGS</string>
+    <string name="settings_headline">Settings</string>
+    <string name="settings_button_logout">Logout</string>
+    <string name="settings_button_setup">User parameters</string>
+
+    <!-- Details Screen -->
+    <string name="title_details">DETAILS</string>
+    <string name="details_id">Details ID: %s</string>
+
+    <!-- Navigation Tabs -->
+    <string name="nav_profile">Profile</string>
+    <string name="nav_targets">Targets</string>
+    <string name="nav_diary">Diary</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- General -->
+    <string name="button_back">Back</string>
+    <string name="button_back_start">Back to Start</string>
+
+    <!-- Validation -->
+    <string name="no_empty_text_string_validation">The field cannot be empty</string>
+
+</resources>

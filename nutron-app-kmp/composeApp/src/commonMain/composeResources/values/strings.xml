@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Login Screen -->
+    <string name="title_welcome">BIENVENIDO</string>
+    <string name="login_headline">Inicia Sesión</string>
+    <string name="login_button_enter">Entrar</string>
+    <string name="login_signup_text">No tengo cuenta, </string>
+    <string name="login_button_signup">Registrarme</string>
+    <string name="login_button_skip">Continuar sin cuenta</string>
+
+    <!-- SignUp Screen -->
+    <string name="title_signup">REGISTRO</string>
+    <string name="signup_headline">Crea tu cuenta</string>
+    <string name="signup_button_continue">Completar Registro</string>
+
+    <!-- Setup Screen -->
+    <string name="title_setup">CONFIGURACIÓN</string>
+    <string name="setup_welcome_user">¡Bienvenido!</string>
+    <string name="setup_welcome_guest">Configuración de Invitado</string>
+    <string name="setup_desc_user">Gracias por registrarte. Ajustemos unos detalles.</string>
+    <string name="setup_desc_guest">Estás en modo invitado. Puedes configurar tu perfil ahora.</string>
+    <string name="setup_button_finish">Empezar</string>
+
+    <!-- Profile Screen -->
+    <string name="title_profile">PERFIL</string>
+    <string name="profile_headline">Pantalla de Perfil</string>
+    <string name="profile_button_details">Ver Detalles</string>
+
+    <!-- Targets Screen -->
+    <string name="title_targets">OBJETIVOS</string>
+    <string name="targets_headline">Objetivos</string>
+
+    <!-- Diary Screen -->
+    <string name="title_diary">DIARIO</string>
+    <string name="diary_headline">Tu Diario</string>
+
+    <!-- Settings Screen -->
+    <string name="title_settings">AJUSTES</string>
+    <string name="settings_headline">Ajustes</string>
+    <string name="settings_button_logout">Cerrar sesión</string>
+    <string name="settings_button_setup">Parámetros del usuario</string>
+
+    <!-- Details Screen -->
+    <string name="title_details">DETALLES</string>
+    <string name="details_id">Detalles ID: %s</string>
+
+    <!-- Navigation Tabs -->
+    <string name="nav_profile">Perfil</string>
+    <string name="nav_targets">Objetivos</string>
+    <string name="nav_diary">Diario</string>
+    <string name="nav_settings">Ajustes</string>
+
+    <!-- General -->
+    <string name="button_back">Volver</string>
+    <string name="button_back_start">Volver al Inicio</string>
+
+    <!-- Validation -->
+    <string name="no_empty_text_string_validation">El campo no puede estar vacío</string>
+
+</resources>
