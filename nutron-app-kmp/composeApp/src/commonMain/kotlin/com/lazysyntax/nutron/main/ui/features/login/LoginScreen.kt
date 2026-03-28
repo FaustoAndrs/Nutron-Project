@@ -12,16 +12,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.lazysyntax.nutron.TopAppBarCommon
+import com.lazysyntax.nutron.main.ui.composables.TextFieldEmail
+import com.lazysyntax.nutron.main.ui.composables.TextFieldPassword
+import com.lazysyntax.nutron.main.ui.navigation.TopAppBarCommon
 import nutron.composeapp.generated.resources.Res
 import nutron.composeapp.generated.resources.login_button_enter
 import nutron.composeapp.generated.resources.login_button_signup
@@ -30,15 +29,18 @@ import nutron.composeapp.generated.resources.login_headline
 import nutron.composeapp.generated.resources.login_signup_text
 import nutron.composeapp.generated.resources.title_welcome
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     onNavigateToProfile: () -> Unit,
     onNavigateToSignUp: () -> Unit,
-    onNavigateToSkip: () -> Unit
+    onNavigateToSkip: () -> Unit,
+    viewModel: LoginViewModel = koinViewModel()
 ) {
-    var loginState by remember { mutableStateOf("") }
+    val uiState by viewModel.uiState.collectAsState()
+    val validationState by viewModel.validationState.collectAsState()
 
     Scaffold(
         topBar = { TopAppBarCommon(stringResource(Res.string.title_welcome)) },
@@ -54,47 +56,47 @@ fun LoginScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            /*
-                TextFieldEmail(
-                    label = "Login",
-                    emailState = TODO(),
-                    validacionState = TODO(),
-                    onValueChange = TODO()
-                )
+            TextFieldEmail(
+                label = "Email",
+                emailState = uiState.email,
+                validacionState = validationState.emailValidation,
+                onValueChange = { viewModel.onEmailChanged(it) }
+            )
 
-                TextFieldPassword(
-                    label = "Password",
-                    passwordState = TODO(),
-                    validacionState = TODO(),
-                    onValueChange = TODO()
-                )
-    */
+            Spacer(modifier = Modifier.height(8.dp))
 
-            TextField(
-                label = {Text("Login")},
-                value = loginState,
-                onValueChange = {loginState = it})
+            TextFieldPassword(
+                label = "Contraseña",
+                passwordState = uiState.password,
+                validacionState = validationState.passwordValidation,
+                onValueChange = { viewModel.onPasswordChanged(it) }
+            )
 
-            TextField(
-                label = {Text("password")},
-                value = loginState,
-                onValueChange = {loginState = it})
+            Spacer(modifier = Modifier.height(24.dp))
 
-
-
-            Button(onClick = onNavigateToProfile) {
+            Button(
+                onClick = onNavigateToProfile,
+                enabled = !validationState.error
+            ) {
                 Text(stringResource(Res.string.login_button_enter))
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(stringResource(Res.string.login_signup_text))
             Text(
                 stringResource(Res.string.login_button_signup),
-                modifier = Modifier.clickable(onClick = onNavigateToSignUp))
+                style = MaterialTheme.typography.labelLarge.copy(color = MaterialTheme.colorScheme.primary),
+                modifier = Modifier.clickable(onClick = onNavigateToSignUp)
+            )
 
+            Spacer(modifier = Modifier.height(8.dp))
 
-            Text(stringResource(Res.string.login_button_skip),
-                modifier = Modifier.clickable(onClick = onNavigateToSkip))
-
+            Text(
+                stringResource(Res.string.login_button_skip),
+                style = MaterialTheme.typography.labelMedium,
+                modifier = Modifier.clickable(onClick = onNavigateToSkip)
+            )
         }
     }
 }
