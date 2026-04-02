@@ -13,10 +13,20 @@ import com.lazysyntax.nutron.main.ui.navigation.NavDisplayNutron
 import com.lazysyntax.nutron.main.ui.navigation.Route
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
 
 private val navConfig = SavedStateConfiguration {
     serializersModule = SerializersModule {
-        polymorphic(NavKey::class) {}
+        polymorphic(NavKey::class) {
+            subclass(Route.Login::class)
+            subclass(Route.SignUp::class)
+            subclass(Route.SetUp::class)
+            subclass(Route.Profile::class)
+            subclass(Route.Targets::class)
+            subclass(Route.Diary::class)
+            subclass(Route.Settings::class)
+            subclass(Route.Details::class)
+        }
     }
 }
 

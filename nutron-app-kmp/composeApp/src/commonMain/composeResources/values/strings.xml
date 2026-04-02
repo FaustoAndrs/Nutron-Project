@@ -33,7 +33,9 @@
     <!-- Diary Screen -->
     <string name="title_diary">DIARIO</string>
     <string name="diary_headline">Tu Diario</string>
-
+    <!-- Library Screen -->
+    <string name="title_library">Biblioteca</string>
+    <string name="library_headline">Tu biblioteca</string>
     <!-- Settings Screen -->
     <string name="title_settings">AJUSTES</string>
     <string name="settings_headline">Ajustes</string>

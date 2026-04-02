@@ -50,9 +50,8 @@ fun NavDisplayNutron(backStack: NavBackStack<NavKey>, navigateToTab: (Int) -> Un
                             backStack.removeAt(backStack.size - 1)
                         }
                     },
-                    onSignUpSuccess = {
-                        backStack.add(Route.SetUp(fromSignUp = true))
-                    }
+                    onNavigateToProfile = {
+                        backStack.add(Route.Profile)}
                 )
 
                 is Route.SetUp -> SetupScreen(
