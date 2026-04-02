@@ -8,15 +8,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.lazysyntax.nutron.main.ui.composables.TextFieldEmail
 import com.lazysyntax.nutron.main.ui.composables.TextFieldPassword
@@ -41,6 +44,13 @@ fun LoginScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val validationState by viewModel.validationState.collectAsState()
+
+    // Manejo de navegación exitosa
+    LaunchedEffect(uiState.loginSuccess) {
+        if (uiState.loginSuccess == true) {
+            onNavigateToProfile()
+        }
+    }
 
     Scaffold(
         topBar = { TopAppBarCommon(stringResource(Res.string.title_welcome)) },
@@ -74,11 +84,24 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Button(
-                onClick = onNavigateToProfile,
-                enabled = !validationState.error
-            ) {
-                Text(stringResource(Res.string.login_button_enter))
+            if (uiState.isLoading) {
+                CircularProgressIndicator()
+            } else {
+                Button(
+                    onClick = { viewModel.login() },
+                    enabled = !validationState.error
+                ) {
+                    Text(stringResource(Res.string.login_button_enter))
+                }
+            }
+
+            uiState.errorMessage?.let { error ->
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = error, color = Color.Red)
+            }
+
+            if (uiState.loginSuccess == true) {
+                Text("¡Bienvenido!", color = Color.Green)
             }
 
             Spacer(modifier = Modifier.height(16.dp))

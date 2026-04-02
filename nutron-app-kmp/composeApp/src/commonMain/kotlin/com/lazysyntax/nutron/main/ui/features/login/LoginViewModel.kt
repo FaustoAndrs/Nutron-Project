@@ -2,7 +2,7 @@ package com.lazysyntax.nutron.main.ui.features.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.ktor.client.*
+import com.lazysyntax.nutron.data.services.authentication.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -10,9 +10,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class LoginViewModel(
-    private val httpClient: HttpClient
+    private val authRepository: AuthRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -29,17 +30,27 @@ class LoginViewModel(
         )
 
     fun onEmailChanged(email: String) {
-        _uiState.update { it.copy(email = email) }
+        _uiState.update { it.copy(email = email, loginSuccess = null, errorMessage = null) }
     }
 
     fun onPasswordChanged(password: String) {
-        _uiState.update { it.copy(password = password) }
+        _uiState.update { it.copy(password = password, loginSuccess = null, errorMessage = null) }
     }
 
     fun login() {
         val validation = validator.validate(_uiState.value)
         if (!validation.error) {
-            // Proceder con login usando httpClient
+            viewModelScope.launch {
+                _uiState.update { it.copy(isLoading = true, loginSuccess = null, errorMessage = null) }
+                val success = authRepository.login(_uiState.value.email, _uiState.value.password)
+                _uiState.update { 
+                    it.copy(
+                        isLoading = false, 
+                        loginSuccess = success,
+                        errorMessage = if (!success) "Usuario o clave incorrectos" else null
+                    )
+                }
+            }
         }
     }
 }
