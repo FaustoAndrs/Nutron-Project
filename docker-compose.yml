@@ -1,24 +1,49 @@
 services:
-  database:
-    image: mongo:latest
-    container_name: nutron-mongodb
-    ports:
-      - "27017:27017"
-    volumes:
-      - ./nutron-docker/mongodb/data:/data/db # Persistencia local
+  # --- CAPA DE DATOS ---
+  
+  # Base de datos relacional para Usuarios
+  mysql-db:
+    image: mysql:8.0
+    container_name: nutron-mysql-db
+    restart: always
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=nutron_pass
+      MYSQL_DATABASE: users_db
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "3306:3306"
+    networks:
+      - backend-net
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
-  backend:
-    image: tomcat:9.0-jdk17-openjdk
-    container_name: nutron-api
+  # Base de datos NoSQL para el Diario
+  # ...
+
+  # --- CAPA DE APLICACIÓN (JAVA) ---
+
+  # Microservicio de Autenticación (MySQL)
+  auth-service:
+    build: ./nutron-auth # Ruta a la carpeta de tu primer proyecto Java
+    container_name: nutron-auth-service
     ports:
-      - "8080:8080"
-    volumes:
-      # Mapeamos el WAR generado por el proyecto Java al Tomcat
-      - ./nutron-api-rest/build/libs/nutron-api.war:/usr/local/tomcat/webapps/nutron-api.war
-    depends_on:
-      - database
+      - "8081:8081"
     environment:
-      - SPRING_DATA_MONGODB_URI=mongodb://admin:nutron_pass@database:27017/nutron_db?authSource=admin
+      - DB_HOST=mysql-db
+      - DB_NAME=auth_db
+      - DB_USER=root
+      - DB_PASS=root_password
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    networks:
+      - backend-net
+
+  # Microservicio de Diario (MongoDB)
+  # ... 
+
+networks:
+  backend-net:
+    driver: bridge
