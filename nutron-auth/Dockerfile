@@ -7,8 +7,8 @@ WORKDIR /app
 # Copiar los archivos de configuración de Gradle primero (para aprovechar el caché de capas)
 COPY gradlew .
 COPY gradle gradle
-COPY build.gradle.kts .
-COPY settings.gradle.kts .
+COPY build.gradle .
+COPY settings.gradle .
 # Nota: Si usas Groovy en lugar de Kotlin, cambia la extensión a .gradle
 
 # Dar permisos de ejecución al wrapper de Gradle
@@ -35,4 +35,4 @@ COPY --from=build /app/build/libs/*-SNAPSHOT.jar app.jar
 EXPOSE 8081
 
 # Comando para ejecutar la aplicación
-ENTRYPOINT ["java", "-j", "/app/app.jar"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

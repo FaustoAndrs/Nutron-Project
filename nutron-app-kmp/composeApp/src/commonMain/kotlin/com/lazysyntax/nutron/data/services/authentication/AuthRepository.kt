@@ -11,13 +11,14 @@ class AuthRepository(private val client: HttpClient) {
     * Si usas iOS o Desktop, será localhost:8081.
     * Cambia "localhost" por "10.0.2.2" si pruebas en Android Emulator
      * */
-    private val BASE_URL = "http://localhost:8081/api/auth"
+    //private val BASE_URL = "http://localhost:8081/api/auth"
+    private val BASE_URL = "http://10.0.2.2:8081/api/auth"
 
-    suspend fun login(username: String, password: String): Boolean {
+    suspend fun login(email: String, password: String): Boolean {
         return try {
             val response = client.post("$BASE_URL/login") {
                 contentType(ContentType.Application.Json)
-                setBody(LoginRequest(username, password))
+                setBody(LoginRequest(email, password))
             }
             response.status == HttpStatusCode.OK
         } catch (e: Exception) {

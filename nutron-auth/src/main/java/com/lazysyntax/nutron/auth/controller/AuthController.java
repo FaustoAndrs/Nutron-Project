@@ -38,7 +38,7 @@ public class AuthController {
             // Mapeamos el DTO a la Entidad
             User newUser = new User();
             newUser.setUsername(request.getUsername());
-            newUser.setFullName(request.getFullName());
+            newUser.setFullname(request.getFullname());
             newUser.setEmail(request.getEmail());
             newUser.setPassword(request.getPassword()); // El servicio se encarga de encriptar
 

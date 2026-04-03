@@ -15,8 +15,8 @@ public class UserService {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-    public boolean verifyCredentials(String username, String rawPassword) {
-        return userRepository.findByUsername(username)
+    public boolean verifyCredentials(String email, String rawPassword) {
+        return userRepository.findByEmail(email)
                 .map(user -> passwordEncoder.matches(rawPassword, user.getPassword()))
                 .orElse(false);
     }

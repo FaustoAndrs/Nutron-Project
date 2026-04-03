@@ -23,5 +23,5 @@ public class User {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) // Esto permite recibir la clave al registrarse, pero NO enviarla en respuestas GET/POST.
     private String password;
 
-    private String fullName;
+    private String fullname;
 }
