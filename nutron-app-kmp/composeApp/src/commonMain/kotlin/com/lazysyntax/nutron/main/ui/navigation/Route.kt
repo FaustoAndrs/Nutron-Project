@@ -1,10 +1,8 @@
 package com.lazysyntax.nutron.main.ui.navigation
 
 import androidx.navigation3.runtime.NavKey
-import androidx.savedstate.serialization.SavedStateConfiguration
+import com.lazysyntax.nutron.models.NewUser
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
 
 @Serializable
 sealed interface Route : NavKey {
@@ -25,6 +23,9 @@ sealed interface Route : NavKey {
 
     @Serializable
     data object Diary : Route
+
+    @Serializable
+    data object Library : Route
 
     @Serializable
     data object Settings : Route

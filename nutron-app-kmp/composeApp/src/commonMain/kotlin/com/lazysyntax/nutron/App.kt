@@ -5,54 +5,40 @@ package com.lazysyntax.nutron
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.savedstate.serialization.SavedStateConfiguration
+import com.lazysyntax.nutron.data.services.authentication.SessionManager
 import com.lazysyntax.nutron.main.ui.navigation.NavDisplayNutron
-import com.lazysyntax.nutron.main.ui.navigation.Route
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
+import com.lazysyntax.nutron.main.utilities.language.changeLanguage
+import org.koin.compose.koinInject
+import kotlin.time.Clock
 
-private val navConfig = SavedStateConfiguration {
-    serializersModule = SerializersModule {
-        polymorphic(NavKey::class) {
-            subclass(Route.Login::class)
-            subclass(Route.SignUp::class)
-            subclass(Route.SetUp::class)
-            subclass(Route.Profile::class)
-            subclass(Route.Targets::class)
-            subclass(Route.Diary::class)
-            subclass(Route.Settings::class)
-            subclass(Route.Details::class)
-        }
-    }
-}
 
 @Composable
 @Preview
 fun App() {
+    val sessionManager: SessionManager = koinInject()
+    // Observamos un estado que cambie al hacer logout
+    val authSession by sessionManager.authSession.collectAsState()
+
+    val language by sessionManager.language.collectAsState()
+
+    // Usamos el ID del usuario como KEY. Si cambia a null, todo se reinicia.
+    val sessionKey = remember(authSession) {
+        authSession?.userId ?: "guest_${Clock.System.now().toEpochMilliseconds()}"
+    }
+
+    LaunchedEffect(language) {
+        changeLanguage(language)
+    }
+
     MaterialTheme {
-
-        val backStack = rememberNavBackStack(navConfig, Route.Login as NavKey)
-
-        val navigateToTab: (Int) -> Unit = { index ->
-            val route = when (index) {
-                0 -> Route.Profile
-                1 -> Route.Targets
-                2 -> Route.Diary
-                3 -> Route.Settings
-                else -> Route.Profile
-            }
-            if (backStack.lastOrNull() != route) {
-                backStack.add(route)
-                while (backStack.size > 1) {
-                    backStack.removeAt(0)
-                }
-            }
+        key(sessionKey) { // Importa androidx.compose.runtime.key
+            NavDisplayNutron()
         }
-
-        NavDisplayNutron(backStack, navigateToTab)
     }
 }

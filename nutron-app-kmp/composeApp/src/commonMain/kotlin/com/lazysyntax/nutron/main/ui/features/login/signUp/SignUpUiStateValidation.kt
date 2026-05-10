@@ -2,6 +2,7 @@ package com.lazysyntax.nutron.main.ui.features.login.signUp
 
 import com.lazysyntax.nutron.main.utilities.validation.Validation
 import com.lazysyntax.nutron.main.utilities.validation.ComposedValidation
+import org.jetbrains.compose.resources.StringResource
 
 data class SignUpUiStateValidation(
     val userNameValidation: Validation = object : Validation {},
@@ -24,6 +25,6 @@ data class SignUpUiStateValidation(
     override val error: Boolean
         get() = validacionCompuesta?.error ?: componerValidacion().error
 
-    override val errorMessage: String?
+    override val errorMessage: StringResource?
         get() = validacionCompuesta?.errorMessage ?: componerValidacion().errorMessage
 }

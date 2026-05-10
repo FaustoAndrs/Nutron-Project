@@ -19,8 +19,50 @@
     <string name="setup_welcome_guest">Guest Setup</string>
     <string name="setup_desc_user">Thanks for registering. Let's set things up.</string>
     <string name="setup_desc_guest">You're in guest mode. You can set up your profile now.</string>
-    <string name="setup_button_finish">Start</string>
+    <string name="setup_button_save">Save</string>
 
+    <!-- Validators -->
+    <string name="email_no_empty_validator">The email cannot be empty.</string>
+    <string name="email_validator">The email format is invalid.</string>
+    <string name="password_no_empty_validator">The password cannot be empty </string>
+    <string name="user_name_no_empty_validator">The username cannot be empty</string>
+    <string name="full_name_no_empty_validator">The full name cannot be empty</string>
+
+    <string name="weight_no_empty_validator">The weight cannot be empty.</string>
+    <string name="weight_double_range_validator">The weight must be between 30 and 300 kg.</string>
+    <string name="weight_number_validator">The weight must be a valid number.</string>
+    <string name="weight_max_length_validator">The weight cannot exceed 3 digits.</string>
+    <string name="weight_min_length_validator">The weight must be at least 2 digits long.</string>
+
+    <string name="height_no_empty_validator">The height cannot be empty.</string>
+    <string name="height_number_validator">The height must be a valid number.</string>
+    <string name="height_max_length_validator">The height cannot exceed 3 digits.</string>
+    <string name="height_min_length_validator">The height must be at least 2 digits long.</string>
+    <string name="height_double_range_validator">The height must be between 100 and 250 cm.</string>
+
+    <string name="age_no_empty_validator">The age cannot be empty.</string>
+    <string name="age_number_validator">The age must be a valid number.</string>
+    <string name="age_max_length_validator">The age cannot exceed 2 digits.</string>
+    <string name="age_int_range_validator">The age must be between 10 and 99 years.</string>
+
+    <string name="gender_no_empty_validator">You must select an option.</string>
+    <string name="activity_no_empty_validator">You must select an activity level.</string>
+    <string name="goal_no_empty_validator">You must select a target.</string>
+    <string name="formula_no_empty_validator">You must select a formula.</string>
+
+    <!-- Activity level-->
+    <string name="low_activity_level">Low</string>
+    <string name="moderate_activity_level">Moderate</string>
+    <string name="high_activity_level">High</string>
+    <string name="very_high_activity_level">Very High</string>
+    <string name="hypractive_activity_level">Hyperactive</string>
+
+    <!-- Goals objective-->
+    <string name="lose_weight_objective">Lose weight</string>
+    <string name="lose_weight_slowly_objective">Lose weight slowly</string>
+    <string name="mantain_weight_objective">Maintain weight</string>
+    <string name="gain_weight_objective">Gain weight</string>
+    <string name="gain_weight_slowly_objective">Gain weight slowly</string>
     <!-- Profile Screen -->
     <string name="title_profile">PROFILE</string>
     <string name="profile_headline">Profile Screen</string>
@@ -29,20 +71,27 @@
     <!-- Targets Screen -->
     <string name="title_targets">TARGETS</string>
     <string name="targets_headline">Targets</string>
+    <string name="label_daily_kcal">Daily Caloric Requirement</string>
+    <string name="label_diet_type">Diet selected</string>
 
     <!-- Diary Screen -->
     <string name="title_diary">DIARY</string>
     <string name="diary_headline">Your Diary</string>
+    <string name="empty_meal">No products added</string>
 
     <!-- Library Screen -->
     <string name="title_library">Library</string>
     <string name="library_headline">Your Library</string>
+    <string name="library_button_add_product">Add Product</string>
+    <string name="library_button_search_product">Search Product</string>
+    <string name="library_button_search_barcode">Search Barcode</string>
 
     <!-- Settings Screen -->
     <string name="title_settings">SETTINGS</string>
     <string name="settings_headline">Settings</string>
     <string name="settings_button_logout">Logout</string>
     <string name="settings_button_setup">User parameters</string>
+    <string name="settings_button_language">Language</string>
 
     <!-- Details Screen -->
     <string name="title_details">DETAILS</string>

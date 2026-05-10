@@ -1,5 +1,7 @@
 package com.lazysyntax.nutron.main.utilities.validation
 
+import org.jetbrains.compose.resources.StringResource
+
 // ValidacionCompuesta.kt -----------------------------------------------
 // Es una clase de utilidad que tiene una lista de validaciones que debemos pasar antes
 // de dar por válidos los datos de un formulario.
@@ -15,6 +17,6 @@ open class ComposedValidation : Validation {
     override val error: Boolean
         get() = validations.any { it.error }
 
-    override val errorMessage: String?
+    override val errorMessage: StringResource?
         get() = validations.firstOrNull { it.error }?.errorMessage
 }

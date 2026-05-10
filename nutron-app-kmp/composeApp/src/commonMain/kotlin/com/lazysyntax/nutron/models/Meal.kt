@@ -1,4 +1,4 @@
-package com.lazysyntax.nutron.data.services.nutron
+package com.lazysyntax.nutron.models
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -6,7 +6,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Meal(
     @SerialName("meal_name") val name: String? = null,
-    val products: List<Product>? = null
+    val foods: List<Food>? = null
 )
-
-

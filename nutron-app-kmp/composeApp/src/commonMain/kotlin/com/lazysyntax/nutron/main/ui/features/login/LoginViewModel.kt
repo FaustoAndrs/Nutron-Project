@@ -3,6 +3,11 @@ package com.lazysyntax.nutron.main.ui.features.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lazysyntax.nutron.data.services.authentication.AuthRepository
+import com.lazysyntax.nutron.data.services.syncronitation.SyncRepository
+import com.lazysyntax.nutron.data.services.syncronitation.SyncResult
+import com.lazysyntax.nutron.main.ui.navigation.Navigator
+import com.lazysyntax.nutron.main.ui.navigation.Route
+import com.lazysyntax.nutron.models.NewUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +18,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class LoginViewModel(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val navigator: Navigator,
+    private val syncRepository: SyncRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -29,6 +36,19 @@ class LoginViewModel(
             initialValue = LoginUiStateValidation()
         )
 
+
+    fun onLoginEvent(loginEvent: LoginEvent){
+        when(loginEvent) {
+            is LoginEvent.EmailChanged -> onEmailChanged(loginEvent.login)
+            is LoginEvent.PasswordChanged -> onPasswordChanged(loginEvent.password)
+            is LoginEvent.OnClickLogin -> login()
+            is LoginEvent.OnClickSignUp -> onGoToSignUp()
+            LoginEvent.OnClickSkipLogin -> onSkipLogin()
+            LoginEvent.OnLoginSuccess -> onLoginSucces()
+        }
+    }
+
+
     fun onEmailChanged(email: String) {
         _uiState.update { it.copy(email = email, loginSuccess = null, errorMessage = null) }
     }
@@ -37,20 +57,78 @@ class LoginViewModel(
         _uiState.update { it.copy(password = password, loginSuccess = null, errorMessage = null) }
     }
 
+    fun resetLoginState() {
+        //Actualiza el login con los datos del SessionManager si cierra sesión
+        // y/o solo resetea el LoginUiSate
+        _uiState.update { LoginUiState() }
+    }
+
     fun login() {
         val validation = validator.validate(_uiState.value)
         if (!validation.error) {
+
             viewModelScope.launch {
-                _uiState.update { it.copy(isLoading = true, loginSuccess = null, errorMessage = null) }
-                val success = authRepository.login(_uiState.value.email, _uiState.value.password)
-                _uiState.update { 
+
+                _uiState.update { it.copy(
+                    isLoading = true,
+                    loginSuccess = null,
+                    errorMessage = null
+                ) }
+                val success = authRepository.login(
+                    _uiState.value.email,
+                    _uiState.value.password
+                )
+                println("Login en servidor - Éxito: $success")
+                _uiState.update {
                     it.copy(
                         isLoading = false, 
                         loginSuccess = success,
                         errorMessage = if (!success) "Usuario o clave incorrectos" else null
                     )
                 }
+
+                var syncResult: SyncResult? = null
+                if (success) {
+                    syncResult = syncRepository.syncUserSetUp()
+                }
+
+                when (syncResult) {
+                    SyncResult.Success -> {
+                        // El usuario ya tiene perfil -> Ir al Home
+                        navigator.navigateTo(Route.Profile)
+                        println("SYNC: Usuario ya tiene perfil")
+                    }
+                     SyncResult.NotFound -> {
+                        // Usuario nuevo (404) -> Ir a la configuración inicial (Calculator/Setup)
+                        navigator.navigateTo(Route.SetUp(fromSignUp = true))
+                        println("SYNC: Usuario nuevo to setup")
+                    }
+                    null -> {
+                        println("SYNC: NULL")
+                    }
+                    SyncResult.Error -> {
+                        // Error de conexión -> Mostrar mensaje al usuario
+                        println("SYNC: Error de conexion")
+                        //Mostrar un SnackBar
+                    }
+                }
+
+
+
+
             }
+
         }
     }
+
+    fun onLoginSucces(){
+        navigator.resetTo(route = Route.Profile)
+    }
+    fun onGoToSignUp(){
+        navigator.navigateTo(route = Route.SignUp)
+    }
+    fun onSkipLogin(){
+        navigator.resetTo(route = Route.SetUp(fromSignUp = false))
+    }
+
 }

@@ -1,5 +1,7 @@
 package com.lazysyntax.nutron.main.ui.features.login.signUp
 
+import com.lazysyntax.nutron.models.NewUser
+
 data class SignUpUiState(
     val userName: String = "",
     val fullName: String = "",
@@ -9,3 +11,12 @@ data class SignUpUiState(
     val signUpSuccess: Boolean? = null,
     val errorMessage: String? = null
 )
+
+fun SignUpUiState.toNewUserEntity(): NewUser {
+    return NewUser (
+        userName = userName,
+        fullName = fullName,
+        email = email,
+        password = password
+    )
+}

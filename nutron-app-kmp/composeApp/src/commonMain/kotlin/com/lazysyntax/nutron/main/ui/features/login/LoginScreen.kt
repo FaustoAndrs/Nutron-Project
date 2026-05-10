@@ -23,7 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.lazysyntax.nutron.main.ui.composables.TextFieldEmail
 import com.lazysyntax.nutron.main.ui.composables.TextFieldPassword
-import com.lazysyntax.nutron.main.ui.navigation.TopAppBarCommon
+import com.lazysyntax.nutron.main.ui.navigation.composables.TopAppBarCommon
 import nutron.composeapp.generated.resources.Res
 import nutron.composeapp.generated.resources.login_button_enter
 import nutron.composeapp.generated.resources.login_button_signup
@@ -34,23 +34,43 @@ import nutron.composeapp.generated.resources.title_welcome
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun LoginScreen(
-    onNavigateToProfile: () -> Unit,
-    onNavigateToSignUp: () -> Unit,
-    onNavigateToSkip: () -> Unit,
-    viewModel: LoginViewModel = koinViewModel()
+    vm: LoginViewModel = koinViewModel(),
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val validationState by viewModel.validationState.collectAsState()
+    val uiState by vm.uiState.collectAsState()
+    val validationState by vm.validationState.collectAsState()
 
-    // Manejo de navegación exitosa
     LaunchedEffect(uiState.loginSuccess) {
         if (uiState.loginSuccess == true) {
-            onNavigateToProfile()
+            vm.onLoginEvent(LoginEvent.OnLoginSuccess)
+            vm.resetLoginState()
         }
     }
+    LoginContent(
+        uiState = uiState,
+        emailChanged = { vm.onLoginEvent(LoginEvent.EmailChanged(it)) },
+        passwordChanged = { vm.onLoginEvent(LoginEvent.PasswordChanged(it)) },
+        onClickLogin = { vm.onLoginEvent(LoginEvent.OnClickLogin) },
+        onClickSignUp = { vm.onLoginEvent(LoginEvent.OnClickSignUp) },
+        onClickSkipLogin = { vm.onLoginEvent(LoginEvent.OnClickSkipLogin) },
+        validationState = validationState,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LoginContent(
+    uiState: LoginUiState,
+    emailChanged: (String) -> Unit,
+    passwordChanged: (String) -> Unit,
+    onClickLogin: () -> Unit,
+    onClickSignUp: () -> Unit,
+    onClickSkipLogin: () -> Unit,
+    validationState: LoginUiStateValidation,
+
+) {
 
     Scaffold(
         topBar = { TopAppBarCommon(stringResource(Res.string.title_welcome)) },
@@ -70,7 +90,8 @@ fun LoginScreen(
                 label = "Email",
                 emailState = uiState.email,
                 validacionState = validationState.emailValidation,
-                onValueChange = { viewModel.onEmailChanged(it) }
+                onValueChange = emailChanged
+
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -79,7 +100,7 @@ fun LoginScreen(
                 label = "Contraseña",
                 passwordState = uiState.password,
                 validacionState = validationState.passwordValidation,
-                onValueChange = { viewModel.onPasswordChanged(it) }
+                onValueChange = passwordChanged
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -88,7 +109,7 @@ fun LoginScreen(
                 CircularProgressIndicator()
             } else {
                 Button(
-                    onClick = { viewModel.login() },
+                    onClick = onClickLogin,
                     enabled = !validationState.error
                 ) {
                     Text(stringResource(Res.string.login_button_enter))
@@ -100,17 +121,13 @@ fun LoginScreen(
                 Text(text = error, color = Color.Red)
             }
 
-            if (uiState.loginSuccess == true) {
-                Text("¡Bienvenido!", color = Color.Green)
-            }
-
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(stringResource(Res.string.login_signup_text))
             Text(
                 stringResource(Res.string.login_button_signup),
                 style = MaterialTheme.typography.labelLarge.copy(color = MaterialTheme.colorScheme.primary),
-                modifier = Modifier.clickable(onClick = onNavigateToSignUp)
+                modifier = Modifier.clickable(onClick = onClickSignUp)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -118,8 +135,9 @@ fun LoginScreen(
             Text(
                 stringResource(Res.string.login_button_skip),
                 style = MaterialTheme.typography.labelMedium,
-                modifier = Modifier.clickable(onClick = onNavigateToSkip)
+                modifier = Modifier.clickable(onClick = onClickSkipLogin)
             )
         }
     }
+
 }

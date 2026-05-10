@@ -5,111 +5,64 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
-import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
-import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.ui.NavDisplay
 import com.lazysyntax.nutron.main.ui.features.diary.DetailsScreen
 import com.lazysyntax.nutron.main.ui.features.diary.DiaryScreen
+import com.lazysyntax.nutron.main.ui.features.diary.DiaryViewModel
+import com.lazysyntax.nutron.main.ui.features.diary.library.LibraryScreen
+import com.lazysyntax.nutron.main.ui.features.diary.library.LibraryViewModel
 import com.lazysyntax.nutron.main.ui.features.login.LoginScreen
-import com.lazysyntax.nutron.main.ui.features.login.setUp.SetupScreen
+import com.lazysyntax.nutron.main.ui.features.login.LoginViewModel
 import com.lazysyntax.nutron.main.ui.features.login.signUp.SignUpScreen
+import com.lazysyntax.nutron.main.ui.features.login.signUp.SignUpViewModel
 import com.lazysyntax.nutron.main.ui.features.profile.ProfileScreen
+import com.lazysyntax.nutron.main.ui.features.setUp.SetUpViewModel
+import com.lazysyntax.nutron.main.ui.features.setUp.SetupScreen
 import com.lazysyntax.nutron.main.ui.features.settings.SettingsScreen
 import com.lazysyntax.nutron.main.ui.features.targets.TargetsScreen
+import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun NavDisplayNutron(backStack: NavBackStack<NavKey>, navigateToTab: (Int) -> Unit) {
+fun NavDisplayNutron() {
+    val navigator: Navigator = koinInject()
 
-    NavDisplay(
-        backStack = backStack,
-        onBack = { backStack.removeLastOrNull() },
-        transitionSpec = {
-            fadeIn(animationSpec = tween(200)) togetherWith fadeOut(animationSpec = tween(200))
-        },
-        popTransitionSpec = {
-            fadeIn(animationSpec = tween(200)) togetherWith fadeOut(animationSpec = tween(200))
-        }
-    ) { route ->
+    NavDisplay(backStack = navigator.backstack, transitionSpec = {
+        fadeIn(animationSpec = tween(200)) togetherWith fadeOut(animationSpec = tween(200))
+    }, popTransitionSpec = {
+        fadeIn(animationSpec = tween(200)) togetherWith fadeOut(animationSpec = tween(200))
+    }) { route ->
         NavEntry(route) {
             when (route) {
-                Route.Login -> LoginScreen(
-                    onNavigateToProfile = {
-                        backStack.add(Route.Profile)
-                        while (backStack.size > 1) {
-                            backStack.removeAt(0)
-                        }
-                    },
-                    onNavigateToSignUp = { backStack.add(Route.SignUp) },
-                    onNavigateToSkip = { backStack.add(Route.SetUp(fromSignUp = false)) }
-                )
+                Route.Login -> LoginScreen()
+                Route.SignUp -> SignUpScreen()
 
-                Route.SignUp -> SignUpScreen(
-                    onBack = {
-                        if (backStack.size > 1) {
-                            backStack.removeAt(backStack.size - 1)
-                        }
-                    },
-                    onNavigateToProfile = {
-                        backStack.add(Route.Profile)}
-                )
+                is Route.SetUp -> SetupScreen(fromSignUp = route.fromSignUp)
 
-                is Route.SetUp -> SetupScreen(
-                    fromSignUp = route.fromSignUp,
-                    onBack = {
-                        if (route.fromSignUp) {
-                            if (backStack.size > 1) {
-                                backStack.removeAt(backStack.size - 1)
-                            }
-                        } else {
-                            backStack.add(Route.Login)
-                            while (backStack.size > 1) {
-                                backStack.removeAt(0)
-                            }
-                        }
-                    },
-                    onFinish = {
-                        backStack.add(Route.Profile)
-                        while (backStack.size > 1) {
-                            backStack.removeAt(0)
-                        }
-                    }
-                )
+                Route.Profile -> ProfileScreen()
 
-                Route.Profile -> ProfileScreen(
-                    onNavigateToDetails = { id -> backStack.add(Route.Details(id)) },
-                    onNavigateToScreen = navigateToTab
-                )
+                Route.Targets -> TargetsScreen()
 
-                Route.Targets -> TargetsScreen(
-                    onNavigateToScreen = navigateToTab
-                )
+                Route.Diary -> DiaryScreen()
 
-                Route.Diary -> DiaryScreen(
-                    onNavigateToScreen = navigateToTab
-                )
+                is Route.Library -> {
+                    val vm: LibraryViewModel = koinViewModel()
+                    LibraryScreen(
+                        viewModel = vm,
+                        onLibraryEvent = vm::onLibraryEvent,
+                    )
+                }
 
                 Route.Settings -> SettingsScreen(
-                    onNavigateToScreen = navigateToTab,
                     onLogOut = {
-                        backStack.add(Route.Login)
-                        while (backStack.size > 1) {
-                            backStack.removeAt(0)
-                        }
-                    },
-                    onSetUp = {
-                        backStack.add(Route.SetUp(fromSignUp = false))
-                    }
-                )
+                    navigator.resetTo(Route.Login)
+                }, onSetUp = {
+                    navigator.navigateTo(Route.SetUp(fromSignUp = false))
+                })
 
                 is Route.Details -> DetailsScreen(
-                    id = route.id,
-                    onBack = {
-                        if (backStack.size > 1) {
-                            backStack.removeAt(backStack.size - 1)
-                        }
-                    }
-                )
+                    id = route.id, onBack = { navigator.goBack() })
             }
         }
     }

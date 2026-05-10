@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.lazysyntax.nutron.main.ui.navigation
+package com.lazysyntax.nutron.main.ui.navigation.composables
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -20,6 +20,8 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.text.style.TextOverflow
+import com.lazysyntax.nutron.main.ui.navigation.Navigator
+import com.lazysyntax.nutron.main.ui.navigation.Route
 import nutron.composeapp.generated.resources.Res
 import nutron.composeapp.generated.resources.button_back
 import nutron.composeapp.generated.resources.nav_diary
@@ -27,25 +29,32 @@ import nutron.composeapp.generated.resources.nav_profile
 import nutron.composeapp.generated.resources.nav_settings
 import nutron.composeapp.generated.resources.nav_targets
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 
 @Composable
-fun NavBar(indexScreenState: Int, onNavigateToScreen: (Int) -> Unit) {
+fun NavBar() { // Sin parámetros
+    val navigator: Navigator = koinInject()
+    val currentRoute = navigator.backstack.lastOrNull()
+
     val items = remember {
         listOf(
-            Res.string.nav_profile to Icons.Default.Person,
-            Res.string.nav_targets to Icons.Default.Info,
-            Res.string.nav_diary to Icons.Default.Star,
-            Res.string.nav_settings to Icons.Default.Settings,
+            Triple(Route.Profile, Res.string.nav_profile, Icons.Default.Person),
+            Triple(Route.Targets, Res.string.nav_targets, Icons.Default.Info),
+            Triple(Route.Diary, Res.string.nav_diary, Icons.Default.Star),
+            Triple(Route.Settings, Res.string.nav_settings, Icons.Default.Settings)
         )
     }
+
     NavigationBar {
-        items.forEachIndexed { index, (resId, icon) ->
-            val title = stringResource(resId)
+        items.forEach { (route, resId, icon) ->
+            val isSelected = currentRoute == route
             NavigationBarItem(
-                icon = { Icon(icon, contentDescription = title) },
-                label = { Text(title) },
-                selected = indexScreenState == index,
-                onClick = { onNavigateToScreen(index) }
+                icon = { Icon(icon, contentDescription = null) },
+                label = { Text(stringResource(resId)) },
+                selected = isSelected,
+                onClick = {
+                    if (!isSelected) navigator.resetTo(route)
+                }
             )
         }
     }

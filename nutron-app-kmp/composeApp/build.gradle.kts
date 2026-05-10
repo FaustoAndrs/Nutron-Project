@@ -1,4 +1,3 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -7,6 +6,8 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.androidx.room)
 }
 
 kotlin {
@@ -15,7 +16,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     listOf(
         iosArm64(),
         iosSimulatorArm64()
@@ -25,12 +26,16 @@ kotlin {
             isStatic = true
         }
     }
-    
+
     sourceSets {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.moko.permissions)
+            implementation(libs.moko.permissions.compose)
+            implementation(libs.androidx.security.crypto)
+            implementation(libs.androidx.appcompat)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -41,12 +46,12 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
-            
+
             // Iconos básicos
             implementation(libs.compose.icons.core)
             // Iconos extendidos
             implementation(libs.compose.icons.extended)
-            
+
             // Navigation 3
             implementation(libs.jetbrains.navigation3.ui)
             implementation(libs.jetbrains.material3.adaptiveNavigation3)
@@ -66,14 +71,44 @@ kotlin {
             implementation(libs.ktor.client.logging)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
+
+            // BarcodeScanning
+            implementation(libs.kscan)
+
+            // Permissions
+            implementation(libs.moko.permissions)
+            implementation(libs.moko.permissions.compose)
+
+            //Room
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.sqlite.bundled)
+
+            // Multiplatform Settings
+            implementation(libs.multiplatform.settings)
+            implementation(libs.multiplatform.settings.no.arg)
+            implementation(libs.multiplatform.settings.coroutines)
+            implementation(libs.multiplatform.settings.serialization)
+
+            // Datetime
+            implementation(libs.kotlinx.datetime)
+
+            //Charts
+            implementation(libs.charty)
+
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+            implementation(libs.moko.permissions)
+            implementation(libs.moko.permissions.compose)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
     }
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 android {
@@ -104,5 +139,9 @@ android {
 }
 
 dependencies {
+    implementation(libs.core.ktx)
     debugImplementation(libs.compose.uiTooling)
+    add("kspAndroid", libs.androidx.room.compiler)
+    add("kspIosArm64", libs.androidx.room.compiler)
+    add("kspIosSimulatorArm64", libs.androidx.room.compiler)
 }

@@ -43,13 +43,17 @@ import org.jetbrains.compose.resources.stringResource
 fun TextFieldWithErrorState(
     modifier: Modifier = Modifier,
     textoState: String,
-    textoPista: String,
+    textoPista: String = "",
     leadingIcon: @Composable (() -> Unit)? = null,
     validacionState: Validation,
     keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
+    suffix: @Composable (() -> Unit)? = null,
+    label: @Composable (() -> Unit)? = null,
 ) {
     TextField(
+        label = label,
+        suffix = suffix,
         modifier = modifier,
         value = textoState,
         onValueChange = onValueChange,
@@ -64,7 +68,7 @@ fun TextFieldWithErrorState(
         keyboardOptions = keyboardOptions,
         supportingText = {
             if (validacionState.error) {
-                Text(text = validacionState.errorMessage!!)
+                Text(text = stringResource(validacionState.errorMessage!!))
             }
         },
         isError = validacionState.error,
@@ -79,7 +83,8 @@ fun TextFieldWithErrorState(
             focusedIndicatorColor = Color.Cyan,
             cursorColor = Color.Cyan
         ),
-    )
+
+        )
 }
 
 
@@ -150,7 +155,7 @@ fun TextFieldPhone(
         onValueChange = onValueChange,
         textoPista = label,
 
-    )
+        )
 }
 
 
@@ -196,7 +201,7 @@ fun TextFieldPassword(
         label = { Text(if (validacionState.error) "${label}*" else label) },
         supportingText = {
             if (validacionState.error) {
-                Text(text = validacionState.errorMessage!!)
+                Text(text = stringResource(validacionState.errorMessage!!))
             }
         },
         isError = validacionState.error,
@@ -240,7 +245,7 @@ fun OutlinedTextFieldPassword(
         label = { Text(if (validacionState.error) "${label}*" else label) },
         supportingText = {
             if (validacionState.error) {
-                Text(text = validacionState.errorMessage!!)
+                Text(text = stringResource(validacionState.errorMessage!!))
             }
         },
         isError = validacionState.error,

@@ -7,3 +7,6 @@ class IOSPlatform: Platform {
 }
 
 actual fun getPlatform(): Platform = IOSPlatform()
+
+//<key>NSCameraUsageDescription</key>
+//<string>Camera access is required for barcode scanning</string>

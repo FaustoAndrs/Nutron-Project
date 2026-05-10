@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.lazysyntax.nutron.main.ui.navigation.TopAppBarCommon
+import com.lazysyntax.nutron.main.ui.navigation.composables.TopAppBarCommon
 import nutron.composeapp.generated.resources.Res
 import nutron.composeapp.generated.resources.button_back
 import nutron.composeapp.generated.resources.details_id

@@ -5,21 +5,27 @@ import com.lazysyntax.nutron.main.utilities.validation.Validator
 import com.lazysyntax.nutron.main.utilities.validation.ComposedValidator
 import com.lazysyntax.nutron.main.utilities.validation.validadores.EmailValidator
 import com.lazysyntax.nutron.main.utilities.validation.validadores.NonEmptyTextValidator
+import nutron.composeapp.generated.resources.Res
+import nutron.composeapp.generated.resources.email_no_empty_validator
+import nutron.composeapp.generated.resources.email_validator
+import nutron.composeapp.generated.resources.full_name_no_empty_validator
+import nutron.composeapp.generated.resources.password_no_empty_validator
+import nutron.composeapp.generated.resources.user_name_no_empty_validator
 
 class SingUpValidator : Validator<SignUpUiState> {
 
     private val userNameValidator = ComposedValidator<String>()
-        .add(NonEmptyTextValidator("El nombre de usuario no puede estar vacío."))
+        .add(NonEmptyTextValidator(Res.string.user_name_no_empty_validator))
 
     private val fullNameValidator = ComposedValidator<String>()
-        .add(NonEmptyTextValidator("El nombre completo no puede estar vacío."))
+        .add(NonEmptyTextValidator(Res.string.full_name_no_empty_validator))
 
     private val emailValidator = ComposedValidator<String>()
-        .add(NonEmptyTextValidator("El correo no puede estar vacío."))
-        .add(EmailValidator("El formato del correo no es válido."))
+        .add(NonEmptyTextValidator(Res.string.email_no_empty_validator))
+        .add(EmailValidator(Res.string.email_validator))
 
     private val passwordValidator = ComposedValidator<String>()
-        .add(NonEmptyTextValidator("La contraseña no puede estar vacía."))
+        .add(NonEmptyTextValidator(Res.string.password_no_empty_validator))
 
     override fun validate(data: SignUpUiState): Validation {
         return SignUpUiStateValidation(

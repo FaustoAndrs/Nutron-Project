@@ -1,5 +1,7 @@
 package com.lazysyntax.nutron.main.utilities.validation
 
+import org.jetbrains.compose.resources.StringResource
+
 // Validacion.kt -----------------------------------------------
 // Abstracción del resultado de una validación.
 // Si hay error, se indica el mensaje de error.
@@ -9,6 +11,6 @@ package com.lazysyntax.nutron.main.utilities.validation
 interface Validation {
     val error: Boolean
         get() = false
-    val errorMessage: String?
+    val errorMessage: StringResource?
         get() = null
 }

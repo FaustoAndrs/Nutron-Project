@@ -2,9 +2,10 @@ package com.lazysyntax.nutron.main.utilities.validation.validadores
 
 import com.lazysyntax.nutron.main.utilities.validation.Validation
 import com.lazysyntax.nutron.main.utilities.validation.Validator
+import org.jetbrains.compose.resources.StringResource
 
 class EmailValidator(
-    val error: String = "Correo no válido"
+    val error: StringResource
 ) : Validator<String> {
     override fun validate(data: String): Validation {
         return object : Validation {
@@ -14,7 +15,7 @@ class EmailValidator(
                 } else {
                     false
                 }
-            override val errorMessage: String
+            override val errorMessage: StringResource
                 get() = this@EmailValidator.error
         }
     }

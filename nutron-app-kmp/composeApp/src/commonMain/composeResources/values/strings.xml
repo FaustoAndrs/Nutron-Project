@@ -19,7 +19,50 @@
     <string name="setup_welcome_guest">Configuración de Invitado</string>
     <string name="setup_desc_user">Gracias por registrarte. Ajustemos unos detalles.</string>
     <string name="setup_desc_guest">Estás en modo invitado. Puedes configurar tu perfil ahora.</string>
-    <string name="setup_button_finish">Empezar</string>
+    <string name="setup_button_save">Guardar</string>
+
+    <!-- Validators -->
+    <string name="email_no_empty_validator">El correo no puede estar vacío.</string>
+    <string name="email_validator">El formato del correo no es válido.</string>
+    <string name="password_no_empty_validator">La contraseña no puede estar vacía</string>
+    <string name="user_name_no_empty_validator">El nombre de usuario no puede estar vacío</string>
+    <string name="full_name_no_empty_validator">El nombre completo del usuario no puede estar vacío</string>
+
+    <string name="weight_no_empty_validator">El peso no puede estar vacío.</string>
+    <string name="weight_double_range_validator">El peso debe estar entre 30 y 300 kg.</string>
+    <string name="weight_number_validator">El peso debe ser un número válido.</string>
+    <string name="weight_max_length_validator">El peso no puede tener más de 3 dígitos.</string>
+    <string name="weight_min_length_validator">El peso no puede tener menos de 2 dígitos.</string>
+
+    <string name="height_no_empty_validator">La altura no puede estar vacío.</string>
+    <string name="height_number_validator">La altura debe ser un número válido.</string>
+    <string name="height_max_length_validator">La altura no puede tener más de 3 dígitos.</string>
+    <string name="height_min_length_validator">La altura no puede tener menos de 2 dígitos</string>
+    <string name="height_double_range_validator">La altura debe estar entre 100 y 250 cm.</string>
+
+    <string name="age_no_empty_validator">La edad no puede estar vacía.</string>
+    <string name="age_number_validator">La edad debe ser un número válido.</string>
+    <string name="age_max_length_validator">La edad no puede tener más de 2 dígitos.</string>
+    <string name="age_int_range_validator">La edad debe estar entre 10 y 99 años.</string>
+
+    <string name="gender_no_empty_validator">Debe seleccionar una opción.</string>
+    <string name="activity_no_empty_validator">Debe seleccionar un grado de Actividad.</string>
+    <string name="goal_no_empty_validator">Debe seleccionar un objetivo.</string>
+    <string name="formula_no_empty_validator">Debe seleccionar una fórmula.</string>
+
+    <!-- Activity level-->
+    <string name="low_activity_level">Sedentario</string>
+    <string name="moderate_activity_level">Moderado</string>
+    <string name="high_activity_level">Alto</string>
+    <string name="very_high_activity_level">Muy alto</string>
+    <string name="hypractive_activity_level">Hiperactivo</string>
+
+    <!-- Goals objective-->
+    <string name="lose_weight_objective">Perder peso</string>
+    <string name="lose_weight_slowly_objective">Perder peso lentamente</string>
+    <string name="mantain_weight_objective">Mantener peso</string>
+    <string name="gain_weight_objective">Ganar músculo</string>
+    <string name="gain_weight_slowly_objective">Ganar músculo lentamente</string>
 
     <!-- Profile Screen -->
     <string name="title_profile">PERFIL</string>
@@ -29,18 +72,27 @@
     <!-- Targets Screen -->
     <string name="title_targets">OBJETIVOS</string>
     <string name="targets_headline">Objetivos</string>
+    <string name="label_daily_kcal">Objetivo calórico diario</string>
+    <string name="label_diet_type">Tipo de dieta</string>
 
     <!-- Diary Screen -->
     <string name="title_diary">DIARIO</string>
     <string name="diary_headline">Tu Diario</string>
+    <string name="empty_meal">No hay productos añadidos</string>
+
     <!-- Library Screen -->
     <string name="title_library">Biblioteca</string>
     <string name="library_headline">Tu biblioteca</string>
+    <string name="library_button_add_product">Añadir alimento</string>
+    <string name="library_button_search_product">Buscar alimento</string>
+    <string name="library_button_search_barcode">Buscar código de barras</string>
+
     <!-- Settings Screen -->
     <string name="title_settings">AJUSTES</string>
     <string name="settings_headline">Ajustes</string>
     <string name="settings_button_logout">Cerrar sesión</string>
     <string name="settings_button_setup">Parámetros del usuario</string>
+    <string name="settings_button_language">Idioma</string>
 
     <!-- Details Screen -->
     <string name="title_details">DETALLES</string>
