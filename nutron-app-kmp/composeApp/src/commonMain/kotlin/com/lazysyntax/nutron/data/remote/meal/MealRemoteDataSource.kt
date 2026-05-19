@@ -1,5 +1,6 @@
 package com.lazysyntax.nutron.data.remote.meal
 
+import com.lazysyntax.nutron.data.remote.NetworkConstants.DATA_BASE_URL
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -11,7 +12,7 @@ import io.ktor.http.contentType
 class MealRemoteDataSource(
     private val client: HttpClient
 ) {
-    private val BASE_URL = "http://10.0.2.2:8082/api/v1/meals" // Adaptar según el backend
+    private val BASE_URL = "${DATA_BASE_URL}/meals" // Adaptar según el backend
 
     suspend fun saveMeal(mealDto: MealDto): Boolean {
         return try {
@@ -30,7 +31,7 @@ class MealRemoteDataSource(
     suspend fun getMealsByUser(userId: String): List<MealDto> {
         return try {
             val response = client.post("$BASE_URL/user/$userId") {
-                 contentType(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
             }
             if (response.status == HttpStatusCode.OK) {
                 response.body<List<MealDto>>()

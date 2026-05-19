@@ -1,5 +1,6 @@
 package com.lazysyntax.nutron.data.remote.food
 
+import com.lazysyntax.nutron.data.remote.NetworkConstants.DATA_BASE_URL
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -12,7 +13,7 @@ import io.ktor.http.contentType
 class FoodRemoteDataSource(
     private val client: HttpClient
 ) {
-    private val BASE_URL = "http://10.0.2.2:8082/api/v1/foods"
+    private val BASE_URL = "${DATA_BASE_URL}/foods"
 
     suspend fun saveFood(foodDto: FoodDto): Boolean {
         return try {

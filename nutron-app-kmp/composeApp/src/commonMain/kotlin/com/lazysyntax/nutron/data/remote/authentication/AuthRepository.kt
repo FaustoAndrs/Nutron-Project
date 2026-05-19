@@ -1,5 +1,6 @@
 package com.lazysyntax.nutron.data.remote.authentication
 
+import com.lazysyntax.nutron.data.remote.NetworkConstants
 import com.lazysyntax.nutron.domain.models.User
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -14,7 +15,7 @@ class AuthRepository(
     private val client: HttpClient, private val sessionManager: SessionManager
 ) {
 
-    private val BASE_URL = "http://10.0.2.2:8081/api/v1/auth" // para el emulador de Android
+    private val BASE_URL = "${NetworkConstants.AUTH_BASE_URL}/auth" // para el emulador de Android
 
     suspend fun login(email: String, password: String): Boolean {
         return try {

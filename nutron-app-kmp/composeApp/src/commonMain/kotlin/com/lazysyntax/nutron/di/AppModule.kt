@@ -7,6 +7,7 @@ import com.lazysyntax.nutron.data.repository.MealRepositoryImpl
 import com.lazysyntax.nutron.domain.repository.UserRepository
 import com.lazysyntax.nutron.data.repository.UserRepositoryImpl
 import com.lazysyntax.nutron.data.local.NutronDatabase
+import com.lazysyntax.nutron.data.remote.NetworkConstants
 import com.lazysyntax.nutron.data.remote.authentication.AuthRepository
 import com.lazysyntax.nutron.data.remote.authentication.SessionManager
 import com.lazysyntax.nutron.data.remote.authentication.TokenResponse
@@ -101,7 +102,7 @@ val appModule = module {
                     refreshTokens {
                         try {
                             // Usamos el cliente interno para la petición de refresh
-                            val response = client.post("http://10.0.2.2:8081/api/v1/auth/refresh") {
+                            val response = client.post("${NetworkConstants.AUTH_BASE_URL}/auth/refresh") {
                                 contentType(ContentType.Application.Json)
                                 setBody(oldTokens?.refreshToken)
                                 markAsRefreshTokenRequest() 

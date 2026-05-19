@@ -1,5 +1,6 @@
 package com.lazysyntax.nutron.data.repository
 
+import com.lazysyntax.nutron.data.remote.NetworkConstants
 import com.lazysyntax.nutron.data.remote.authentication.SessionManager
 import com.lazysyntax.nutron.data.remote.synchronization.UserSetupResponse
 import com.lazysyntax.nutron.data.remote.synchronization.toSetupUiState
@@ -25,7 +26,7 @@ class UserRepositoryImpl(
 
 
     //private val BASE_URL = "http://localhost:8081/api/v1" // para iOS o Desktop
-    private val BASE_URL = "http://10.0.2.2:8081/api/v1" // para el emulador de Android
+    private val BASE_URL = "${NetworkConstants.AUTH_BASE_URL}/api/v1" // para el emulador de Android
 
     override suspend fun getUserSetups(id: String): Boolean {
 

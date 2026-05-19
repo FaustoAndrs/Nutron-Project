@@ -1,5 +1,6 @@
 package com.lazysyntax.nutron.data.repository
 
+import com.lazysyntax.nutron.data.remote.NetworkConstants.AUTH_BASE_URL
 import com.lazysyntax.nutron.data.remote.authentication.SessionManager
 import com.lazysyntax.nutron.data.remote.synchronization.SyncResult
 import com.lazysyntax.nutron.data.remote.synchronization.UserSetupResponse
@@ -16,7 +17,7 @@ class SyncRepositoryImpl(
     private val client: HttpClient,
     private val sessionManager: SessionManager
 ) : SyncRepository {
-    private val BASE_URL = "http://10.0.2.2:8081/api/v1/user" // para el emulador de Android
+    private val BASE_URL = "${AUTH_BASE_URL}/user" // para el emulador de Android
 
     // Agrega esta función para obtener el perfil
     override suspend fun syncUserSetUp(): SyncResult {
