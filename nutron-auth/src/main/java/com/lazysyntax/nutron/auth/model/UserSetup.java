@@ -19,7 +19,10 @@ public class UserSetup {
 
     @OneToOne // Relación uno a uno con User
     @MapsId // Indica que el ID de esta entidad es también la clave foránea de la entidad User
-    @JoinColumn(name = "user_id") // Nombre de la columna de la clave foránea en la tabla users_settings
+    @JoinColumn(
+            name = "user_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_settings_user")) // Nombre de la columna de la clave foránea en la tabla users_settings
     private User user; // Referencia al usuario al que pertenecen estas configuraciones
 
     @Column(nullable = false)

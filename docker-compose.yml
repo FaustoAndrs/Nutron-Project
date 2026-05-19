@@ -12,6 +12,8 @@ services:
       - TZ=Europe/Madrid # Sincroniza la zona horaria en MySQL
     volumes:
       - /etc/localtime:/etc/localtime:ro # Lee la hora del host
+      - ./scripts-db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro #Script de inicialización
+      - auth-data:/var/lib/mysql # <-- Persistencia para auth
     ports:
       - "3306:3306"
     networks:
@@ -22,8 +24,27 @@ services:
       timeout: 5s
       retries: 10
 
-  # Base de datos NoSQL para el Diario
-  # ...
+  # Base de datos MySQL para registros de nutricio
+  nutrition-db:
+    image: mysql:8.0
+    container_name: nutron-nutrition-db
+    restart: always
+    environment:
+      - MYSQL_DATABASE=nutrition_db
+      - MYSQL_ROOT_PASSWORD=nutrition_password # Contraseña propia para aislamiento
+      - TZ=Europe/Madrid
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - nutrition-data:/var/lib/mysql # <-- Persistencia para nutrición
+    ports:
+      - "3307:3306" # Mapeado al puerto 3307 del host para evitar conflictos con el puerto 3306 de auth
+    networks:
+      - backend-net
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   # --- CAPA DE APLICACIÓN (JAVA) ---
 
@@ -38,6 +59,7 @@ services:
       - DB_NAME=auth_db
       - DB_USER=root
       - DB_PASS=root_password
+      - JWT_SECRET=fvSxRZ1jZEXo1Z5ehhl4FOqS0dAuFIsaKMkVZ4ZJsY55Zl71W63o/cOIpCsCOr/L
       - TZ=Europe/Madrid # Define la zona horaria para el contenedor Linux
     volumes:
       - /etc/localtime:/etc/localtime:ro # Refuerza la hora local para la JVM
@@ -47,9 +69,31 @@ services:
     networks:
       - backend-net
 
-  # Microservicio de Diario (MongoDB)
-  # ... 
+ # Microservicio de nutrición (MySQL)
+  nutrition-service:
+    build: ./nutron-nutrition # Ruta a la carpeta de tu nuevo proyecto Java
+    container_name: nutron-nutrition-service
+    ports:
+      - "8082:8082" # Usamos el puerto 8082 para no colisionar con el 8081 de auth
+    environment:
+      - DB_HOST=nutrition-db
+      - DB_NAME=nutrition_db
+      - DB_USER=root
+      - DB_PASS=nutrition_password
+      - JWT_SECRET=fvSxRZ1jZEXo1Z5ehhl4FOqS0dAuFIsaKMkVZ4ZJsY55Zl71W63o/cOIpCsCOr/L
+      - TZ=Europe/Madrid
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      nutrition-db:
+        condition: service_healthy
+    networks:
+      - backend-net
 
 networks:
   backend-net:
     driver: bridge
+
+volumes:
+  auth-data:
+  nutrition-data:    
