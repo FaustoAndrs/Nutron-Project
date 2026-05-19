@@ -2,8 +2,8 @@ package com.lazysyntax.nutron.di
 
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.lazysyntax.nutron.data.room.NutronDatabase
-import com.lazysyntax.nutron.data.room.getRoomDatabase
+import com.lazysyntax.nutron.data.local.NutronDatabase
+import com.lazysyntax.nutron.data.local.getRoomDatabase
 import com.russhwolf.settings.KeychainSettings
 import com.russhwolf.settings.NSUserDefaultsSettings
 import com.russhwolf.settings.Settings

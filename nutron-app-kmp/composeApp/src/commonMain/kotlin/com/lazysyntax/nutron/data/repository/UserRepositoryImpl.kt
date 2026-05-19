@@ -1,12 +1,13 @@
 package com.lazysyntax.nutron.data.repository
 
-import com.lazysyntax.nutron.data.services.authentication.SessionManager
-import com.lazysyntax.nutron.data.services.syncronitation.UserSetupResponse
-import com.lazysyntax.nutron.data.services.syncronitation.toSetupUiState
-import com.lazysyntax.nutron.data.services.syncronitation.toTargetEntity
-import com.lazysyntax.nutron.data.services.syncronitation.toUserSetupEntity
-import com.lazysyntax.nutron.main.ui.features.setUp.SetUpUiState
-import com.lazysyntax.nutron.main.ui.features.targets.TargetsUiState
+import com.lazysyntax.nutron.data.remote.authentication.SessionManager
+import com.lazysyntax.nutron.data.remote.synchronization.UserSetupResponse
+import com.lazysyntax.nutron.data.remote.synchronization.toSetupUiState
+import com.lazysyntax.nutron.data.remote.synchronization.toTargetDto
+import com.lazysyntax.nutron.data.remote.synchronization.toUserSetupEntity
+import com.lazysyntax.nutron.domain.repository.UserRepository
+import com.lazysyntax.nutron.presentation.ui.features.setUp.SetUpUiState
+import com.lazysyntax.nutron.presentation.ui.features.targets.TargetsUiState
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -95,7 +96,7 @@ class UserRepositoryImpl(
         return try {
             val response = client.patch("$BASE_URL/user/setup/diet") {
                 contentType(ContentType.Application.Json)
-                setBody(targetsUiState.toTargetEntity())
+                setBody(targetsUiState.toTargetDto())
             }
 
             if (response.status == HttpStatusCode.OK) {

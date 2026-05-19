@@ -1,51 +1,72 @@
 package com.lazysyntax.nutron.data.repository
 
-import com.lazysyntax.nutron.data.room.food.toDomain
-import com.lazysyntax.nutron.data.room.meal.MealDao
-import com.lazysyntax.nutron.data.room.meal.MealEntity
-import com.lazysyntax.nutron.data.room.meal.MealFoodCrossRef
-import com.lazysyntax.nutron.data.services.authentication.SessionManager
-import com.lazysyntax.nutron.models.Food
-import com.lazysyntax.nutron.models.Meal
+import com.lazysyntax.nutron.data.local.meal.MealDao
+import com.lazysyntax.nutron.data.local.meal.MealEntity
+import com.lazysyntax.nutron.data.local.meal.MealFoodSnapshotEntity
+import com.lazysyntax.nutron.data.local.meal.MealWithFoods
+import com.lazysyntax.nutron.data.local.meal.toDomain
+import com.lazysyntax.nutron.data.remote.authentication.SessionManager
+import com.lazysyntax.nutron.data.remote.meal.MealRemoteDataSource
+import com.lazysyntax.nutron.data.remote.meal.toDto
+import com.lazysyntax.nutron.domain.models.Food
+import com.lazysyntax.nutron.domain.models.Meal
+import com.lazysyntax.nutron.domain.repository.FoodRepository
+import com.lazysyntax.nutron.domain.repository.MealRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 
 class MealRepositoryImpl(
     private val mealDao: MealDao,
     private val sessionManager: SessionManager,
-    private val foodRepository: FoodRepository
+    private val foodRepository: FoodRepository,
+    private val mealRemoteDataSource: MealRemoteDataSource
 ) : MealRepository {
 
     override suspend fun createMeal(name: String, foods: List<Food>) {
         // 1. Insert the meal and get its ID
         val userId = sessionManager.getUserId() ?: throw Exception()
-        val mealId = mealDao.insertMeal(MealEntity(
+        mealDao.insertMeal(MealEntity(
             name = name,
             userId = userId,
-            foods = TODO(),
-            recipes = TODO()
+            date =  Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
         ))
-        
-        // 2. Insert each food (to ensure they exist in DB) and the relationship
-        foods.forEach { food ->
-            foodRepository.saveFood(food)
-            mealDao.insertMealFoodCrossRef(
-                MealFoodCrossRef(mealId = mealId, foodBarcode = food.barcode ?: "")
-            )
-        }
     }
 
-    override fun getAllMeals(): Flow<List<Pair<Meal, List<Food>>>> {
-        return mealDao.getAllMealsWithFoods().map { list ->
-            list.map { mealWithFoods ->
-                val meal = Meal(name = mealWithFoods.meal.name)
-                val foods = mealWithFoods.foods.map { it.toDomain() }
-                Pair(meal, foods)
-            }
-        }
-    }
-
-    override suspend fun deleteMeal(mealId: Long) {
+    override suspend fun deleteMeal(mealId: String) {
         mealDao.deleteMealById(mealId)
+    }
+
+    override suspend fun getMealsByDate(date: LocalDate): List<Meal> {
+        return mealDao.getMealsWithFoodsByDate(date).first().map { it.toDomain() }
+    }
+
+    override fun getMealsByDateRange(
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): Flow<List<Meal>> {
+        return mealDao.getMealsWithFoodsByDateRange(startDate, endDate)
+            .map { list -> list.map { it.toDomain() } }
+    }
+
+    override suspend fun insertMealWithFood(
+        mealEntity: MealEntity,
+        snapshots: List<MealFoodSnapshotEntity>
+    ) {
+        // 1. Local insert
+        mealDao.insertMealWithSnapshots(mealEntity, snapshots)
+
+        // 2. Remote sync
+        val mealWithFoods = MealWithFoods(mealEntity, snapshots)
+        val isSynced = mealRemoteDataSource.saveMeal(mealWithFoods.toDto())
+
+        // 3. Update local sync status if successful
+        if (isSynced) {
+            mealDao.updateMeal(mealEntity.copy(isSynced = true))
+        }
     }
 }

@@ -79,6 +79,9 @@
     <string name="title_diary">DIARIO</string>
     <string name="diary_headline">Tu Diario</string>
     <string name="empty_meal">No hay productos añadidos</string>
+    <string name="breakfas_meal_template">Desayuno</string>
+    <string name="lunch_meal_template">Almuerzo</string>
+    <string name="dinner_meal_template">Cena</string>
 
     <!-- Library Screen -->
     <string name="title_library">Biblioteca</string>

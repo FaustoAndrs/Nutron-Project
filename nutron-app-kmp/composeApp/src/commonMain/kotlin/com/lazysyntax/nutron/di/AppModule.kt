@@ -1,30 +1,32 @@
 package com.lazysyntax.nutron.di
 
-import com.lazysyntax.nutron.data.repository.FoodRepository
+import com.lazysyntax.nutron.domain.repository.FoodRepository
 import com.lazysyntax.nutron.data.repository.FoodRepositoryImpl
-import com.lazysyntax.nutron.data.repository.MealRepository
+import com.lazysyntax.nutron.domain.repository.MealRepository
 import com.lazysyntax.nutron.data.repository.MealRepositoryImpl
-import com.lazysyntax.nutron.data.repository.UserRepository
+import com.lazysyntax.nutron.domain.repository.UserRepository
 import com.lazysyntax.nutron.data.repository.UserRepositoryImpl
-import com.lazysyntax.nutron.data.room.NutronDatabase
-import com.lazysyntax.nutron.data.services.authentication.AuthRepository
-import com.lazysyntax.nutron.data.services.authentication.SessionManager
-import com.lazysyntax.nutron.data.services.authentication.TokenResponse
-import com.lazysyntax.nutron.data.services.openFoodFactsApi.OpenFoodFactService
-import com.lazysyntax.nutron.data.services.openFoodFactsApi.OpenFoodFactsServiceImpl
-import com.lazysyntax.nutron.data.services.syncronitation.SyncRepository
-import com.lazysyntax.nutron.main.ui.features.diary.DiaryViewModel
-import com.lazysyntax.nutron.main.ui.features.diary.library.LibraryViewModel
-import com.lazysyntax.nutron.main.ui.features.diary.macros.MacrosViewModel
-import com.lazysyntax.nutron.main.ui.features.login.LoginViewModel
-import com.lazysyntax.nutron.main.ui.features.setUp.SetUpViewModel
-import com.lazysyntax.nutron.main.ui.features.login.signUp.SignUpViewModel
-import com.lazysyntax.nutron.main.ui.features.profile.ProfileViewModel
-import com.lazysyntax.nutron.main.ui.features.settings.SettingsViewModel
-import com.lazysyntax.nutron.main.ui.features.targets.TargetsViewModel
-import com.lazysyntax.nutron.main.ui.navigation.DefaultNavigator
-import com.lazysyntax.nutron.main.ui.navigation.Navigator
-import com.lazysyntax.nutron.main.ui.navigation.Route
+import com.lazysyntax.nutron.data.local.NutronDatabase
+import com.lazysyntax.nutron.data.remote.authentication.AuthRepository
+import com.lazysyntax.nutron.data.remote.authentication.SessionManager
+import com.lazysyntax.nutron.data.remote.authentication.TokenResponse
+import com.lazysyntax.nutron.data.remote.openFoodFactsApi.OpenFoodFactService
+import com.lazysyntax.nutron.data.remote.openFoodFactsApi.OpenFoodFactsServiceImpl
+import com.lazysyntax.nutron.data.remote.food.FoodRemoteDataSource
+import com.lazysyntax.nutron.data.remote.meal.MealRemoteDataSource
+import com.lazysyntax.nutron.data.repository.SyncRepositoryImpl
+import com.lazysyntax.nutron.data.util.TestDataGenerator
+import com.lazysyntax.nutron.presentation.ui.features.diary.DiaryViewModel
+import com.lazysyntax.nutron.presentation.ui.features.login.LoginViewModel
+import com.lazysyntax.nutron.presentation.ui.features.setUp.SetUpViewModel
+import com.lazysyntax.nutron.presentation.ui.features.login.signUp.SignUpViewModel
+import com.lazysyntax.nutron.presentation.ui.features.profile.ProfileViewModel
+import com.lazysyntax.nutron.presentation.ui.features.settings.SettingsViewModel
+import com.lazysyntax.nutron.presentation.ui.features.statistics.StatisticsViewModel
+import com.lazysyntax.nutron.presentation.ui.features.targets.TargetsViewModel
+import com.lazysyntax.nutron.presentation.ui.navigation.DefaultNavigator
+import com.lazysyntax.nutron.presentation.ui.navigation.Navigator
+import com.lazysyntax.nutron.presentation.ui.navigation.Route
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.auth.Auth
@@ -79,6 +81,7 @@ val appModule = module {
                     ignoreUnknownKeys = true
                     prettyPrint = true
                     isLenient = true
+                    encodeDefaults = true
                 })
             }
             install(Auth) {
@@ -173,12 +176,19 @@ val appModule = module {
     single { get<NutronDatabase>().foodDao() }
     single { get<NutronDatabase>().mealDao() }
 
+    // Remote Data Sources
+    single { MealRemoteDataSource(get()) }
+    single { FoodRemoteDataSource(get()) }
+
+    // Utils
+    single { TestDataGenerator(get(), get(), get()) }
+
     // Repositories
-    single<FoodRepository> { FoodRepositoryImpl(get(), get(), get()) }
-    single<MealRepository> { MealRepositoryImpl(get(), get(),get()) }
+    single<FoodRepository> { FoodRepositoryImpl(get(), get(), get(), get()) }
+    single<MealRepository> { MealRepositoryImpl(get(), get(), get(), get()) }
     single<UserRepository> { UserRepositoryImpl(get(), get()) }
     single { AuthRepository(get(), get()) }
-    single { SyncRepository(get(), get()) }
+    single { SyncRepositoryImpl(get(), get()) }
 
     // ViewModels
     viewModelOf(::LoginViewModel)
@@ -187,9 +197,10 @@ val appModule = module {
     viewModelOf(::ProfileViewModel)
     viewModelOf(::TargetsViewModel)
     viewModelOf(::DiaryViewModel)
-    viewModelOf(::LibraryViewModel)
-    viewModelOf(::MacrosViewModel)
+    //viewModelOf(::LibraryViewModel)
+    //viewModelOf(::MacrosViewModel)
     viewModelOf(::SettingsViewModel)
+    viewModelOf(::StatisticsViewModel)
 }
 
 expect fun platformModule(): Module
