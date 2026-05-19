@@ -40,12 +40,25 @@ class ProfileViewModel(
 
     private fun checkAndSyncProfile() {
         viewModelScope.launch {
-            // Si no tenemos altura o peso, los datos locales están incompletos
-            if (sessionManager.getCurrentUserData().height.isEmpty()) {
-                println("PROFILE: Datos locales vacíos, sincronizando con servidor...")
-                val result = syncRepository.syncUserSetUp()
-                if (result is SyncResult.Error) {
-                    println("PROFILE: Error al sincronizar datos")
+            val currentLocalData = sessionManager.getCurrentUserData()
+
+            // Verificamos si los datos esenciales faltan (ej. altura o peso)
+            if (currentLocalData.height.isEmpty() || currentLocalData.weight.isEmpty()) {
+                println("PROFILE: Datos locales incompletos, sincronizando...")
+
+                when (val result = syncRepository.syncUserSetUp()) {
+                    is SyncResult.Success -> {
+                        println("PROFILE: Sincronización exitosa. El StateFlow actualizará la UI.")
+                    }
+                    is SyncResult.NotFound -> {
+                        // El usuario está registrado pero nunca completó el SetUp (onboarding)
+                        println("PROFILE: No hay datos en el servidor, redirigiendo a SetUp")
+                        navigator.navigateTo(Route.SetUp(true))
+                    }
+                    is SyncResult.Error -> {
+                        println("PROFILE: Error de red o servidor al sincronizar")
+                        // Opcional: Mostrar un mensaje de error al usuario
+                    }
                 }
             }
         }
