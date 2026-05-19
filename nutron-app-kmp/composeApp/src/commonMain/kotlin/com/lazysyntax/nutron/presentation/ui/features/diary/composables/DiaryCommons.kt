@@ -440,10 +440,10 @@ fun MealCard(
                     .background(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 content = {
-                    MacroItem("Proteins", productCount.proteins.toInt())
-                    MacroItem("Carbohydrates", productCount.carbohydrates.toInt())
-                    MacroItem("Fats", productCount.fats.toInt())
-                    MacroItem("Calories", productCount.calories.toInt())
+                    MacroItem("Proteins", productCount.proteins.toInt(), Modifier.weight(1f))
+                    MacroItem("Carbohydrates", productCount.carbohydrates.toInt(), Modifier.weight(1f))
+                    MacroItem("Fats", productCount.fats.toInt(), Modifier.weight(1f))
+                    MacroItem("Calories", productCount.calories.toInt(), Modifier.weight(1f))
                 }
             )
             //Spacer( modifier = Modifier.height(16.dp))
@@ -472,22 +472,24 @@ fun MealCard(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun MacroItem(label: String, value: Int) {
+fun MacroItem(label: String, value: Int, modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier.padding(16.dp),
+        modifier = modifier.padding(vertical = 12.dp, horizontal = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = "$value",
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.SemiBold,
-            overflow = TextOverflow.Clip
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
         Text(
-            textAlign = TextAlign.End,
+            textAlign = TextAlign.Center,
             text = label,
             style = MaterialTheme.typography.bodySmall,
-            overflow = TextOverflow.Clip
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }

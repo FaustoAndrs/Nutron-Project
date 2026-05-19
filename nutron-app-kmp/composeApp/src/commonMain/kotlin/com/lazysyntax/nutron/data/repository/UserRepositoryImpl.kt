@@ -26,7 +26,7 @@ class UserRepositoryImpl(
 
 
     //private val BASE_URL = "http://localhost:8081/api/v1" // para iOS o Desktop
-    private val BASE_URL = "${NetworkConstants.AUTH_BASE_URL}/api/v1" // para el emulador de Android
+    private val BASE_URL = NetworkConstants.AUTH_BASE_URL // para el emulador de Android
 
     override suspend fun getUserSetups(id: String): Boolean {
 

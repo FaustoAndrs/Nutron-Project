@@ -7,6 +7,7 @@ import com.lazysyntax.nutron.data.repository.MealRepositoryImpl
 import com.lazysyntax.nutron.domain.repository.UserRepository
 import com.lazysyntax.nutron.data.repository.UserRepositoryImpl
 import com.lazysyntax.nutron.data.local.NutronDatabase
+import com.lazysyntax.nutron.data.remote.BASE_HOST
 import com.lazysyntax.nutron.data.remote.NetworkConstants
 import com.lazysyntax.nutron.data.remote.authentication.AuthRepository
 import com.lazysyntax.nutron.data.remote.authentication.SessionManager
@@ -99,6 +100,9 @@ val appModule = module {
                             BearerTokens(accessToken, refreshToken)
                         } else null
                     }
+                    sendWithoutRequest { request ->
+                        request.url.host == BASE_HOST
+                    }
                     refreshTokens {
                         try {
                             // Usamos el cliente interno para la petición de refresh
@@ -131,11 +135,6 @@ val appModule = module {
                             // para seguir usando la app offline.
                             null
                         }
-                    }
-                    sendWithoutRequest { request ->
-                        // Solo enviamos tokens a nuestro backend. (Entorno local/laboratorio)
-                        // En entorno de despliegue es importante establecer el dominio o Ip del backend.
-                        request.url.host == "10.0.2.2" || request.url.host == "localhost"
                     }
                 }
                 basic {
