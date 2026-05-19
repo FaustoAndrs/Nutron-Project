@@ -26,19 +26,40 @@ data class SetUpUiState(
     val diet: String = "standard"
 )
 
-enum class Activity(val level: StringResource, val factor: Double)
+@Serializable
+enum class Activity(val factor: Double)
 {
-    LOW(Res.string.low_activity_level, 1.2),
-    MODERATE(Res.string.moderate_activity_level, 1.375),
-    HIGH(Res.string.high_activity_level, 1.55),
-    VERY_HIGH(Res.string.very_high_activity_level, 1.725),
-    HYPERACTIVE(Res.string.high_activity_level, 1.9)
+    LOW(1.2),
+    MODERATE(1.375),
+    HIGH(1.55),
+    VERY_HIGH(1.725),
+    HYPERACTIVE(1.9);
+
+    val level: StringResource
+        get() = when(this) {
+            LOW -> Res.string.low_activity_level
+            MODERATE -> Res.string.moderate_activity_level
+            HIGH -> Res.string.high_activity_level
+            VERY_HIGH -> Res.string.very_high_activity_level
+            HYPERACTIVE -> Res.string.high_activity_level
+        }
 }
-enum class Goal(val objective: StringResource, val factor: Double) {
-    LOSE_WEIGHT(Res.string.lose_weight_objective, 0.8),
-    LOSE_SLOWLY(Res.string.lose_weight_slowly_objective, 0.9),
-    MAINTAIN(Res.string.mantain_weight_objective, 1.0),
-    GAIN_MUSCLE(Res.string.gain_weight_objective, 1.10),
-    GAIN_MUSCLE_SLOWLY(Res.string.gain_weight_slowly_objective, 1.20)
+
+@Serializable
+enum class Goal(val factor: Double) {
+    LOSE_WEIGHT(0.8),
+    LOSE_SLOWLY(0.9),
+    MAINTAIN(1.0),
+    GAIN_MUSCLE(1.10),
+    GAIN_MUSCLE_SLOWLY(1.20);
+
+    val objective: StringResource
+        get() = when(this) {
+            LOSE_WEIGHT -> Res.string.lose_weight_objective
+            LOSE_SLOWLY -> Res.string.lose_weight_slowly_objective
+            MAINTAIN -> Res.string.mantain_weight_objective
+            GAIN_MUSCLE -> Res.string.gain_weight_objective
+            GAIN_MUSCLE_SLOWLY -> Res.string.gain_weight_slowly_objective
+        }
 
 }
