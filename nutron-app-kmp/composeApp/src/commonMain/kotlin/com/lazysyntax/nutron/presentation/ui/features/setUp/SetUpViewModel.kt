@@ -163,9 +163,12 @@ class SetUpViewModel(
     }
 
     fun onBack(fromSignUp: Boolean) {
+        println("ON BACK")
         if (fromSignUp) {
+            println("FROM LOGIN")
             navigator.resetTo(route = Route.Login)
         } else {
+            println("FROM SETUP")
             navigator.goBack()
         }
 

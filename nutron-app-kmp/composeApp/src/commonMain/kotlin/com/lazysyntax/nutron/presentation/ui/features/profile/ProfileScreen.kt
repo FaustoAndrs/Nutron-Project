@@ -41,6 +41,24 @@ import com.lazysyntax.nutron.presentation.ui.navigation.composables.NavBar
 import com.lazysyntax.nutron.presentation.ui.navigation.composables.TopAppBarCommon
 import kotlinx.coroutines.launch
 import nutron.composeapp.generated.resources.Res
+import nutron.composeapp.generated.resources.profile_balance_text_tooltip
+import nutron.composeapp.generated.resources.profile_balance_tooltip
+import nutron.composeapp.generated.resources.profile_bmi_text_tooltip
+import nutron.composeapp.generated.resources.profile_bmi_tooltip
+import nutron.composeapp.generated.resources.profile_body_water_label
+import nutron.composeapp.generated.resources.profile_fat_label
+import nutron.composeapp.generated.resources.profile_fat_text_tooltip
+import nutron.composeapp.generated.resources.profile_fat_tooltip
+import nutron.composeapp.generated.resources.profile_gender_label
+import nutron.composeapp.generated.resources.profile_get_text_tooltip
+import nutron.composeapp.generated.resources.profile_get_tooltip
+import nutron.composeapp.generated.resources.profile_height_label
+import nutron.composeapp.generated.resources.profile_mbr_label
+import nutron.composeapp.generated.resources.profile_section_details
+import nutron.composeapp.generated.resources.profile_section_resume
+import nutron.composeapp.generated.resources.profile_show_progres
+import nutron.composeapp.generated.resources.profile_tdee_label
+import nutron.composeapp.generated.resources.profile_weight_label
 import nutron.composeapp.generated.resources.title_profile
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -73,7 +91,7 @@ fun ProfileContent(
         ) {
             item {
                 Spacer(modifier = Modifier.height(8.dp))
-                ProfileSectionHeader("Resumen de Salud")
+                ProfileSectionHeader(stringResource(Res.string.profile_section_resume))
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -82,19 +100,16 @@ fun ProfileContent(
                         label = "BMI",
                         value = uiState.bodyMassIndex,
                         unit = "",
-                        titleTooltip = "Índice de Masa Corporal (BMI)",
-                        textTooltip = "Indicador de la relación entre el peso y la talla.\n" +
-                                "Normal: 18.5 - 24.9\n" +
-                                "Sobrepeso: 25.0 - 29.9",
+                        titleTooltip = stringResource(Res.string.profile_bmi_tooltip),
+                        textTooltip =  stringResource(Res.string.profile_bmi_text_tooltip),
                         modifier = Modifier.weight(1f)
                     )
                     StatHighlightCard(
-                        label = "Grasa",
+                        label = stringResource(Res.string.profile_fat_label),
                         value = uiState.bodyFatPercentage,
                         unit = "%",
-                        titleTooltip = "Grasa Corporal",
-                        textTooltip = "Porcentaje de grasa estimado.\n" +
-                                "Hombres: 18-24%\nMujeres: 25-31%",
+                        titleTooltip = stringResource(Res.string.profile_fat_tooltip),
+                        textTooltip =  stringResource(Res.string.profile_fat_text_tooltip),
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -106,19 +121,19 @@ fun ProfileContent(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     StatHighlightCard(
-                        label = "GET",
+                        label = stringResource(Res.string.profile_tdee_label),
                         value = uiState.gastoEnergeticoTotal,
                         unit = "kcal",
-                        titleTooltip = "Gasto Energético Total",
-                        textTooltip = "Calorías diarias estimadas incluyendo actividad física.",
+                        titleTooltip = stringResource(Res.string.profile_get_tooltip),
+                        textTooltip = stringResource(Res.string.profile_get_text_tooltip),
                         modifier = Modifier.weight(1f)
                     )
                     StatHighlightCard(
                         label = "Balance",
                         value = uiState.energeticBalance,
                         unit = "kcal",
-                        titleTooltip = "Balance Energético",
-                        textTooltip = "Tu objetivo calórico diario ajustado.",
+                        titleTooltip = stringResource(Res.string.profile_balance_tooltip),
+                        textTooltip = stringResource(Res.string.profile_balance_text_tooltip),
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -131,13 +146,13 @@ fun ProfileContent(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Ver estadísticas de progreso")
+                    Text(stringResource(Res.string.profile_show_progres))
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
             item {
-                ProfileSectionHeader("Detalles del Perfil")
+                ProfileSectionHeader(stringResource(Res.string.profile_section_details))
                 Card(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     shape = RoundedCornerShape(16.dp),
@@ -145,15 +160,15 @@ fun ProfileContent(
                     elevation = CardDefaults.cardElevation(0.dp)
                 ) {
                     Column {
-                        ProfileDetailRow("Altura", "${uiState.height} cm")
+                        ProfileDetailRow(stringResource(Res.string.profile_height_label), "${uiState.height} cm")
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
-                        ProfileDetailRow("Peso", "${uiState.weight} kg")
+                        ProfileDetailRow(stringResource(Res.string.profile_weight_label), "${uiState.weight} kg")
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
-                        ProfileDetailRow("Género", uiState.gender)
+                        ProfileDetailRow(stringResource(Res.string.profile_gender_label), uiState.gender)
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
-                        ProfileDetailRow("Metabolismo (BMR)", "${uiState.basalMetabolicRate} kcal")
+                        ProfileDetailRow(stringResource(Res.string.profile_mbr_label), "${uiState.basalMetabolicRate} kcal")
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
-                        ProfileDetailRow("Agua Corporal", "${uiState.bodyWaterPercentage} %")
+                        ProfileDetailRow(stringResource(Res.string.profile_body_water_label), "${uiState.bodyWaterPercentage} %")
                     }
                 }
                 Spacer(modifier = Modifier.height(24.dp))

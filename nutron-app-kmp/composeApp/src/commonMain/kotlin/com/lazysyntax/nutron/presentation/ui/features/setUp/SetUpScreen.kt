@@ -2,6 +2,7 @@ package com.lazysyntax.nutron.presentation.ui.features.setUp
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -50,13 +51,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.lazysyntax.nutron.presentation.theme.Theme
 import com.lazysyntax.nutron.presentation.ui.features.setUp.composables.ActivitySelector
 import com.lazysyntax.nutron.presentation.ui.features.setUp.composables.BMRSelector
 import com.lazysyntax.nutron.presentation.ui.features.setUp.composables.GoalSelector
@@ -94,7 +99,7 @@ fun SetupScreen(
         onGoalChanged = { viewModel.onSetUpEvent(SetUpEvent.GoalChanged(it)) },
         onFormulaChanged = { viewModel.onSetUpEvent(SetUpEvent.FormulaChanged(it)) },
         onClickSave = { viewModel.onSetUpEvent(SetUpEvent.OnClickSave) },
-        onClickBack = { viewModel.onSetUpEvent(SetUpEvent.OnClickBack(fromSignUp)) }
+        onClickBack = {viewModel.onSetUpEvent(SetUpEvent.OnClickBack(fromSignUp)) }
     )
 }
 
@@ -125,6 +130,7 @@ fun SetupContent(
     val goalSheetState = rememberModalBottomSheetState()
     val formulaSheetState = rememberModalBottomSheetState()
 
+    val focusManager = LocalFocusManager.current
     Scaffold(
         topBar = {
             TopAppBarWhitBackButtonCommon(
@@ -136,6 +142,7 @@ fun SetupContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .pointerInput(Unit){detectTapGestures ( onTap = {focusManager.clearFocus()} )}
                 .padding(padding)
                 .verticalScroll(scrollState)
                 .padding(24.dp), // Margen general de formulario
@@ -485,10 +492,23 @@ fun GenderSelectorSegmentedButton(
                 shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
                 onClick = { onGenderChanged(label) },
                 selected = label == uiState,
-                label = { Text(label) }
+                label = { Text(label) },
+                colors = SegmentedButtonDefaults.colors(
+                    activeContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    activeContentColor = MaterialTheme.colorScheme.secondary,
+                    activeBorderColor = MaterialTheme.colorScheme.primary,
+                    inactiveContainerColor = MaterialTheme.colorScheme.surface,
+                    inactiveContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    inactiveBorderColor = MaterialTheme.colorScheme.outlineVariant
+                )
             )
         }
     }
+}
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun prevSelector(){
+    GenderSelectorSegmentedButton(uiState="", onGenderChanged = {})
 }
 
 @Preview(showSystemUi = true, showBackground = true)

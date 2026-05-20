@@ -11,8 +11,12 @@
     <!-- SignUp Screen -->
     <string name="title_signup">SIGN UP</string>
     <string name="signup_headline">Create your account</string>
+    <string name="signup_subline">Create an account to start taking care of your health</string>
     <string name="signup_button_continue">Complete Registration</string>
-
+    <string name="signup_name_field">Name</string>
+    <string name="signup_full_name_field">Full name</string>
+    <string name="signup_email_field">Email</string>
+    <string name="signup_passwd_field">Password</string>
     <!-- Setup Screen -->
     <string name="title_setup">SETUP</string>
     <string name="setup_welcome_user">Welcome!</string>
@@ -67,6 +71,28 @@
     <string name="title_profile">PROFILE</string>
     <string name="profile_headline">Profile Screen</string>
     <string name="profile_button_details">View Details</string>
+    <string name="profile_section_resume">Health Summary</string>
+    <string name="profile_section_details">Profile details</string>
+    <string name="profile_show_progres">Show progress statistics</string>
+    <string name="profile_height_label">Height</string>
+    <string name="profile_weight_label">Weight</string>
+    <string name="profile_gender_label">Gender</string>
+    <string name="profile_body_water_label">Body Water</string>
+    <string name="profile_mbr_label">Metabolism</string>
+    <string name="profile_fat_label">Fat</string>
+    <string name="profile_tdee_label">TDEE</string>
+
+    <string name="profile_bmi_tooltip">Body mass index (BMI)</string>
+    <string name="profile_bmi_text_tooltip">Body Mass Index (BMI).\nNormal: 18.5–24.9\nOverweight: 25.0–29.9</string>
+
+    <string name="profile_fat_tooltip">Body fat</string>
+    <string name="profile_fat_text_tooltip">Estimated body fat percentage.\nMen: 18-24%\nWomen: 25-31%</string>
+
+    <string name="profile_get_tooltip">Total Daily Energy Expenditure (TDEE)</string>
+    <string name="profile_get_text_tooltip">Estimated daily calories, including physical activity.</string>
+
+    <string name="profile_balance_tooltip">Energy Balance</string>
+    <string name="profile_balance_text_tooltip">Your adjusted daily calorie goal.</string>
 
     <!-- Targets Screen -->
     <string name="title_targets">TARGETS</string>

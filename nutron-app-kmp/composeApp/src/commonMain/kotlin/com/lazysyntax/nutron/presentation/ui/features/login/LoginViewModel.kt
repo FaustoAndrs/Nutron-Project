@@ -127,7 +127,7 @@ class LoginViewModel(
         navigator.navigateTo(route = Route.SignUp)
     }
     fun onSkipLogin(){
-        navigator.resetTo(route = Route.SetUp(fromSignUp = false))
+        navigator.resetTo(route = Route.SetUp(fromSignUp = true))
     }
 
 }

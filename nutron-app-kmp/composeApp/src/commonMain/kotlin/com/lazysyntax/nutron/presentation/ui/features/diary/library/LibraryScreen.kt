@@ -119,7 +119,7 @@ fun LibraryContent(
             LibrarySearchBar(
                 query = uiState.productName,
                 onSearch = onSearchProduct,
-                onScanBarcode = onSearchBarcode,
+                onScanBarcode = onShowScanner,
                 onQueryChanged = onProductChanged ,
                 onCleanQuery = { onProductChanged("") },
             )
