@@ -40,7 +40,7 @@ class OpenFoodFactsServiceImpl(private val client: HttpClient) : OpenFoodFactSer
 
     override suspend fun searchFoodByName(name: String): List<Food> {
         // En staging (.net), api/v1/search.json es el más estable para búsquedas por nombre
-        val url = "https://world.openfoodfacts.net/api/v2/search.json"
+        val url = "https://world.openfoodfacts.org/api/v2/search.json"
 
         return try {
             val response = client.get(url) {

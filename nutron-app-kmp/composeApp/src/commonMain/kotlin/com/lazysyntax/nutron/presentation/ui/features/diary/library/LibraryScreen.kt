@@ -1,13 +1,21 @@
 package com.lazysyntax.nutron.presentation.ui.features.diary.library
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +31,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.lazysyntax.nutron.presentation.ui.features.diary.DiaryViewModel
@@ -126,7 +136,7 @@ fun LibraryContent(
             LibrarySearchBar(
                 query = uiState.barcode,
                 onSearch = onSearchBarcode,
-                onScanBarcode = onSearchBarcode,
+                onScanBarcode = onShowScanner,
                 onQueryChanged = onBarcodeChanded,
                 onCleanQuery = { onProductChanged("") },
             )
@@ -144,23 +154,57 @@ fun LibraryContent(
                     uiState.foodListResult?.let { products ->
                         items(products) { product ->
                             Column(
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier
+                                    .fillMaxWidth()
                                     .clickable { onProductSelected(product) }
-                                    .padding(16.dp)
-
+                                    .padding(horizontal = 16.dp, vertical = 12.dp)
                             ) {
-                                Text(
-                                    text = product.name ?: "Producto sin nombre",
-                                    style = MaterialTheme.typography.titleMedium
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.Top
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = product.name ?: "Producto sin nombre",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        if (!product.brands.isNullOrBlank()) {
+                                            Text(
+                                                text = product.brands,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.secondary
+                                            )
+                                        }
+                                    }
+
+                                    Text(
+                                        text = "${product.nutriments?.calories ?: 0.0} kcal",
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    MacroMiniItem("P", "${product.nutriments?.proteins ?: 0.0}g", Color(0xFFE57373))
+                                    MacroMiniItem("C", "${product.nutriments?.carbs ?: 0.0}g", Color(0xFFFFB74D))
+                                    MacroMiniItem("G", "${product.nutriments?.fat ?: 0.0}g", Color(0xFF81C784))
+                                }
+
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(top = 12.dp),
+                                    thickness = 0.5.dp,
+                                    color = MaterialTheme.colorScheme.outlineVariant
                                 )
-                                Text(
-                                    text = "Calorías: ${product.nutriments?.carbs ?: 0.0} g"
-                                            + "Calorías: ${product.nutriments?.calories ?: 0.0} kcal"
-                                            + "Calorías: ${product.nutriments?.proteins ?: 0.0} g"
-                                            + "Calorías: ${product.nutriments?.fat ?: 0.0} g",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                                HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
                             }
                         }
                     }
@@ -201,6 +245,23 @@ fun LibraryContent(
             }
         }
 
+    }
+}
+
+@Composable
+fun MacroMiniItem(label: String, value: String, color: Color) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .background(color, shape = CircleShape)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = "$label: $value",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
