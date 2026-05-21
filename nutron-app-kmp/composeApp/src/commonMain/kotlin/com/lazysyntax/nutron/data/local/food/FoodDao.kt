@@ -26,4 +26,6 @@ interface FoodDao {
     @Query("DELETE FROM foods WHERE barcode = :barcode")
     suspend fun deleteFoodByBarcode(barcode: String?)
 
+    @Query("SELECT * FROM foods WHERE name LIKE '%' || :name || '%'")
+    suspend fun searchFoodByName(name: String): List<FoodEntity>
 }

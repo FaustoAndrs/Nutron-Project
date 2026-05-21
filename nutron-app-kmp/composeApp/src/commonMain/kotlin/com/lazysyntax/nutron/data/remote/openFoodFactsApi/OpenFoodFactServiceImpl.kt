@@ -12,7 +12,7 @@ class OpenFoodFactsServiceImpl(private val client: HttpClient) : OpenFoodFactSer
 
     override suspend fun fetchFoodByBarcode(barcode: String): Food? {
         // Usamos el dominio .net para staging/testing
-        val url = "https://world.openfoodfacts.net/api/2/product/$barcode.json"
+        val url = "https://world.openfoodfacts.net/api/v2/product/$barcode.json"
 
         return try {
             val response = client.get(url) {
@@ -39,16 +39,16 @@ class OpenFoodFactsServiceImpl(private val client: HttpClient) : OpenFoodFactSer
     }
 
     override suspend fun searchFoodByName(name: String): List<Food> {
-        // En staging (.net), api/v1/search.json es el más estable para búsquedas por nombre
-        val url = "https://world.openfoodfacts.org/api/v2/search.json"
+        val fields = "code,product_name,product_name_es,product_name_en,nutriments,nutriscore_grade,brands"
+        val url = "https://world.openfoodfacts.net/cgi/search.pl"
 
         return try {
             val response = client.get(url) {
                 parameter("search_terms", name)
-                parameter("search_simple", 1)
+                parameter("search_simple", "1")
                 parameter("action", "process")
-                parameter("json", 1)
-                parameter("page_size", "24")
+                parameter("json", "1")
+                parameter("fields", fields)
                 header(HttpHeaders.UserAgent, userAgent)
                 header(HttpHeaders.Accept, "application/json")
             }
@@ -57,11 +57,11 @@ class OpenFoodFactsServiceImpl(private val client: HttpClient) : OpenFoodFactSer
                 val searchResponse: SearchResponse = response.body()
                 searchResponse.foods ?: emptyList()
             } else {
-                println("Error OFF Search (Staging): Status ${response.status.value} - ${response.status.description}")
+                println("Error OFF Search: Status ${response.status.value} - ${response.status.description}")
                 emptyList()
             }
         } catch (e: Exception) {
-            println("Error en la búsqueda por nombre (Staging): ${e.message}")
+            println("Error en la búsqueda por nombre: ${e.message}")
             emptyList()
         }
     }

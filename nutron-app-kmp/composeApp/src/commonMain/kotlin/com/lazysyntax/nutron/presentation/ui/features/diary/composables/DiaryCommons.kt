@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -311,6 +312,9 @@ fun MealCard(
 
     ElevatedCard(
         modifier = modifier.fillMaxWidth().padding(8.dp),
+        colors = CardDefaults.cardColors().copy(
+            containerColor = MaterialTheme.colorScheme.surface,
+        )
     ) {   // Título de la comida (ej. Desayuno)
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -511,11 +515,18 @@ fun LibrarySearchBar(
     //Los resultados no se mostrarán en el desplegable
     var expanded = false
     Box(
-        modifier.fillMaxWidth().padding(top = 0.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
-            .semantics { isTraversalGroup = true }) {
+        modifier.fillMaxWidth()
+            .padding(top = 0.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
+            .semantics { isTraversalGroup = true })
+    {
         SearchBar(
+            colors = SearchBarDefaults.colors().copy(
+                containerColor = MaterialTheme.colorScheme.surface,
+
+            ),
             modifier = Modifier.align(Alignment.TopCenter)
-                .windowInsetsPadding(WindowInsets(0.dp)).semantics { traversalIndex = 0f },
+                .windowInsetsPadding(WindowInsets(0.dp))
+                .semantics { traversalIndex = 0f },
             inputField = {
                 SearchBarDefaults.InputField(
                     modifier = Modifier.windowInsetsPadding(WindowInsets(0.dp)),

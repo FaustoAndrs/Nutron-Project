@@ -51,6 +51,7 @@ class DiaryViewModel(
     )
     val uiState: StateFlow<DiaryUiState> = _uiState.asStateFlow()
 
+
     init {
         // Carga los datos reales de la base de datos para hoy al iniciar
         loadMealsForDate(_uiState.value.date)
@@ -89,6 +90,9 @@ class DiaryViewModel(
         }
     }
 
+    enum class SearchSource { LOCAL, API }
+    
+    
     fun onLibraryEvent(libraryEvent: LibraryEvent) {
         when (libraryEvent) {
             is LibraryEvent.BarcodeChanged -> onBarcodeFieldChange(libraryEvent.barcode)
@@ -96,6 +100,15 @@ class DiaryViewModel(
             LibraryEvent.OnClickSearchProduct -> onSearchProduct()
             is LibraryEvent.ProductNameChanged -> onProductNameFieldChange(libraryEvent.productName)
             is LibraryEvent.ProductSelected -> onFoodSelected(libraryEvent.product)
+            is LibraryEvent.SearchSourceChanged -> {
+                _uiState.update {
+                    it.copy(
+                        libraryUiState = it.libraryUiState.copy(
+                            searchSource = libraryEvent.source
+                        )
+                    )
+                }
+            }
             LibraryEvent.OnClickBack -> {
                 onBack()
                 _uiState.update {
@@ -108,6 +121,7 @@ class DiaryViewModel(
             }
 
             is LibraryEvent.SelectedMeal -> setSelectedMeal(libraryEvent.meal)
+            
         }
     }
 
@@ -120,7 +134,7 @@ class DiaryViewModel(
 
             MacrosEvent.OnclickSave -> {
                 addFood()
-                onBack()
+                navigator.resetTo(Route.Diary)
             }
         }
 
@@ -232,9 +246,19 @@ class DiaryViewModel(
     @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     fun onSearchBarcode() {
         val barcode = _uiState.value.libraryUiState.barcode
+        val source = _uiState.value.libraryUiState.searchSource
 
         viewModelScope.launch {
-            val product = foodRepository.fetchFoodByBarcode(barcode)
+            // Buscamos localmente primero para ver si ya tenemos este alimento y reutilizar su ID
+            val localProduct = foodRepository.getSavedFoodByCode(barcode)
+
+            val product = if (source == SearchSource.API) {
+                // Si es API, traemos la info fresca pero intentamos mantener el ID local si existe
+                foodRepository.fetchFoodByBarcode(barcode)?.copy(id = localProduct?.id)
+            } else {
+                localProduct
+            }
+
             if (product != null) {
                 // Aseguramos que el barcode esté presente en el objeto y generamos un ID si no lo tiene
                 val productWithId = product.copy(
@@ -258,9 +282,6 @@ class DiaryViewModel(
                     )
                 }
 
-                // Se guarda en ROOM
-                onSaveFood(productWithId)
-
                 navigator.navigateTo(Route.Macros)
             }
         }
@@ -268,9 +289,14 @@ class DiaryViewModel(
 
     fun onSearchProduct() {
         val productName = _uiState.value.libraryUiState.productName
+        val source = _uiState.value.libraryUiState.searchSource
 
         viewModelScope.launch {
-            val foods = foodRepository.searchFoodByName(productName)
+            val foods = if (source == SearchSource.API) {
+                foodRepository.searchFoodByName(productName)
+            } else {
+                foodRepository.searchSavedFoodByName(productName)
+            }
             _uiState.update {
                 it.copy(
                     libraryUiState = it.libraryUiState.copy(
@@ -285,14 +311,16 @@ class DiaryViewModel(
     @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     fun onFoodSelected(food: Food) {
         viewModelScope.launch {
+            // Si el alimento tiene código de barras, comprobamos si ya existe localmente para reutilizar su ID
+            val localFood = food.barcode?.let { foodRepository.getSavedFoodByCode(it) }
+
             val foodWithId = food.copy(
-                id = food.id ?: kotlin.uuid.Uuid.random().toString(),
+                id = food.id ?: localFood?.id ?: kotlin.uuid.Uuid.random().toString(),
                 nutriments = food.nutriments?.copy(
                     quantity = food.nutriments.quantity ?: "100",
                     quantityUnit = food.nutriments.quantityUnit ?: "g"
                 ) ?: Nutriments()
             )
-            onSaveFood(foodWithId)
             _uiState.update {
                 it.copy(
                     macrosUiState = it.macrosUiState.copy(
@@ -415,6 +443,7 @@ class DiaryViewModel(
 
         // 4. Persistir en la base de datos (onSaveMealWithFood se encargará de usar el ID correcto)
         viewModelScope.launch {
+            onSaveFood(selectedFood)
             onSaveMealWithFood(updatedMeal)
         }
     }

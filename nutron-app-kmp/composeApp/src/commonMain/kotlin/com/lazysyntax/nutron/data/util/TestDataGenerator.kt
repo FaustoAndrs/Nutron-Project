@@ -174,7 +174,7 @@ class TestDataGenerator(
 
     )
 
-    suspend fun generateData(months: Int = 4) {
+    suspend fun generateData(months: Int = 2) {
         val userId = sessionManager.getUserId() ?: "dev_user_id"
         // Usamos Clock de kotlinx.datetime explícitamente
         val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
@@ -194,12 +194,12 @@ class TestDataGenerator(
             template.forEach { templateMeal ->
                 // Decidimos aleatoriamente si esta comida tiene alimentos (80% de probabilidad)
                 if (Random.nextFloat() > 0.2f) {
-                    val numFoods = Random.nextInt(4, 10)
+                    val numFoods = Random.nextInt(2, 6)
                     val mealFoods = mutableListOf<Food>()
 
                     repeat(numFoods) {
                         val baseFood = sampleFoods.random()
-                        val quantity = Random.nextDouble(30.0, 250.0).round(1) ?: 100.0
+                        val quantity = Random.nextDouble(30.0, 150.0).round(1) ?: 100.0
                         val factor = quantity / 100.0
 
                         val snapshotFood = baseFood.copy(

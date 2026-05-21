@@ -62,4 +62,8 @@ class FoodRepositoryImpl(
     override suspend fun deleteFood(code: String) {
         foodDao.deleteFoodByCode(code)
     }
+
+    override suspend fun searchSavedFoodByName(name: String): List<Food> {
+        return foodDao.searchFoodByName(name).map { it.toDomain() }
+    }
 }

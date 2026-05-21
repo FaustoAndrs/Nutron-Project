@@ -126,13 +126,12 @@ fun DiaryContent(
                 uiState.meals?.let { meals ->
                     items(meals) { meal ->
                         Column(
-                            modifier = Modifier.fillMaxWidth().padding(16.dp)
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
                         ) {
                             MealCard(meal = meal, onAddProduct = {
                                 onDiaryEvent(DiaryEvent.OnClickAddProduct(
                                 meal
                             )) })
-                            HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
                         }
                     }
                 }

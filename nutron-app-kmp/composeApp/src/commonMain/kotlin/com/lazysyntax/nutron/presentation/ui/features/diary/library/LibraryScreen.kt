@@ -2,11 +2,13 @@ package com.lazysyntax.nutron.presentation.ui.features.diary.library
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,34 +18,49 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import com.lazysyntax.nutron.presentation.theme.Theme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.lazysyntax.nutron.domain.models.Food
 import com.lazysyntax.nutron.presentation.ui.features.diary.DiaryViewModel
+import com.lazysyntax.nutron.presentation.ui.features.diary.DiaryViewModel.SearchSource
 import com.lazysyntax.nutron.presentation.ui.features.diary.composables.LibrarySearchBar
 import com.lazysyntax.nutron.presentation.ui.features.diary.composables.LibraryTopAppBar
-import com.lazysyntax.nutron.domain.models.Food
 import dev.icerock.moko.permissions.Permission
 import dev.icerock.moko.permissions.camera.CAMERA
 import dev.icerock.moko.permissions.compose.BindEffect
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
 import nutron.composeapp.generated.resources.Res
+import nutron.composeapp.generated.resources.button_back
 import nutron.composeapp.generated.resources.title_library
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -83,6 +100,7 @@ fun LibraryScreen(
         }
     }
 
+    
     LibraryContent(
         uiState = uiState.libraryUiState,
         onBack = { viewModel.onLibraryEvent(LibraryEvent.OnClickBack) },
@@ -93,11 +111,14 @@ fun LibraryScreen(
         showScanner = showScanner,
         hasCameraPermission = hasCameraPermission,
         onShowScanner = { showScanner = !showScanner },
-        onProductSelected = {viewModel.onLibraryEvent(LibraryEvent.ProductSelected(it))}
+        onProductSelected = { viewModel.onLibraryEvent(LibraryEvent.ProductSelected(it)) },
+        onSearchSourceChanged = { viewModel.onLibraryEvent(LibraryEvent.SearchSourceChanged(it)) }
 
 
     )
 }
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -111,35 +132,103 @@ fun LibraryContent(
     showScanner: Boolean,
     hasCameraPermission: Boolean,
     onShowScanner: () -> Unit,
-    onProductSelected: (Food) -> Unit
+    onProductSelected: (Food) -> Unit,
+    onSearchSourceChanged: (SearchSource) -> Unit
 ) {
+    val focusManager = LocalFocusManager.current
+    var showBarBarcodeSearch = rememberSaveable { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             LibraryTopAppBar(
                 title = stringResource(Res.string.title_library),
                 onBack = onBack,
-                onSearch = onSearchProduct,
+                onSearch = {
+                    onSearchProduct()
+                    focusManager.clearFocus()
+                },
                 onCleanSearch = { onProductChanged("") },
             )
         }) { padding ->
         Column(
-            modifier = Modifier.padding(padding),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.fillMaxHeight().padding(padding)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = { focusManager.clearFocus() })
+                }, verticalArrangement = Arrangement.Top
         ) {
             LibrarySearchBar(
                 query = uiState.productName,
-                onSearch = onSearchProduct,
+                onSearch = {
+                    onSearchProduct()
+                    focusManager.clearFocus()
+                },
                 onScanBarcode = onShowScanner,
-                onQueryChanged = onProductChanged ,
+                onQueryChanged = onProductChanged,
                 onCleanQuery = { onProductChanged("") },
             )
-            LibrarySearchBar(
-                query = uiState.barcode,
-                onSearch = onSearchBarcode,
-                onScanBarcode = onShowScanner,
-                onQueryChanged = onBarcodeChanded,
-                onCleanQuery = { onProductChanged("") },
-            )
+
+            if(showBarBarcodeSearch.value) {
+                LibrarySearchBar(
+                    query = uiState.barcode,
+                    onSearch = {
+                        onSearchBarcode()
+                        focusManager.clearFocus()
+                    },
+                    onScanBarcode = onShowScanner,
+                    onQueryChanged = onBarcodeChanded,
+                    onCleanQuery = { onBarcodeChanded("") },
+                )
+            }
+
+            // 2. Selectores de origen (Chips)
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(start = 32.dp, end = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+            FilterChip(
+                    selected = uiState.searchSource == SearchSource.LOCAL,
+                    onClick = { onSearchSourceChanged(SearchSource.LOCAL) },
+                    label = { Text("Mi Librería") },
+                    shape = RoundedCornerShape(20.dp),
+                    leadingIcon = if (uiState.searchSource == SearchSource.LOCAL) {
+                        {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = null,
+                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                            )
+                        }
+                    } else null)
+
+                FilterChip(
+                    selected = uiState.searchSource == SearchSource.API,
+                    onClick = { onSearchSourceChanged(SearchSource.API) },
+                    label = { Text("Buscar en la Red") },
+                    shape = RoundedCornerShape(20.dp),
+                    leadingIcon = if (uiState.searchSource == SearchSource.API) {
+                        {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = null,
+                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                            )
+                        }
+                    } else null)
+                IconButton(
+                    modifier = Modifier.padding(0.dp),
+                    onClick = { showBarBarcodeSearch.value = !showBarBarcodeSearch.value },
+                    content = {
+                        if (showBarBarcodeSearch.value) Icon(
+                            imageVector = Icons.Default.ExpandLess,
+                            contentDescription = stringResource(Res.string.button_back)
+                        )
+                        else Icon(
+                            imageVector = Icons.Default.ExpandMore,
+                            contentDescription = stringResource(Res.string.button_back)
+                        )
+                    })
+            }
 
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -153,12 +242,10 @@ fun LibraryContent(
                 ) {
                     uiState.foodListResult?.let { products ->
                         items(products) { product ->
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { onProductSelected(product) }
-                                    .padding(horizontal = 16.dp, vertical = 12.dp)
-                            ) {
+                            Column(modifier = Modifier.fillMaxWidth().clickable {
+                                    onProductSelected(product)
+                                    focusManager.clearFocus()
+                                }.padding(horizontal = 16.dp, vertical = 12.dp)) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -195,9 +282,19 @@ fun LibraryContent(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
-                                    MacroMiniItem("P", "${product.nutriments?.proteins ?: 0.0}g", Color(0xFFE57373))
-                                    MacroMiniItem("C", "${product.nutriments?.carbs ?: 0.0}g", Color(0xFFFFB74D))
-                                    MacroMiniItem("G", "${product.nutriments?.fat ?: 0.0}g", Color(0xFF81C784))
+                                    MacroMiniItem(
+                                        "P",
+                                        "${product.nutriments?.proteins ?: 0.0}g",
+                                        Color(0xFFE57373)
+                                    )
+                                    MacroMiniItem(
+                                        "C",
+                                        "${product.nutriments?.carbs ?: 0.0}g",
+                                        Color(0xFFFFB74D)
+                                    )
+                                    MacroMiniItem(
+                                        "G", "${product.nutriments?.fat ?: 0.0}g", Color(0xFF81C784)
+                                    )
                                 }
 
                                 HorizontalDivider(
@@ -217,9 +314,7 @@ fun LibraryContent(
         ScannerView(
             codeTypes = listOf(BarcodeFormat.FORMAT_QR_CODE, BarcodeFormat.FORMAT_EAN_13),
             scannerUiOptions = ScannerUiOptions().copy(
-                headerTitle = "Scan Barcode",
-                showTorch = true,
-                showZoom = false
+                headerTitle = "Scan Barcode", showTorch = true, showZoom = false
             ),
             colors = ScannerColors().copy(
                 headerContainerColor = Color.Transparent
@@ -252,9 +347,7 @@ fun LibraryContent(
 fun MacroMiniItem(label: String, value: String, color: Color) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
-            modifier = Modifier
-                .size(8.dp)
-                .background(color, shape = CircleShape)
+            modifier = Modifier.size(8.dp).background(color, shape = CircleShape)
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(
@@ -270,38 +363,20 @@ fun MacroMiniItem(label: String, value: String, color: Color) {
 @Composable
 @Preview
 fun PreviewLibraryScafold() {
-    Scaffold(
-        topBar = {
-            LibraryTopAppBar(
-                title = stringResource(Res.string.title_library),
-                onBack = { },
-                onSearch = { },
-                onCleanSearch = { },
-            )
-        }) { padding ->
-        Column(
-            modifier = Modifier.padding(padding),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            LibrarySearchBar(
-                query = "",
-                onSearch = { },
-                onScanBarcode = { },
-                onQueryChanged = {},
-                onCleanQuery = {},
-            )
-            /*Row(
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 0.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                content = {
-                    LibrarySearchBar(
-                        textFieldState = TextFieldState(),
-                        onSearch = { },
-                        onScanBarcode = { }
-                    )
-                }
-            )*/
-
-        }
+    Theme {
+        var libraryUiState = LibraryUiState()
+        LibraryContent(
+            uiState = libraryUiState,
+            onBack = {},
+            onSearchBarcode = {},
+            onSearchProduct = {},
+            onBarcodeChanded = {},
+            onProductChanged = {},
+            showScanner = false,
+            hasCameraPermission = true,
+            onShowScanner = {},
+            onProductSelected = {},
+            onSearchSourceChanged = {}
+        )
     }
 }

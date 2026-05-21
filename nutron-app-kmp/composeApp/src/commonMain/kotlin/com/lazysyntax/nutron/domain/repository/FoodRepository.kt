@@ -13,4 +13,5 @@ FoodRepository {
     fun getSavedFoods(): Flow<List<Food>>
     suspend fun getSavedFoodByCode(code: String): Food?
     suspend fun deleteFood(code: String)
+    suspend fun searchSavedFoodByName(name: String): List<Food>
 }

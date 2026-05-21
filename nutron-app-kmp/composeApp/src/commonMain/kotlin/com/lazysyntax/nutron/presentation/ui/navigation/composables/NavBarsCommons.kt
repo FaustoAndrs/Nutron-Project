@@ -18,6 +18,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import com.lazysyntax.nutron.presentation.ui.navigation.Navigator
 import com.lazysyntax.nutron.presentation.ui.navigation.Route
 import nutron.composeapp.generated.resources.Res
@@ -50,7 +51,10 @@ fun NavBar() { // Sin parámetros
         )
     }
 
-    NavigationBar {
+    NavigationBar(
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 0.dp
+    ) {
         items.forEach { (route, resId, icon) ->
             val isSelected = currentRoute == route
             NavigationBarItem(
