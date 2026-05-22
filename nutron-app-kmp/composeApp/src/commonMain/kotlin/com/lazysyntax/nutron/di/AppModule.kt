@@ -163,7 +163,7 @@ val appModule = module {
 
         val initialRoute = when {
             !isLoggedIn -> Route.Login
-            else -> Route.Profile
+            else -> Route.Diary
         }
         println("NAV DEBUG: Ruta inicial decidida -> $initialRoute")
         DefaultNavigator(initialRoute = initialRoute)

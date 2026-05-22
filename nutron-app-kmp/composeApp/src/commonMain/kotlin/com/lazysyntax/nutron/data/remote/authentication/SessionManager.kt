@@ -47,13 +47,20 @@ class SessionManager(
 
     fun getAuthSession(): AuthSession? {
         return try {
-            encryptedSettings.decodeValue(
+            val session = encryptedSettings.decodeValue(
                 authSessionSerializer,
                 AUTH_SESSION_KEY,
                 null
             )
+            if (session != null) {
+                println("SESSION DEBUG: Sesión cargada correctamente para el usuario: ${session.email}")
+            } else {
+                println("SESSION DEBUG: No se encontró ninguna sesión guardada.")
+            }
+            session
         } catch (e: Exception) {
-            println("SESSION ERROR: Error decoding auth session: ${e.message}")
+            println("SESSION ERROR: Fallo crítico al decodificar la sesión: ${e.message}")
+            e.printStackTrace()
             null
         }
     }
