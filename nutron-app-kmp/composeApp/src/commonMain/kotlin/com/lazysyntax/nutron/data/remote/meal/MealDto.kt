@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class MealDto(
-    val id: String? = null,
+    val id: String,
     val userId: String? = null,
     val name: String,
     val date: String, // LocalDate as String "YYYY-MM-DD"
@@ -13,8 +13,8 @@ data class MealDto(
 
 @Serializable
 data class MealFoodSnapshotDto(
-    val snapshotId: String? = null,
-    val foodId: String? = null,
+    val snapshotId: String,
+    val foodId: String,
     val name: String?,
     val barcode: String?,
     val nutriments: NutrimentsDto?

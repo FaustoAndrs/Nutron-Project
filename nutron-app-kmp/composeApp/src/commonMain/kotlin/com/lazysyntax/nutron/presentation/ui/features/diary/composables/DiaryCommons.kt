@@ -2,7 +2,6 @@ package com.lazysyntax.nutron.presentation.ui.features.diary.composables
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.runtime.getValue
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.MoreVert
@@ -41,13 +42,19 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -55,20 +62,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
+import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.lazysyntax.nutron.presentation.ui.features.diary.DiaryEvent
-import com.lazysyntax.nutron.presentation.ui.features.diary.DiaryUiState
-import com.lazysyntax.nutron.presentation.ui.features.targets.TargetsUiState
 import com.lazysyntax.nutron.domain.models.Food
 import com.lazysyntax.nutron.domain.models.Meal
 import com.lazysyntax.nutron.presentation.theme.Theme
+import com.lazysyntax.nutron.presentation.ui.features.diary.DiaryEvent
+import com.lazysyntax.nutron.presentation.ui.features.diary.DiaryUiState
+import com.lazysyntax.nutron.presentation.ui.features.targets.TargetsUiState
 import nutron.composeapp.generated.resources.Res
 import nutron.composeapp.generated.resources.add_check
 import nutron.composeapp.generated.resources.barcode_scanner_24px
@@ -237,7 +246,7 @@ fun MacroProgressBar(
         animationSpec = tween(durationMillis = 1000),
         label = "progressAnimation"
     )
-    
+
     Column(modifier = modifier.padding(4.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -245,7 +254,7 @@ fun MacroProgressBar(
             verticalAlignment = Alignment.Bottom
         ) {
             Text(
-                text = label, 
+                text = label,
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -268,9 +277,10 @@ fun MacroProgressBar(
         )
     }
 }
+
 @Preview(showBackground = true)
 @Composable
-fun PrevMacrosbar(){
+fun PrevMacrosbar() {
     MacroProgressBar(
         label = "kalories",
         current = 2100.0,
@@ -279,6 +289,7 @@ fun PrevMacrosbar(){
         color = MaterialTheme.colorScheme.primary
     )
 }
+
 fun Meal.calculateMacros(): MacrosCount {
     return foods?.fold(MacrosCount()) { acc, food ->
         val n = food.nutriments
@@ -301,11 +312,13 @@ fun TargetsUiState.calculateTargetGrams(): MacrosCount {
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MealCard(
     meal: Meal,
     modifier: Modifier = Modifier,
     onAddProduct: () -> Unit,
+    onDeleteFood: (Food) -> Unit
 ) {
     val productCount = meal.calculateMacros()
     var showNutriments = rememberSaveable { mutableStateOf(true) }
@@ -353,7 +366,8 @@ fun MealCard(
             thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant
         )
         Column(
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 16.dp),
+            modifier = Modifier.fillMaxWidth()
+                .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
 
@@ -375,62 +389,108 @@ fun MealCard(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     } else {
+                        val localDensity = LocalDensity.current
+
                         foods.forEach { product ->
-                            Column(
-                                Modifier.background(
-                                    color = MaterialTheme.colorScheme.surface.copy(
-                                        alpha = 0.9f
-                                    )
+
+                            key(product.id) {
+                                // 1. El estado actual ya no necesita lógica de confirmación intrusiva
+                                val dismissState = rememberSwipeToDismissBoxState(
+                                    positionalThreshold = { with(localDensity) { 30.dp.toPx() } }
                                 )
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                ) {
-                                    Text(
-                                        text = product.name ?: "Producto desconocido",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier.weight(1f),
-                                        overflow = TextOverflow.Clip,
-                                        maxLines = 1
 
-                                    )
-                                    Text(
-                                        textAlign = TextAlign.End,
-                                        text = "Cal:${product.nutriments?.calories?.toInt() ?: "Na"}",
-                                        modifier = Modifier.weight(4f),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        overflow = TextOverflow.Clip
-                                    )
+                                // 2. Escuchamos el cambio de estado de forma reactiva
+                                // Cuando el estado pase a ser 'EndToStart', ejecutamos el borrado
+                                if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
+                                    LaunchedEffect(product) {
+                                        onDeleteFood(product)
+                                    }
+                                }
 
-                                }
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                ) {
-                                    Text(
-                                        text = "${product.nutriments?.quantity ?: "Na"} ${product.nutriments?.quantityUnit}",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        modifier = Modifier.weight(1f),
-                                        overflow = TextOverflow.Clip
-                                    )
-                                    Text(
-                                        textAlign = TextAlign.End,
-                                        text = "C:${product.nutriments?.carbs ?: "Na"}  " +
-                                                "P:${product.nutriments?.proteins ?: "Na"}  " +
-                                                "F:${product.nutriments?.fat ?: "Na"}",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        modifier = Modifier.weight(4f),
-                                        overflow = TextOverflow.Clip
-                                    )
-                                }
+
+                                SwipeToDismissBox(
+                                    state = dismissState,
+                                    enableDismissFromStartToEnd = false,
+                                    backgroundContent = {
+                                        val color =
+                                            if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
+                                                Color.Red.copy(alpha = 0.8f)
+                                            } else {
+                                                Color.Transparent
+                                            }
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .background(color)
+                                                .padding(horizontal = 20.dp),
+                                            contentAlignment = Alignment.CenterEnd
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Delete,
+                                                contentDescription = "Eliminar",
+                                                tint = Color.White
+                                            )
+                                        }
+                                    },
+                                    content = {
+                                        Column(
+                                            Modifier.background(
+                                                color = MaterialTheme.colorScheme.surface
+                                            )
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth()
+                                                    .padding(vertical = 4.dp),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                            ) {
+                                                Text(
+                                                    text = product.name ?: "Producto desconocido",
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = FontWeight.Bold,
+                                                    modifier = Modifier.weight(1f),
+                                                    overflow = TextOverflow.Clip,
+                                                    maxLines = 1
+
+                                                )
+                                                Text(
+                                                    textAlign = TextAlign.End,
+                                                    text = "Cal:${product.nutriments?.calories?.toInt() ?: "Na"}",
+                                                    modifier = Modifier.weight(4f),
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    overflow = TextOverflow.Clip
+                                                )
+
+                                            }
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth()
+                                                    .padding(vertical = 4.dp),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                            ) {
+                                                Text(
+                                                    text = "${product.nutriments?.quantity ?: "Na"} ${product.nutriments?.quantityUnit}",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    modifier = Modifier.weight(1f),
+                                                    overflow = TextOverflow.Clip
+                                                )
+                                                Text(
+                                                    textAlign = TextAlign.End,
+                                                    text = "C:${product.nutriments?.carbs ?: "Na"}  " +
+                                                            "P:${product.nutriments?.proteins ?: "Na"}  " +
+                                                            "F:${product.nutriments?.fat ?: "Na"}",
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    modifier = Modifier.weight(4f),
+                                                    overflow = TextOverflow.Clip
+                                                )
+                                            }
+                                        }
+                                    }
+                                )
+                                HorizontalDivider(
+                                    thickness = 0.5.dp,
+                                    color = MaterialTheme.colorScheme.outlineVariant
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
                             }
-                            HorizontalDivider(
-                                thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-
                         }
 
                     }
@@ -445,7 +505,11 @@ fun MealCard(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 content = {
                     MacroItem("Proteins", productCount.proteins.toInt(), Modifier.weight(1f))
-                    MacroItem("Carbohydrates", productCount.carbohydrates.toInt(), Modifier.weight(1f))
+                    MacroItem(
+                        "Carbohydrates",
+                        productCount.carbohydrates.toInt(),
+                        Modifier.weight(1f)
+                    )
                     MacroItem("Fats", productCount.fats.toInt(), Modifier.weight(1f))
                     MacroItem("Calories", productCount.calories.toInt(), Modifier.weight(1f))
                 }
@@ -507,7 +571,7 @@ fun LibrarySearchBar(
     onScanBarcode: () -> Unit,
     onQueryChanged: (String) -> Unit,
     onCleanQuery: () -> Unit,
-
+    placeholder: String = ""
     ) {
     // Controls expansion state of the search bar
     //var expanded by rememberSaveable { mutableStateOf(false) }
@@ -523,7 +587,7 @@ fun LibrarySearchBar(
             colors = SearchBarDefaults.colors().copy(
                 containerColor = MaterialTheme.colorScheme.surface,
 
-            ),
+                ),
             modifier = Modifier.align(Alignment.TopCenter)
                 .windowInsetsPadding(WindowInsets(0.dp))
                 .semantics { traversalIndex = 0f },
@@ -538,7 +602,7 @@ fun LibrarySearchBar(
                     },
                     expanded = expanded,
                     onExpandedChange = { expanded = it },
-                    placeholder = { Text("Search") },
+                    placeholder = { Text(placeholder) },
                     leadingIcon = {
                         IconButton(onClick = onSearch) {
                             Icon(
@@ -588,6 +652,6 @@ fun SearchBarPrev() {
     )
     Theme {
         MealCard(
-            meal = meal, onAddProduct = {})
+            meal = meal, onAddProduct = {}, onDeleteFood = {})
     }
 }

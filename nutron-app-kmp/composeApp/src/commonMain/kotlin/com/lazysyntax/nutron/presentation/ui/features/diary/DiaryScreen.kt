@@ -19,6 +19,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.lazysyntax.nutron.presentation.theme.CaloriesIndexColor
+import com.lazysyntax.nutron.presentation.theme.CarbohydratesIndexColor
+import com.lazysyntax.nutron.presentation.theme.FatsIndexColor
+import com.lazysyntax.nutron.presentation.theme.ProteinsIndexColor
 import com.lazysyntax.nutron.presentation.ui.features.diary.composables.DiaryTopAppBar
 import com.lazysyntax.nutron.presentation.ui.features.diary.composables.MacroProgressBar
 import com.lazysyntax.nutron.presentation.ui.features.diary.composables.MacrosCount
@@ -83,7 +87,7 @@ fun DiaryContent(
                     current = totalMacros.calories,
                     target = targetMacros.calories,
                     unit = "kcal",
-                    color = MaterialTheme.colorScheme.primary
+                    color = CaloriesIndexColor
                 )
 
                 Row(
@@ -95,7 +99,7 @@ fun DiaryContent(
                         current = totalMacros.proteins,
                         target = targetMacros.proteins,
                         unit = "g",
-                        color = androidx.compose.ui.graphics.Color(0xFFE57373),
+                        color = ProteinsIndexColor,
                         modifier = Modifier.weight(1f)
                     )
                     MacroProgressBar(
@@ -103,7 +107,7 @@ fun DiaryContent(
                         current = totalMacros.carbohydrates,
                         target = targetMacros.carbohydrates,
                         unit = "g",
-                        color = androidx.compose.ui.graphics.Color(0xFFFFB74D),
+                        color = CarbohydratesIndexColor,
                         modifier = Modifier.weight(1f)
                     )
                     MacroProgressBar(
@@ -111,7 +115,7 @@ fun DiaryContent(
                         current = totalMacros.fats,
                         target = targetMacros.fats,
                         unit = "g",
-                        color = androidx.compose.ui.graphics.Color(0xFF81C784),
+                        color  = FatsIndexColor,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -126,12 +130,18 @@ fun DiaryContent(
                 uiState.meals?.let { meals ->
                     items(meals) { meal ->
                         Column(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+                            modifier = Modifier.fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
                         ) {
-                            MealCard(meal = meal, onAddProduct = {
-                                onDiaryEvent(DiaryEvent.OnClickAddProduct(
-                                meal
-                            )) })
+                            MealCard(
+                                meal = meal,
+                                onAddProduct = { onDiaryEvent(DiaryEvent.OnClickAddProduct(meal)) },
+                                onDeleteFood = { food ->
+                                    onDiaryEvent(
+                                        DiaryEvent.OnDeleteFood(meal, food)
+                                    )
+                                }
+                            )
                         }
                     }
                 }

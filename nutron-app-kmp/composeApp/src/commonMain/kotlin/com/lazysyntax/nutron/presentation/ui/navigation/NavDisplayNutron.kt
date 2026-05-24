@@ -56,7 +56,6 @@ fun NavDisplayNutron() {
                 Statistics -> StatisticsScreen()
 
                 Settings -> SettingsScreen(
-                    onLogOut = { navigator.resetTo(Login) },
                     onSetUp = {
                         navigator.navigateTo(
                             SetUp(fromSignUp = false)

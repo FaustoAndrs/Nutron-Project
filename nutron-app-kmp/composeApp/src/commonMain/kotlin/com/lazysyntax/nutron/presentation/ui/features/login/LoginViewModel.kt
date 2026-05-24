@@ -3,6 +3,7 @@ package com.lazysyntax.nutron.presentation.ui.features.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lazysyntax.nutron.data.remote.authentication.AuthRepository
+import com.lazysyntax.nutron.data.remote.authentication.AuthResult
 import com.lazysyntax.nutron.data.repository.SyncRepositoryImpl
 import com.lazysyntax.nutron.data.remote.synchronization.SyncResult
 import com.lazysyntax.nutron.presentation.ui.navigation.Navigator
@@ -73,21 +74,27 @@ class LoginViewModel(
                     loginSuccess = null,
                     errorMessage = null
                 ) }
-                val success = authRepository.login(
+                val result = authRepository.login(
                     _uiState.value.email,
                     _uiState.value.password
                 )
-                println("Login en servidor - Éxito: $success")
+                println("Login en servidor - Resultado: $result")
                 _uiState.update {
                     it.copy(
-                        isLoading = false, 
-                        loginSuccess = success,
-                        errorMessage = if (!success) "Usuario o clave incorrectos" else null
+                        isLoading = false,
+                        loginSuccess = result is AuthResult.Success,
+                        errorMessage = when (result) {
+                            AuthResult.Success -> null
+                            AuthResult.InvalidCredentials -> "Usuario o clave incorrectos"
+                            AuthResult.NetworkError -> "Error de conexión. Revisa el servidor o tu internet."
+                            is AuthResult.UnknownError -> result.message ?: "Error desconocido"
+                            AuthResult.UserAlreadyExists -> "Usuario ya registrado con estos parámetros."
+                        }
                     )
                 }
 
                 var syncResult: SyncResult? = null
-                if (success) {
+                if (result is AuthResult.Success) {
                     syncResult = syncRepository.syncUserSetUp()
                 }
 
@@ -105,10 +112,10 @@ class LoginViewModel(
                     null -> {
                         println("SYNC: NULL")
                     }
-                    SyncResult.Error -> {
-                        // Error de conexión -> Mostrar mensaje al usuario
-                        println("SYNC: Error de conexion")
-                        //Mostrar un SnackBar
+                    SyncResult.Error, SyncResult.NetworkError -> {
+                        // Error de conexión o servidor -> Mostrar mensaje al usuario
+                        println("SYNC: Error de conexion o servidor")
+                        _uiState.update { it.copy(errorMessage = "Error al sincronizar datos del perfil.") }
                     }
                 }
 
@@ -127,6 +134,7 @@ class LoginViewModel(
         navigator.navigateTo(route = Route.SignUp)
     }
     fun onSkipLogin(){
+        authRepository.loginAsGuest()
         navigator.resetTo(route = Route.SetUp(fromSignUp = true))
     }
 

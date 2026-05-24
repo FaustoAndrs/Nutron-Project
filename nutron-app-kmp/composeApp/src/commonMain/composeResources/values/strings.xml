@@ -12,7 +12,6 @@
     <string name="title_signup">REGISTRO</string>
     <string name="signup_headline">Crea tu cuenta</string>
     <string name="signup_subline">Crea una cuenta para empezar a cuidar tu salud</string>
-
     <string name="signup_button_continue">Completar Registro</string>
     <string name="signup_name_field">Nombre</string>
     <string name="signup_full_name_field">Nombre completo</string>
@@ -26,6 +25,7 @@
     <string name="setup_desc_user">Gracias por registrarte. Ajustemos unos detalles.</string>
     <string name="setup_desc_guest">Estás en modo invitado. Puedes configurar tu perfil ahora.</string>
     <string name="setup_button_save">Guardar</string>
+    <string name="setup_age_label">años</string>
 
     <!-- Validators -->
     <string name="email_no_empty_validator">El correo no puede estar vacío.</string>
@@ -102,6 +102,10 @@
     <string name="targets_headline">Objetivos</string>
     <string name="label_daily_kcal">Objetivo calórico diario</string>
     <string name="label_diet_type">Tipo de dieta</string>
+    <string name="label_macro_distribution">Distribución de macronutrientes</string>
+    <string name="label_proteins">Proteínas</string>
+    <string name="label_carbs">Carbohidratos</string>
+    <string name="label_fats">Grasas</string>
 
     <!-- Diary Screen -->
     <string name="title_diary">DIARIO</string>
@@ -117,13 +121,34 @@
     <string name="library_button_add_product">Añadir alimento</string>
     <string name="library_button_search_product">Buscar alimento</string>
     <string name="library_button_search_barcode">Buscar código de barras</string>
+    <string name="library_search_placeholder">Busca productos o escanea un código</string>
+    <string name="library_no_results">No se encontraron resultados para tu búsqueda</string>
+    <string name="library_error_barcode_not_found">No se ha encontrado ningún producto con este código de barras</string>
+    <string name="library_error_scanner_failed">Error al iniciar el escáner de códigos</string>
 
     <!-- Settings Screen -->
     <string name="title_settings">AJUSTES</string>
     <string name="settings_headline">Ajustes</string>
     <string name="settings_button_logout">Cerrar sesión</string>
+    <string name="settings_button_signup">Crea tu cuenta</string>
     <string name="settings_button_setup">Parámetros del usuario</string>
     <string name="settings_button_language">Idioma</string>
+    <string name="settings_on_dimiss">Cancelar</string>
+    <string name="settings_on_confirm">Cerrar sesión</string>
+    <string name="settings_logout_confirm_title">Confirmar salida</string>
+    <string name="settings_logout_confirm_message">Tienes comidas pendientes de sincronizar. Si cierras sesión ahora, estos datos podrían perderse. ¿Estás seguro de que deseas salir?</string>
+
+    <string name="settings_sync_advise_title">Sincronización no disponible</string>
+    <string name="settings_sync_advise_message">Tienes comidas pendientes de sincronizar. Para poder sincronizar y guardar estos registros en la nube debes crear una cuenta de usuario. </string>
+
+    <string name="settings_logout_guest_confirm_message">Si cierras sesión como invitado, los registros de tu diario se perderán./nPuedes crear una cuenta de usuario para sincronizar tus datos. ¿Estás seguro de que deseas salir?</string>
+    <string name="settings_section_sync">Sincronización</string>
+    <string name="settings_sync_pending_headline">Comidas pendientes de subir</string>
+    <string name="settings_sync_pending_supporting"> comidas no sincronizadas</string>
+    <string name="settings_section_app">Ajustes de la aplicación</string>
+    <string name="settings_diary_settings">Ajustes del diario</string>
+    <string name="settings_dark_theme">Tema oscuro</string>
+    <string name="settings_generate_test_data">Generar datos de prueba (2 meses)</string>
 
     <!-- Details Screen -->
     <string name="title_details">DETALLES</string>

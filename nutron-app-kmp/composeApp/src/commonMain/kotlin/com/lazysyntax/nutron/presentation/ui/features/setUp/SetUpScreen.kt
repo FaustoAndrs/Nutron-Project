@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -51,23 +52,24 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.lazysyntax.nutron.presentation.theme.Theme
 import com.lazysyntax.nutron.presentation.ui.features.setUp.composables.ActivitySelector
 import com.lazysyntax.nutron.presentation.ui.features.setUp.composables.BMRSelector
 import com.lazysyntax.nutron.presentation.ui.features.setUp.composables.GoalSelector
 import com.lazysyntax.nutron.presentation.ui.navigation.composables.TopAppBarWhitBackButtonCommon
 import com.lazysyntax.nutron.presentation.utilities.validation.Validation
 import nutron.composeapp.generated.resources.Res
+import nutron.composeapp.generated.resources.setup_age_label
 import nutron.composeapp.generated.resources.setup_button_save
 import nutron.composeapp.generated.resources.setup_desc_guest
 import nutron.composeapp.generated.resources.setup_desc_user
@@ -99,7 +101,7 @@ fun SetupScreen(
         onGoalChanged = { viewModel.onSetUpEvent(SetUpEvent.GoalChanged(it)) },
         onFormulaChanged = { viewModel.onSetUpEvent(SetUpEvent.FormulaChanged(it)) },
         onClickSave = { viewModel.onSetUpEvent(SetUpEvent.OnClickSave) },
-        onClickBack = {viewModel.onSetUpEvent(SetUpEvent.OnClickBack(fromSignUp)) }
+        onClickBack = { viewModel.onSetUpEvent(SetUpEvent.OnClickBack(fromSignUp)) }
     )
 }
 
@@ -111,7 +113,7 @@ fun SetupContent(
     validationState: SetUpUiStateValidation,
     onWeightChanged: (String) -> Unit,
     onHeightChanged: (String) -> Unit,
-    onGenderChanged: (String) -> Unit,
+    onGenderChanged: (Gender) -> Unit,
     onAgeChanged: (String) -> Unit,
     onActivityChanged: (Activity) -> Unit,
     onGoalChanged: (Goal) -> Unit,
@@ -142,7 +144,9 @@ fun SetupContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .pointerInput(Unit){detectTapGestures ( onTap = {focusManager.clearFocus()} )}
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = { focusManager.clearFocus() })
+                }
                 .padding(padding)
                 .verticalScroll(scrollState)
                 .padding(24.dp), // Margen general de formulario
@@ -169,11 +173,18 @@ fun SetupContent(
                 OutlinedTextField(
                     value = uiState.weight,
                     onValueChange = onWeightChanged,
-                    placeholder = { Text("Ej: 75.5") },
+                    placeholder = { Text("Ej: 75.5", color = MaterialTheme.colorScheme.secondary) },
                     suffix = { Text("kg") },
                     modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    shape = RoundedCornerShape(12.dp)
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    keyboardActions = KeyboardActions(
+                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                    ),
+                    singleLine = true
                 )
             }
 
@@ -185,11 +196,23 @@ fun SetupContent(
                 OutlinedTextField(
                     value = uiState.height,
                     onValueChange = onHeightChanged,
-                    placeholder = { Text("Ej: 180") },
+                    placeholder = {
+                        Text(
+                            "Ej: 180",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
                     suffix = { Text("cm") },
                     modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    shape = RoundedCornerShape(12.dp)
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    keyboardActions = KeyboardActions(
+                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                    ),
+                    singleLine = true
                 )
             }
 
@@ -201,16 +224,29 @@ fun SetupContent(
                 OutlinedTextField(
                     value = uiState.age,
                     onValueChange = onAgeChanged,
-                    placeholder = { Text("Ej: 25") },
+                    placeholder = {
+                        Text(
+                            "Ej: 25",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
+                    suffix = { Text(stringResource(Res.string.setup_age_label)) },
                     modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    shape = RoundedCornerShape(12.dp)
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Done
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    keyboardActions = KeyboardActions(
+                        onDone = { focusManager.clearFocus() }
+                    ),
+                    singleLine = true
                 )
             }
 
             FormField(label = "Género") {
                 GenderSelectorSegmentedButton(
-                    uiState = uiState.gender,
+                    uiState = uiState.gender.name,
                     onGenderChanged = onGenderChanged,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -329,8 +365,13 @@ fun FormField(
 
 @Composable
 fun SelectableField(value: String, icon: ImageVector, onClick: () -> Unit) {
+    val focusManager = LocalFocusManager.current
     Surface(
-        onClick = onClick,
+        onClick = {
+            focusManager.clearFocus()
+            onClick(
+            )
+        },
         shape = RoundedCornerShape(12.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         color = MaterialTheme.colorScheme.surface
@@ -425,6 +466,7 @@ fun FormSelectableRow(
     icon: ImageVector,
     onClick: () -> Unit
 ) {
+    val focusManager = LocalFocusManager.current
     ListItem(
         headlineContent = { Text(label) },
         supportingContent = {
@@ -443,7 +485,10 @@ fun FormSelectableRow(
             )
         },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        modifier = Modifier.clickable { onClick() }
+        modifier = Modifier.clickable {
+            focusManager.clearFocus()
+            onClick()
+        }
     )
 }
 
@@ -483,16 +528,20 @@ fun SetupSection(
 fun GenderSelectorSegmentedButton(
     modifier: Modifier = Modifier,
     uiState: String,
-    onGenderChanged: (String) -> Unit
+    onGenderChanged: (Gender) -> Unit
 ) {
-    val options = listOf("Hombre", "Mujer")
+    val focusManager = LocalFocusManager.current
+    val options = Gender.entries.filter { g -> g != Gender.NON }
     SingleChoiceSegmentedButtonRow(modifier = modifier) {
         options.forEachIndexed { index, label ->
             SegmentedButton(
                 shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
-                onClick = { onGenderChanged(label) },
-                selected = label == uiState,
-                label = { Text(label) },
+                onClick = {
+                    focusManager.clearFocus()
+                    onGenderChanged(label)
+                },
+                selected = label.name == uiState,
+                label = { Text(label.name) },
                 colors = SegmentedButtonDefaults.colors(
                     activeContainerColor = MaterialTheme.colorScheme.primaryContainer,
                     activeContentColor = MaterialTheme.colorScheme.secondary,
@@ -505,10 +554,11 @@ fun GenderSelectorSegmentedButton(
         }
     }
 }
+
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun prevSelector(){
-    GenderSelectorSegmentedButton(uiState="", onGenderChanged = {})
+fun prevSelector() {
+    GenderSelectorSegmentedButton(uiState = "", onGenderChanged = {})
 }
 
 @Preview(showSystemUi = true, showBackground = true)

@@ -1,7 +1,9 @@
 package com.lazysyntax.nutron.presentation.ui.features.targets
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,10 +11,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ElevatedCard
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RichTooltip
 import androidx.compose.material3.Scaffold
@@ -33,23 +45,31 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
 import com.himanshoe.charty.color.ChartyColor
-import com.himanshoe.charty.line.AreaChart
-import com.himanshoe.charty.line.config.LineChartConfig
-import com.himanshoe.charty.line.data.LineData
 import com.himanshoe.charty.pie.PieChart
 import com.himanshoe.charty.pie.config.LabelConfig
 import com.himanshoe.charty.pie.config.PieChartConfig
 import com.himanshoe.charty.pie.data.PieData
+import com.lazysyntax.nutron.presentation.theme.CarbohydratesIndexColor
+import com.lazysyntax.nutron.presentation.theme.FatsIndexColor
+import com.lazysyntax.nutron.presentation.theme.ProteinsIndexColor
 import com.lazysyntax.nutron.presentation.ui.features.targets.composables.Diet
 import com.lazysyntax.nutron.presentation.ui.features.targets.composables.DietSelector
 import com.lazysyntax.nutron.presentation.ui.navigation.composables.NavBar
 import com.lazysyntax.nutron.presentation.ui.navigation.composables.TopAppBarCommon
 import nutron.composeapp.generated.resources.Res
+import nutron.composeapp.generated.resources.label_carbs
 import nutron.composeapp.generated.resources.label_daily_kcal
 import nutron.composeapp.generated.resources.label_diet_type
+import nutron.composeapp.generated.resources.label_fats
+import nutron.composeapp.generated.resources.label_macro_distribution
+import nutron.composeapp.generated.resources.label_proteins
+import nutron.composeapp.generated.resources.profile_show_progres
 import nutron.composeapp.generated.resources.title_targets
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -64,11 +84,15 @@ fun TargetsScreen(
     val diets by viewModel.diets.collectAsState()
 
     TargetsContent(
+        fats = uiState.fats,
+        proteins = uiState.proteins,
+        carbs = uiState.carbs,
         dailyKcals = uiState.dailyKcal,
         onDietChanged = { viewModel.onTargetsEvent(TargetsEvent.OnSelectDietType(it)) },
         onAddCustomDiet = { viewModel.onTargetsEvent(TargetsEvent.OnAddCustomDiet(it)) },
         diets = diets,
-        selectedDiet = uiState.diet
+        selectedDiet = uiState.diet,
+        onNavigateToStatistics = { viewModel.onTargetsEvent(TargetsEvent.OnNavigateToStatistics)}
     )
 }
 
@@ -79,8 +103,13 @@ fun TargetsContent(
     onDietChanged: (Diet) -> Unit,
     onAddCustomDiet: (Diet) -> Unit,
     diets: List<Diet>,
-    selectedDiet: Diet
-) {
+    selectedDiet: Diet,
+    fats: Int?,
+    proteins: Int?,
+    carbs: Int?,
+    onNavigateToStatistics: ()  -> Unit,
+
+    ) {
     val scope = rememberCoroutineScope()
 
     var showDietSheet by remember { mutableStateOf(false) }
@@ -105,71 +134,101 @@ fun TargetsContent(
             )
             CardDietStat(
                 label = selectedDiet.name,
-                modifier = Modifier.padding(top = 16.dp),
+                modifier = Modifier.padding(top = 8.dp),
                 onClick = {
-                    onDietChanged(selectedDiet)
                     showDietSheet = true
                 }
             )
-            PieChart(
-                modifier = Modifier.fillMaxWidth().height(300.dp),
-                config = PieChartConfig(
-                    labelConfig = LabelConfig(
-                        shouldShowLabels = true,
-                        shouldShowLabelsOutside = true,
-                        labelTextStyle = MaterialTheme.typography.labelSmall.copy(
-                            color = MaterialTheme.colorScheme.secondary
+
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
+                        alpha = 0.35f
+                    )
+                ),
+                modifier = Modifier.fillMaxWidth().padding(8.dp),
+            ) {
+                Column(
+
+                    modifier = Modifier.background(color = Color.Transparent).padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+
+                ) {
+                    Text(
+                        text = stringResource(Res.string.label_macro_distribution),
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    PieChart(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        config = PieChartConfig(
+                            labelConfig = LabelConfig(
+                                shouldShowLabels = true,
+                                shouldShowLabelsOutside = true,
+                                labelTextStyle = MaterialTheme.typography.labelSmall.copy(
+                                    color = MaterialTheme.colorScheme.secondary
+                                ),
+                                minimumPercentageToShowLabel = 0f
+                            )
                         ),
-                        // Aseguramos que se muestren incluso si el porcentaje es bajo
-                        minimumPercentageToShowLabel = 0f
+                        data = {
+                            listOf(
+                                PieData("Proteins", selectedDiet.protein.toFloat()),
+                                PieData("Carbs", selectedDiet.carbs.toFloat()),
+                                PieData("Fats", selectedDiet.fat.toFloat()),
+                            )
+                        },
+                        color = ChartyColor.Gradient(
+                            listOf(ProteinsIndexColor, CarbohydratesIndexColor, FatsIndexColor)
+                        ),
                     )
-                ),
-                data = {
-                    listOf(
-                        PieData("Proteins", selectedDiet.protein.toFloat()),
-                        PieData("Carbs", selectedDiet.carbs.toFloat()),
-                        PieData("Fats", selectedDiet.fat.toFloat()),
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    MacroDetailRow(
+                        label = stringResource(Res.string.label_proteins),
+                        kcal = proteins ?: 0,
+                        grams = if (proteins != null) proteins / 4 else 0,
+                        color = ProteinsIndexColor
                     )
-                },
-                color = ChartyColor.Gradient(
-                    listOf(Color(0xFFE91E63), Color(0xFF2196F3), Color(0xFF4CAF50))
-                ),
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        thickness = 0.5.dp
+                    )
+                    MacroDetailRow(
+                        label = stringResource(Res.string.label_carbs),
+                        kcal = carbs ?: 0,
+                        grams = if (carbs != null) carbs / 4 else 0,
+                        color = CarbohydratesIndexColor
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        thickness = 0.5.dp
+                    )
+                    MacroDetailRow(
+                        label = stringResource(Res.string.label_fats),
+                        kcal = fats ?: 0,
+                        grams = if (fats != null) fats / 9 else 0,
+                        color = FatsIndexColor
+                    )
 
-                )
 
-            Text(
-                text = "Variation across Diets (%)",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(top = 24.dp, bottom = 8.dp)
-            )
-
-            Text("Proteins", style = MaterialTheme.typography.labelMedium)
-            AreaChart(
-                modifier = Modifier.fillMaxWidth().height(150.dp).padding(8.dp),
-                data = { diets.map { LineData(it.name, it.protein.toFloat()) } },
-                color = ChartyColor.Gradient(listOf(Color(0xFFE91E63), Color.Transparent)),
-                lineConfig = LineChartConfig(
-                    showPoints = false,
-                    smoothCurve = true
-                )
-            )
-
-            Text("Carbs", style = MaterialTheme.typography.labelMedium)
-            AreaChart(
-                modifier = Modifier.fillMaxWidth().height(150.dp).padding(8.dp),
-                data = { diets.map { LineData(it.name, it.carbs.toFloat()) } },
-                color = ChartyColor.Gradient(listOf(Color(0xFF2196F3), Color.Transparent))
-            )
-
-            Text("Fats", style = MaterialTheme.typography.labelMedium)
-            AreaChart(
-                modifier = Modifier.fillMaxWidth().height(150.dp).padding(8.dp),
-                data = { diets.map { LineData(it.name, it.fat.toFloat()) } },
-                color = ChartyColor.Gradient(listOf(Color(0xFF4CAF50), Color.Transparent))
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = onNavigateToStatistics,
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(stringResource(Res.string.profile_show_progres))
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
         }
+
 
         if (showDietSheet) {
             DietSelector(
@@ -184,6 +243,48 @@ fun TargetsContent(
     }
 }
 
+@Composable
+fun MacroDetailRow(
+    label: String,
+    kcal: Int,
+    grams: Int,
+    color: Color
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(12.dp)
+                    .background(color, shape = CircleShape)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "$grams g",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "($kcal kcal)",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CardDietStat(
@@ -191,11 +292,16 @@ fun CardDietStat(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    ElevatedCard(
+    Card(
         modifier = modifier.fillMaxWidth().padding(8.dp)
             .clickable(
                 onClick = onClick
             ),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
+                alpha = 0.45f
+            )
+        ),
         content = {
 
             Row(
@@ -205,12 +311,26 @@ fun CardDietStat(
             ) {
                 Text(
                     text = stringResource(Res.string.label_diet_type) + ":",
-                    style = MaterialTheme.typography.titleSmall
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.padding(end = 8.dp)
                 )
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Row(
+                    modifier = Modifier.weight(1f, fill = false),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = label.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.outline
+                    )
+                }
             }
         }
     )
@@ -243,12 +363,18 @@ fun CardTargetStat(
         state = rememberTooltipState()
     ) {
 
-        ElevatedCard(
+        Card(
             modifier = modifier.fillMaxWidth().padding(8.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
+                    alpha = 0.45f
+                )
+            ),
             content = {
 
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+                        .padding(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -271,35 +397,47 @@ fun CardTargetStat(
 @Composable
 fun PrevCard() {
     Surface {
-        PieChart(
-            modifier = Modifier.fillMaxSize(), // Es recomendable darle un tamaño
-
-            config = PieChartConfig(
-                labelConfig = LabelConfig(
-                    shouldShowLabels = true,
-                    shouldShowValue = true,
-                    shouldShowLabelsOutside = true,
-                    labelTextStyle = MaterialTheme.typography.labelSmall.copy(
-                        color = MaterialTheme.colorScheme.secondary
-                    ),
-
-                    // Aseguramos que se muestren incluso si el porcentaje es bajo
-                    minimumPercentageToShowLabel = 0f
-                )
-            ),
-            data = {
-                listOf(
-                    PieData("Proteins", 30f),
-                    PieData("Carbs", 20f),
-                    PieData("Fats", 50f),
-                )
-            },
-            color = ChartyColor.Gradient(
-                listOf(Color(0xFFE91E63), Color(0xFF2196F3), Color(0xFF4CAF50))
-            ),
-
+        Column {
+            CardTargetStat(
+                label = "texto label",
+                kCals = "1881",
+                unit = "kcals"
             )
+            CardDietStat(
+                label = "Plus protein",
+                onClick = {}
+            )
+            PieChart(
+                modifier = Modifier.fillMaxSize().height(200.dp), // Es recomendable darle un tamaño
+
+                config = PieChartConfig(
+                    labelConfig = LabelConfig(
+                        shouldShowLabels = true,
+                        shouldShowValue = true,
+                        shouldShowLabelsOutside = true,
+                        labelTextStyle = MaterialTheme.typography.labelSmall.copy(
+                            color = MaterialTheme.colorScheme.secondary
+                        ),
+
+                        // Aseguramos que se muestren incluso si el porcentaje es bajo
+                        minimumPercentageToShowLabel = 0f
+                    )
+                ),
+                data = {
+                    listOf(
+                        PieData("Proteins", 30f),
+                        PieData("Carbs", 20f),
+                        PieData("Fats", 50f),
+                    )
+                },
+                color = ChartyColor.Gradient(
+                    listOf(Color(0xFFE91E63), Color(0xFF2196F3), Color(0xFF4CAF50))
+                ),
+
+                )
+        }
     }
+
     /*CardTargetStat(
         label = "Daily Caloric Requirement",
         kCals = "2038",

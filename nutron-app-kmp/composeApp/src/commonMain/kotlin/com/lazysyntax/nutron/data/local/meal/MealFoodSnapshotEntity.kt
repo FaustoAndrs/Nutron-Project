@@ -25,7 +25,7 @@ import kotlin.uuid.Uuid
 data class MealFoodSnapshotEntity(
     @PrimaryKey val snapshotId: String = Uuid.random().toString(),
     val mealId: String,
-    val foodId: String?, // Referencia opcional al alimento original
+    val foodId: String, // Referencia opcional al alimento original
     val name: String?,
     val barcode: String?,
     @Embedded val nutriments: NutrimentsEntity?

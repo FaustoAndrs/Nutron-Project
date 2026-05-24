@@ -18,7 +18,7 @@ import com.lazysyntax.nutron.data.local.recipe.RecipeEntity
         MealFoodSnapshotEntity::class,
         FoodEntity::class,
         RecipeEntity::class],
-    version = 2
+    version = 4
 )
 @TypeConverters(RoomConverters::class)
 @ConstructedBy(NutronDatabaseConstructor::class)

@@ -4,6 +4,8 @@ package com.lazysyntax.nutron.presentation.ui.navigation.composables
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -16,9 +18,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.lazysyntax.nutron.domain.repository.MealRepository
 import com.lazysyntax.nutron.presentation.ui.navigation.Navigator
 import com.lazysyntax.nutron.presentation.ui.navigation.Route
 import nutron.composeapp.generated.resources.Res
@@ -40,7 +45,9 @@ import org.koin.compose.koinInject
 @Composable
 fun NavBar() { // Sin parámetros
     val navigator: Navigator = koinInject()
+    val mealRepository: MealRepository = koinInject()
     val currentRoute = navigator.backstack.lastOrNull()
+    val unsyncedCount by mealRepository.getUnsyncedMealsCount().collectAsState(initial = 0)
 
     val items = remember {
         listOf(
@@ -58,7 +65,19 @@ fun NavBar() { // Sin parámetros
         items.forEach { (route, resId, icon) ->
             val isSelected = currentRoute == route
             NavigationBarItem(
-                icon = { Icon(vectorResource(icon), contentDescription = null) },
+                icon = {
+                    BadgedBox(
+                        badge = {
+                            if (route == Route.Settings && unsyncedCount > 0) {
+                                Badge {
+                                    Text(unsyncedCount.toString())
+                                }
+                            }
+                        }
+                    ) {
+                        Icon(vectorResource(icon), contentDescription = null)
+                    }
+                },
                 label = { Text(stringResource(resId)) },
                 selected = isSelected,
                 onClick = {

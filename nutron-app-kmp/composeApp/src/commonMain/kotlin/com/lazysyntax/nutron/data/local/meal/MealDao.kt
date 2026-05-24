@@ -2,6 +2,7 @@ package com.lazysyntax.nutron.data.local.meal
 
 import androidx.room.*
 import com.lazysyntax.nutron.data.local.recipe.RecipeEntity
+import com.lazysyntax.nutron.domain.models.Food
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.LocalDate
 
@@ -41,4 +42,27 @@ interface MealDao {
     @Transaction
     @Query("SELECT * FROM meals WHERE date BETWEEN :startDate AND :endDate")
     fun getMealsWithFoodsByDateRange(startDate: LocalDate, endDate: LocalDate): Flow<List<MealWithFoods>>
+
+    @Transaction
+    @Query("SELECT * FROM meals WHERE isSynced = 0")
+    fun getUnsyncedMeals(): Flow<List<MealWithFoods>>
+
+    @Query("SELECT COUNT(*) FROM meals WHERE isSynced = 0")
+    fun getUnsyncedMealsCount(): Flow<Int>
+
+    @Transaction
+    suspend fun clearAll() {
+        deleteAllFoodSnapshots()
+        deleteAllMeals()
+        deleteAllRecipes()
+    }
+
+    @Query("DELETE FROM meal_food_snapshots")
+    suspend fun deleteAllFoodSnapshots()
+
+    @Query("DELETE FROM meals")
+    suspend fun deleteAllMeals()
+
+    @Query("DELETE FROM recipes")
+    suspend fun deleteAllRecipes()
 }

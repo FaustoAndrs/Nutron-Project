@@ -23,6 +23,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -43,6 +47,10 @@ class DiaryViewModel(
 ) : ViewModel() {
 
 
+    // Alimentos guardados localmente expuestos como StateFlow
+    val savedFoods: StateFlow<List<Food>> = foodRepository.getSavedFoods()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     private val _uiState = MutableStateFlow(
         DiaryUiState().copy(
             meals = sessionManager.mealTemplate.value,
@@ -53,20 +61,46 @@ class DiaryViewModel(
 
 
     init {
+        // Observamos cambios en los datos del usuario para actualizar las metas (calorías)
+        viewModelScope.launch {
+            sessionManager.userData.collect { userData ->
+                _uiState.update { it.copy(targets = userData.toTargetsUiState()) }
+            }
+        }
+
+        // Observamos la lista de alimentos local para actualizar la UI reactivamente si estamos en LOCAL
+        viewModelScope.launch {
+            combine(
+                savedFoods,
+                _uiState.map { it.libraryUiState.searchSource }.distinctUntilChanged(),
+                _uiState.map { it.libraryUiState.productName }.distinctUntilChanged()
+            ) { foods, source, query ->
+                if (source == SearchSource.LOCAL) {
+                    _uiState.update { state ->
+                        state.copy(
+                            libraryUiState = state.libraryUiState.copy(
+                                foodListResult = filterLocalFoods(foods, query)
+                            )
+                        )
+                    }
+                }
+            }.collect()
+        }
+
         // Carga los datos reales de la base de datos para hoy al iniciar
         loadMealsForDate(_uiState.value.date)
     }
 
     private fun SetUpUiState.toTargetsUiState(): TargetsUiState {
-        val w = weight.toDoubleOrNull() ?: 0.0
-        val h = height.toDoubleOrNull() ?: 0.0
+        val w = weight.replace(',', '.').toDoubleOrNull() ?: 0.0
+        val h = height.replace(',', '.').toDoubleOrNull() ?: 0.0
         val a = age.toIntOrNull() ?: 0
 
         val bmiValue = Calculator.calculateBMI(w, h)
         val fatPercentage = Calculator.calculateFatPercentage(bmiValue, a, gender)
         val bmrValue = Calculator.calculateBMR(w, h, a, gender, fatPercentage, formula)
         val getValue = Calculator.calculateGET(bmrValue, activity.factor)
-        val ebValue = Calculator.calculateEB(getValue, goal.objective.toString())
+        val ebValue = Calculator.calculateEB(getValue, goal.factor)
 
         return TargetsUiState(
             dailyKcal = "${ebValue.toInt()}",
@@ -87,6 +121,7 @@ class DiaryViewModel(
             DiaryEvent.OnClickNextDay -> onMoveDay(1)
             is DiaryEvent.OnAddMeal -> onAddMealToTemplate(diaryEvent.meal)
             is DiaryEvent.OnDeleteMeal -> onDeleteMealToTemplate(diaryEvent.meal)
+            is DiaryEvent.OnDeleteFood -> onDeleteFoodFromMeal(diaryEvent.meal, diaryEvent.food)
         }
     }
 
@@ -104,7 +139,8 @@ class DiaryViewModel(
                 _uiState.update {
                     it.copy(
                         libraryUiState = it.libraryUiState.copy(
-                            searchSource = libraryEvent.source
+                            searchSource = libraryEvent.source,
+                            foodListResult = if (libraryEvent.source == SearchSource.API) null else it.libraryUiState.foodListResult
                         )
                     )
                 }
@@ -121,7 +157,13 @@ class DiaryViewModel(
             }
 
             is LibraryEvent.SelectedMeal -> setSelectedMeal(libraryEvent.meal)
-            
+            is LibraryEvent.OnError -> {
+                _uiState.update {
+                    it.copy(
+                        libraryUiState = it.libraryUiState.copy(error = libraryEvent.message)
+                    )
+                }
+            }
         }
     }
 
@@ -148,6 +190,15 @@ class DiaryViewModel(
 
     private fun onAddMealToTemplate(meal: Meal) {
         sessionManager.removeMealFromTemplate(meal.name)
+    }
+
+    private fun onDeleteFoodFromMeal(meal: Meal, food: Food) {
+        val updatedFoods = meal.foods?.filter { it != food }
+        val updatedMeal = meal.copy(foods = updatedFoods)
+
+        viewModelScope.launch {
+            onSaveMealWithFood(updatedMeal)
+        }
     }
 
 
@@ -221,14 +272,14 @@ class DiaryViewModel(
     }
 
 
-    // Alimentos guardados localmente expuestos como StateFlow
-    val savedFoods: StateFlow<List<Food>> = foodRepository.getSavedFoods()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun onProductNameFieldChange(productName: String) {
         _uiState.update {
             it.copy(
-                libraryUiState = it.libraryUiState.copy(productName = productName)
+                libraryUiState = it.libraryUiState.copy(
+                    productName = productName,
+                    foodListResult = if (it.libraryUiState.searchSource == SearchSource.API && productName.isEmpty()) null else it.libraryUiState.foodListResult
+                )
             )
         }
     }
@@ -249,40 +300,67 @@ class DiaryViewModel(
         val source = _uiState.value.libraryUiState.searchSource
 
         viewModelScope.launch {
-            // Buscamos localmente primero para ver si ya tenemos este alimento y reutilizar su ID
-            val localProduct = foodRepository.getSavedFoodByCode(barcode)
-
-            val product = if (source == SearchSource.API) {
-                // Si es API, traemos la info fresca pero intentamos mantener el ID local si existe
-                foodRepository.fetchFoodByBarcode(barcode)?.copy(id = localProduct?.id)
-            } else {
-                localProduct
+            // Limpiamos errores previos y activamos loading
+            _uiState.update {
+                it.copy(libraryUiState = it.libraryUiState.copy(error = "", isLoading = true))
             }
 
-            if (product != null) {
-                // Aseguramos que el barcode esté presente en el objeto y generamos un ID si no lo tiene
-                val productWithId = product.copy(
-                    id = product.id ?: kotlin.uuid.Uuid.random().toString(),
-                    barcode = product.barcode ?: barcode,
-                    nutriments = product.nutriments?.copy(
-                        quantity = product.nutriments.quantity ?: "100",
-                        quantityUnit = product.nutriments.quantityUnit ?: "g"
-                    ) ?: Nutriments()
-                )
+            try {
+                // Buscamos localmente primero para ver si ya tenemos este alimento y reutilizar su ID
+                val localProduct = foodRepository.getSavedFoodByCode(barcode)
 
+                val product = if (source == SearchSource.API) {
+                    // Si es API, traemos la info fresca pero intentamos mantener el ID local si existe
+                    foodRepository.fetchFoodByBarcode(barcode)?.copy(id = localProduct?.id)
+                } else {
+                    localProduct
+                }
+
+                if (product != null) {
+                    // Aseguramos que el barcode esté presente en el objeto y generamos un ID si no lo tiene
+                    val productWithId = product.copy(
+                        id = product.id ?: kotlin.uuid.Uuid.random().toString(),
+                        barcode = product.barcode ?: barcode,
+                        nutriments = product.nutriments?.copy(
+                            quantity = product.nutriments.quantity ?: "100",
+                            quantityUnit = product.nutriments.quantityUnit ?: "g"
+                        ) ?: Nutriments()
+                    )
+
+                    _uiState.update {
+                        it.copy(
+                            libraryUiState = it.libraryUiState.copy(
+                                foodResult = productWithId,
+                                isLoading = false
+                            ),
+                            macrosUiState = it.macrosUiState.copy(
+                                food = productWithId,
+                                editedFood = productWithId
+                            )
+                        )
+                    }
+
+                    navigator.navigateTo(Route.Macros)
+                } else {
+                    // Producto no encontrado
+                    _uiState.update {
+                        it.copy(
+                            libraryUiState = it.libraryUiState.copy(
+                                error = "barcode_not_found",
+                                isLoading = false
+                            )
+                        )
+                    }
+                }
+            } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
                         libraryUiState = it.libraryUiState.copy(
-                            foodResult = productWithId
-                        ),
-                        macrosUiState = it.macrosUiState.copy(
-                            food = productWithId,
-                            editedFood = productWithId
+                            error = e.message ?: "error",
+                            isLoading = false
                         )
                     )
                 }
-
-                navigator.navigateTo(Route.Macros)
             }
         }
     }
@@ -291,20 +369,45 @@ class DiaryViewModel(
         val productName = _uiState.value.libraryUiState.productName
         val source = _uiState.value.libraryUiState.searchSource
 
+        if (source == SearchSource.LOCAL) return
+
         viewModelScope.launch {
-            val foods = if (source == SearchSource.API) {
-                foodRepository.searchFoodByName(productName)
-            } else {
-                foodRepository.searchSavedFoodByName(productName)
-            }
             _uiState.update {
-                it.copy(
-                    libraryUiState = it.libraryUiState.copy(
-                        foodListResult = foods
+                it.copy(libraryUiState = it.libraryUiState.copy(isLoading = true))
+            }
+            try {
+                val foods = foodRepository.searchFoodByName(productName)
+                _uiState.update {
+                    it.copy(
+                        libraryUiState = it.libraryUiState.copy(
+                            foodListResult = foods,
+                            isLoading = false
+                        )
                     )
-                )
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        libraryUiState = it.libraryUiState.copy(
+                            error = e.message ?: "error",
+                            isLoading = false
+                        )
+                    )
+                }
             }
         }
+    }
+
+    private fun filterLocalFoods(foods: List<Food>, query: String): List<Food> {
+        val filtered = if (query.isBlank()) {
+            foods
+        } else {
+            foods.filter {
+                it.name?.contains(query, ignoreCase = true) == true ||
+                        it.brands?.contains(query, ignoreCase = true) == true
+            }
+        }
+        return filtered.sortedBy { it.name?.lowercase() ?: "" }
     }
 
     // Al seleccionar un alimento de la búsqueda para guardarlo localmente
@@ -317,8 +420,8 @@ class DiaryViewModel(
             val foodWithId = food.copy(
                 id = food.id ?: localFood?.id ?: kotlin.uuid.Uuid.random().toString(),
                 nutriments = food.nutriments?.copy(
-                    quantity = food.nutriments.quantity ?: "100",
-                    quantityUnit = food.nutriments.quantityUnit ?: "g"
+                    quantity = food.nutriments.quantity ,
+                    quantityUnit = food.nutriments.quantityUnit
                 ) ?: Nutriments()
             )
             _uiState.update {
@@ -421,6 +524,7 @@ class DiaryViewModel(
         val currentState = _uiState.value
         val selectedMeal = currentState.selectedMeal ?: return
         val selectedFood = currentState.macrosUiState.editedFood
+        val foodOriginal = currentState.macrosUiState.food
 
         // 1. Obtener la comida actual del estado de la UI (que ya tiene los alimentos anteriores)
         val currentMealInList = currentState.meals?.find { it.name == selectedMeal.name }
@@ -443,7 +547,7 @@ class DiaryViewModel(
 
         // 4. Persistir en la base de datos (onSaveMealWithFood se encargará de usar el ID correcto)
         viewModelScope.launch {
-            onSaveFood(selectedFood)
+            onSaveFood(foodOriginal!!)
             onSaveMealWithFood(updatedMeal)
         }
     }

@@ -2,15 +2,19 @@ package com.lazysyntax.nutron.presentation.ui.features.targets
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lazysyntax.nutron.domain.repository.UserRepository
 import com.lazysyntax.nutron.data.remote.authentication.SessionManager
+import com.lazysyntax.nutron.domain.repository.UserRepository
 import com.lazysyntax.nutron.presentation.ui.features.setUp.SetUpUiState
 import com.lazysyntax.nutron.presentation.ui.features.setUp.composables.Calculator
 import com.lazysyntax.nutron.presentation.ui.features.targets.composables.Diet
 import com.lazysyntax.nutron.presentation.ui.navigation.Navigator
+import com.lazysyntax.nutron.presentation.ui.navigation.Route
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -25,7 +29,8 @@ enum class DietPreset(val label: String, val carbs: Int, val protein: Int, val f
     fun toDiet() = Diet(label, carbs, protein, fat)
 
     companion object {
-        fun fromLabel(label: String) = entries.find { it.label == label } ?: STANDARD
+        fun fromLabel(label: String) =
+            entries.find { it.label.equals(label, ignoreCase = true) } ?: STANDARD
     }
 }
 
@@ -35,64 +40,100 @@ class TargetsViewModel(
     private val navigator: Navigator
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(
-        sessionManager.getCurrentUserData().toTargetsUiState()
+    private val _diets = MutableStateFlow(
+        DietPreset.entries.map { it.toDiet() } + sessionManager.getUserPreferences().customDiets
     )
-    val uiState: StateFlow<TargetsUiState> = _uiState.asStateFlow()
-
-    private val _diets = MutableStateFlow(DietPreset.entries.map { it.toDiet() })
     val diets: StateFlow<List<Diet>> = _diets.asStateFlow()
+
+    val _uiState = MutableStateFlow(
+        sessionManager.userData
+            .map { it.toTargetsUiState() }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = sessionManager.userData.value.toTargetsUiState()
+
+            )
+    )
+
+    val uiState: StateFlow<TargetsUiState> = _uiState.value
 
     fun onTargetsEvent(targetsEvent: TargetsEvent) {
         when (targetsEvent) {
-            is TargetsEvent.OnClickBack -> { navigator.goBack() }
+            is TargetsEvent.OnClickBack -> {
+                navigator.goBack()
+            }
+
             TargetsEvent.OnEditMealsDistribution -> {}
             is TargetsEvent.OnSelectDietType -> {
                 onDietChanged(targetsEvent.diet)
             }
+
             is TargetsEvent.OnAddCustomDiet -> {
                 addCustomDiet(targetsEvent.diet)
             }
+
+            TargetsEvent.OnNavigateToStatistics -> navigator.navigateTo(Route.Statistics)
         }
     }
 
     private fun addCustomDiet(diet: Diet) {
-        _diets.update { it + diet }
-        // Opcionalmente, seleccionar la nueva dieta automáticamente
+        // 1. Guardar localmente en SessionManager para persistencia offline
+        sessionManager.saveCustomDiet(diet)
+
+        // 2. Actualizar lista en UI
+        _diets.update { current ->
+            if (current.none { it.name == diet.name }) current + diet else current
+        }
+
+        // 3. Seleccionar la nueva dieta (esto dispara la persistencia y sync)
         onDietChanged(diet)
     }
 
     fun onDietChanged(diet: Diet) {
-        _uiState.update { it.copy(diet = diet) }
+        // 1. Persistencia local inmediata (Offline-first)
+        // Esto actualiza SessionManager, lo cual a su vez actualiza el uiState vía el Flow de userData
+        val currentSetup = sessionManager.userData.value
+        val updatedSetup = currentSetup.copy(diet = diet.name)
+        sessionManager.saveUserProfile(updatedSetup)
 
+        // 2. Sincronización remota en segundo plano
         viewModelScope.launch {
-            println("UPDATE TARGETS: Intentando actualizar en servidor...")
-            val success = userSetupRepository.updateUserDiet(uiState.value)
+            println("UPDATE TARGETS: Sincronizando dieta '${diet.name}' con el servidor...")
+            // Usamos updatedSetup para calcular los valores finales para el servidor
+            val currentState = updatedSetup.toTargetsUiState(diet)
+            val success = userSetupRepository.updateUserDiet(currentState)
+
             if (success) {
                 println("Server update success")
             } else {
-                println("Server update failed")
+                println("Server update failed - los cambios se mantienen localmente")
             }
         }
     }
 
-    private fun SetUpUiState.toTargetsUiState(): TargetsUiState {
-        val w = weight.toDoubleOrNull() ?: 0.0
-        val h = height.toDoubleOrNull() ?: 0.0
+    private fun SetUpUiState.toTargetsUiState(dietOverride: Diet? = null): TargetsUiState {
+        val w = weight.replace(',', '.').toDoubleOrNull() ?: 0.0
+        val h = height.replace(',', '.').toDoubleOrNull() ?: 0.0
         val a = age.toIntOrNull() ?: 0
 
         val bmiValue = Calculator.calculateBMI(w, h)
         val fatPercentage = Calculator.calculateFatPercentage(bmiValue, a, gender)
         val bmrValue = Calculator.calculateBMR(w, h, a, gender, fatPercentage, formula)
         val getValue = Calculator.calculateGET(bmrValue, activity.factor)
-        val ebValue = Calculator.calculateEB(getValue, goal.objective.toString())
+        val ebValue = Calculator.calculateEB(getValue, goal.factor).toInt()
 
-        val currentDietLabel = this.diet
-        val initialDiet = DietPreset.fromLabel(currentDietLabel).toDiet()
+        // Buscamos la dieta en la lista (incluyendo personalizadas) o usamos el preset
+        val selectedDiet =
+            dietOverride ?: diets.value.find { it.name.equals(this.diet, ignoreCase = true) }
+            ?: DietPreset.fromLabel(this.diet).toDiet()
 
         return TargetsUiState(
-            dailyKcal = "${ebValue.toInt()}",
-            diet = initialDiet
+            dailyKcal = ebValue.toString(),
+            diet = selectedDiet,
+            carbs = (ebValue * (selectedDiet.carbs / 100.0)).toInt(),
+            fats = (ebValue * (selectedDiet.fat / 100.0)).toInt(),
+            proteins = (ebValue * (selectedDiet.protein / 100.0)).toInt(),
         )
     }
 }

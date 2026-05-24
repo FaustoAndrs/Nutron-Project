@@ -8,4 +8,5 @@ sealed interface TargetsEvent {
     data class OnAddCustomDiet(val diet: Diet) : TargetsEvent
     object OnEditMealsDistribution : TargetsEvent
     data class OnClickBack(val fromSignUp: Boolean) : TargetsEvent
+    object OnNavigateToStatistics : TargetsEvent
 }

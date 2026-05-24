@@ -79,7 +79,7 @@ class SetUpValidator : Validator<SetUpUiState> {
             weightValidation = weightValidator.validate(data.weight),
             heightValidation = heightValidator.validate(data.height),
             ageValidation = ageValidator.validate(data.age),
-            genderValidation = genderValidator.validate(data.gender),
+            genderValidation = genderValidator.validate(data.gender.name),
             activityValidation = activityValidator.validate(data.activity.name),
             goalValidation = goalValidator.validate(data.goal.name),
             formulaValidation = formulaValidator.validate(data.formula)

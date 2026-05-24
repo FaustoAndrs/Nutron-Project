@@ -7,6 +7,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TargetsUiState(
     val dailyKcal: String = "",
-    val diet: Diet = Diet("Standard", 50, 20, 30)
+    val diet: Diet = Diet("Standard", 50, 20, 30),
+    val carbs: Int?= null,
+    val fats: Int?= null,
+    val proteins: Int?= null
 
 )

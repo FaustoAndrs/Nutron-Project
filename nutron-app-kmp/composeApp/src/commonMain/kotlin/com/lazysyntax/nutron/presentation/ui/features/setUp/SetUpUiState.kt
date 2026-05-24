@@ -18,14 +18,19 @@ import org.jetbrains.compose.resources.StringResource
 data class SetUpUiState(
     val weight: String = "",
     val height: String = "",
-    val gender: String = "",
+    val gender: Gender = Gender.NON,
     val age: String = "",
     val activity : Activity = Activity.LOW,
     val goal: Goal = Goal.MAINTAIN,
     val formula: String = "Harris-Benedict",
     val diet: String = "standard"
 )
-
+@Serializable
+enum class Gender(){
+    MAN,
+    FEMALE,
+    NON
+}
 @Serializable
 enum class Activity(val factor: Double)
 {

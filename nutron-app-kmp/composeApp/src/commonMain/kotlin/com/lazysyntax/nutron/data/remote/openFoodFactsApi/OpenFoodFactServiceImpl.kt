@@ -12,7 +12,7 @@ class OpenFoodFactsServiceImpl(private val client: HttpClient) : OpenFoodFactSer
 
     override suspend fun fetchFoodByBarcode(barcode: String): Food? {
         // Usamos el dominio .net para staging/testing
-        val url = "https://world.openfoodfacts.net/api/v2/product/$barcode.json"
+        val url = "https://world.openfoodfacts.org/api/v2/product/$barcode.json"
 
         return try {
             val response = client.get(url) {

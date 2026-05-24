@@ -11,6 +11,11 @@ val BasicFitWhite = Color(0xFFFFFFFF)
 val BasicFitLightGrey = Color(0xFFF2F2F2)
 val BasicFitDarkGrey = Color(0xFF2C2C2C)
 
+val ProteinsIndexColor = Color(0xFFE91E63)
+val CarbohydratesIndexColor = Color(0xFF2196F3)
+val FatsIndexColor = Color(0xFFFFC800)
+val CaloriesIndexColor = BasicFitOrange
+
 // Light Theme Colors
 internal val LightColorScheme = lightColorScheme(
     primary = BasicFitOrange,

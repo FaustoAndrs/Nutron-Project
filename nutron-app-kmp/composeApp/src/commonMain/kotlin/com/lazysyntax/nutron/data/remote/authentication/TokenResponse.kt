@@ -7,3 +7,8 @@ data class TokenResponse(
     val accessToken: String,
     val refreshToken: String
 )
+
+@Serializable
+data class RefreshTokenRequest(
+    val refreshToken: String
+)

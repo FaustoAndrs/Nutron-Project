@@ -2,6 +2,7 @@ package com.lazysyntax.nutron.data.local.food
 
 import androidx.room.Embedded
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import kotlin.time.Clock
@@ -9,7 +10,10 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalUuidApi::class)
-@Entity(tableName = "foods")
+@Entity(
+    tableName = "foods",
+    indices = [Index(value = ["barcode", "userId"], unique = true)]
+)
 @Serializable
 data class FoodEntity(
     @PrimaryKey

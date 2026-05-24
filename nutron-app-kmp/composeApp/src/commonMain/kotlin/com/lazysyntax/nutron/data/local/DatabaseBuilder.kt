@@ -10,6 +10,7 @@ fun getRoomDatabase(
     builder: Builder<NutronDatabase>
 ): NutronDatabase {
     return builder
+        .fallbackToDestructiveMigration(true)
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.IO)
         .build()

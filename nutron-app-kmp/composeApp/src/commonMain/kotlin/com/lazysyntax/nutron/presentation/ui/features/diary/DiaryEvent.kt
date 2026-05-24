@@ -1,5 +1,6 @@
 package com.lazysyntax.nutron.presentation.ui.features.diary
 
+import com.lazysyntax.nutron.domain.models.Food
 import com.lazysyntax.nutron.domain.models.Meal
 
 sealed interface DiaryEvent {
@@ -12,6 +13,7 @@ sealed interface DiaryEvent {
     object OnClickNextDay : DiaryEvent
     data class OnAddMeal(val meal: Meal) : DiaryEvent
     data class OnDeleteMeal(val meal: Meal) : DiaryEvent
+    data class OnDeleteFood(val meal: Meal, val food: Food) : DiaryEvent
 
 
 }

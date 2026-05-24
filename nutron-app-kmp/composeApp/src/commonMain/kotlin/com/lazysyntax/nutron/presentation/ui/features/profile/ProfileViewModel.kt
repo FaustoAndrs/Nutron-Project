@@ -40,33 +40,25 @@ class ProfileViewModel(
 
     private fun checkAndSyncProfile() {
         viewModelScope.launch {
-            val currentLocalData = sessionManager.getCurrentUserData()
-
-            // Verificamos si los datos esenciales faltan (ej. altura o peso)
-            if (currentLocalData.height.isEmpty() || currentLocalData.weight.isEmpty()) {
-                println("PROFILE: Datos locales incompletos, sincronizando...")
-
-                when (val result = syncRepository.syncUserSetUp()) {
-                    is SyncResult.Success -> {
-                        println("PROFILE: Sincronización exitosa. El StateFlow actualizará la UI.")
-                    }
-                    is SyncResult.NotFound -> {
-                        // El usuario está registrado pero nunca completó el SetUp (onboarding)
-                        println("PROFILE: No hay datos en el servidor, redirigiendo a SetUp")
-                        navigator.navigateTo(Route.SetUp(true))
-                    }
-                    is SyncResult.Error -> {
-                        println("PROFILE: Error de red o servidor al sincronizar")
-                        // Opcional: Mostrar un mensaje de error al usuario
-                    }
+            // Estrategia Offline-First: syncUserSetUpIfNeeded solo irá a la red si es estrictamente necesario
+            when (syncRepository.syncUserSetUpIfNeeded()) {
+                is SyncResult.Success -> {
+                    println("PROFILE: Datos verificados correctamente.")
+                }
+                is SyncResult.NotFound -> {
+                    println("PROFILE: Usuario nuevo, redirigiendo a SetUp")
+                    navigator.navigateTo(Route.SetUp(true))
+                }
+                else -> {
+                    println("PROFILE: Usando datos locales por error de red o similar.")
                 }
             }
         }
     }
 
     private fun SetUpUiState.toProfileUiState(): ProfileUiState {
-        val w = weight.toDoubleOrNull() ?: 0.0
-        val h = height.toDoubleOrNull() ?: 0.0
+        val w = weight.replace(',', '.').toDoubleOrNull() ?: 0.0
+        val h = height.replace(',', '.').toDoubleOrNull() ?: 0.0
         val a = age.toIntOrNull() ?: 0
 
         val bmiValue = Calculator.calculateBMI(w, h)
@@ -74,7 +66,7 @@ class ProfileViewModel(
         val bmrValue = Calculator.calculateBMR(w, h, a, gender, fatPercentage, formula)
         val tbwValue = Calculator.calculateTBW(w, h, a, gender)
         val getValue = Calculator.calculateGET(bmrValue, activity.factor)
-        val ebValue = Calculator.calculateEB(getValue, goal.objective.toString())
+        val ebValue = Calculator.calculateEB(getValue, goal.factor)
 
         return ProfileUiState(
             weight = weight,

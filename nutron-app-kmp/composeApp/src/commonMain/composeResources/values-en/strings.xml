@@ -17,6 +17,7 @@
     <string name="signup_full_name_field">Full name</string>
     <string name="signup_email_field">Email</string>
     <string name="signup_passwd_field">Password</string>
+
     <!-- Setup Screen -->
     <string name="title_setup">SETUP</string>
     <string name="setup_welcome_user">Welcome!</string>
@@ -24,6 +25,7 @@
     <string name="setup_desc_user">Thanks for registering. Let's set things up.</string>
     <string name="setup_desc_guest">You're in guest mode. You can set up your profile now.</string>
     <string name="setup_button_save">Save</string>
+    <string name="setup_age_label">years</string>
 
     <!-- Validators -->
     <string name="email_no_empty_validator">The email cannot be empty.</string>
@@ -67,6 +69,7 @@
     <string name="mantain_weight_objective">Maintain weight</string>
     <string name="gain_weight_objective">Gain weight</string>
     <string name="gain_weight_slowly_objective">Gain weight slowly</string>
+
     <!-- Profile Screen -->
     <string name="title_profile">PROFILE</string>
     <string name="profile_headline">Profile Screen</string>
@@ -107,19 +110,41 @@
     <string name="breakfas_meal_template">Breakfast</string>
     <string name="lunch_meal_template">Lunch</string>
     <string name="dinner_meal_template">Dinner</string>
+
     <!-- Library Screen -->
     <string name="title_library">Library</string>
     <string name="library_headline">Your Library</string>
     <string name="library_button_add_product">Add Product</string>
     <string name="library_button_search_product">Search Product</string>
     <string name="library_button_search_barcode">Search Barcode</string>
+    <string name="library_search_placeholder">Search products or scan a code</string>
+    <string name="library_no_results">No results found for your search</string>
+    <string name="library_error_barcode_not_found">No product found with this barcode</string>
+    <string name="library_error_scanner_failed">Failed to start barcode scanner</string>
 
     <!-- Settings Screen -->
     <string name="title_settings">SETTINGS</string>
     <string name="settings_headline">Settings</string>
-    <string name="settings_button_logout">Logout</string>
+    <string name="settings_button_logout">Log Out</string>
+    <string name="settings_button_signup">Create account</string>
     <string name="settings_button_setup">User parameters</string>
     <string name="settings_button_language">Language</string>
+    <string name="settings_on_dimiss">Cancel</string>
+    <string name="settings_on_confirm">Log Out</string>
+    <string name="settings_logout_confirm_title">Confirm Logout</string>
+    <string name="settings_logout_confirm_message">You have meals pending synchronization. If you log out now, this data might be lost. Are you sure you want to exit?</string>
+
+    <string name="settings_sync_advise_title">Synchronization not available</string>
+    <string name="settings_sync_advise_message">You have meals that need to be synced. To sync and save these entries to the cloud, you must create a user account.</string>
+
+    <string name="settings_logout_guest_confirm_message">If you log out as a guest, your journal entries will be lost./nYou can create a user account to sync your data. Are you sure you want to log out?</string>
+    <string name="settings_section_sync">Synchronization</string>
+    <string name="settings_sync_pending_headline">Meals pending upload</string>
+    <string name="settings_sync_pending_supporting"> unsynced meals</string>
+    <string name="settings_section_app">App Settings</string>
+    <string name="settings_diary_settings">Diary Settings</string>
+    <string name="settings_dark_theme">Dark Theme</string>
+    <string name="settings_generate_test_data">Generate test data (2 months)</string>
 
     <!-- Details Screen -->
     <string name="title_details">DETAILS</string>

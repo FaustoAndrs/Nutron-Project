@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.lazysyntax.nutron.presentation.ui.features.setUp.Gender
 import com.lazysyntax.nutron.presentation.ui.navigation.composables.NavBar
 import com.lazysyntax.nutron.presentation.ui.navigation.composables.TopAppBarCommon
 import kotlinx.coroutines.launch
@@ -83,7 +84,6 @@ fun ProfileContent(
     Scaffold(
         topBar = { TopAppBarCommon(stringResource(Res.string.title_profile)) },
         bottomBar = { NavBar() },
-        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
     ) { padding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),
@@ -156,7 +156,8 @@ fun ProfileContent(
                 Card(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.50f)
+                            ),
                     elevation = CardDefaults.cardElevation(0.dp)
                 ) {
                     Column {
@@ -164,7 +165,7 @@ fun ProfileContent(
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
                         ProfileDetailRow(stringResource(Res.string.profile_weight_label), "${uiState.weight} kg")
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
-                        ProfileDetailRow(stringResource(Res.string.profile_gender_label), uiState.gender)
+                        ProfileDetailRow(stringResource(Res.string.profile_gender_label), uiState.gender.name)
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
                         ProfileDetailRow(stringResource(Res.string.profile_mbr_label), "${uiState.basalMetabolicRate} kcal")
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
@@ -182,6 +183,7 @@ fun ProfileContent(
 fun PrevProfileContent(){
     val uiState = ProfileUiState(
         weight = "70",
+        gender = Gender.MAN
     )
     ProfileContent(
         uiState = uiState,

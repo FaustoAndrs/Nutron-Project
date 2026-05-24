@@ -10,15 +10,15 @@ data class LibraryUiState(
     val foodListResult: List<Food>?,
     val foodSelected: Food? = null,
     val searchSource: SearchSource = SearchSource.LOCAL,
-    val error: String = ""
-
-
+    val error: String = "",
+    val isLoading: Boolean = false
 ) {
     constructor() : this(
-        barcode = "3017624010701",
-        productName = "Nutella",
+        barcode = "",
+        productName = "",
         foodResult = null,
-        foodListResult = emptyList(),
-        searchSource = SearchSource.LOCAL
+        foodListResult = null,
+        searchSource = SearchSource.LOCAL,
+        isLoading = false
     )
 }

@@ -18,6 +18,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import kotlin.time.Clock
 
 class UserRepositoryImpl(
     private val client: HttpClient,
@@ -43,7 +44,8 @@ class UserRepositoryImpl(
                 val settings = response.body<UserSetupResponse>()
 
                 // 4. Persistir localmente si es necesario
-                sessionManager.saveUserProfile(settings.toSetupUiState())
+                val now = Clock.System.now().toEpochMilliseconds()
+                sessionManager.saveUserProfile(settings.toSetupUiState(), lastSyncTime = now)
                 true
             } else {
                 val errorBody =
@@ -73,7 +75,8 @@ class UserRepositoryImpl(
             }
 
             if (response.status == HttpStatusCode.OK) {
-                sessionManager.saveUserProfile(setUpUiState)
+                val now = Clock.System.now().toEpochMilliseconds()
+                sessionManager.saveUserProfile(setUpUiState, lastSyncTime = now)
                 true
             } else {
                 val errorBody = response.body<String>()
@@ -103,7 +106,8 @@ class UserRepositoryImpl(
             if (response.status == HttpStatusCode.OK) {
                 val currentSetup = sessionManager.getCurrentUserData()
                 val updatedSetup = currentSetup.copy(diet = targetsUiState.diet.name)
-                sessionManager.saveUserProfile(updatedSetup)
+                val now = Clock.System.now().toEpochMilliseconds()
+                sessionManager.saveUserProfile(updatedSetup, lastSyncTime = now)
                 true
             } else {
                 val errorBody = response.body<String>()

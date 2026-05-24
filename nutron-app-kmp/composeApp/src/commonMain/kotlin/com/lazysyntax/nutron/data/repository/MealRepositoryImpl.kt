@@ -6,8 +6,10 @@ import com.lazysyntax.nutron.data.local.meal.MealFoodSnapshotEntity
 import com.lazysyntax.nutron.data.local.meal.MealWithFoods
 import com.lazysyntax.nutron.data.local.meal.toDomain
 import com.lazysyntax.nutron.data.remote.authentication.SessionManager
+import com.lazysyntax.nutron.data.remote.food.FoodRemoteDataSource
 import com.lazysyntax.nutron.data.remote.meal.MealRemoteDataSource
 import com.lazysyntax.nutron.data.remote.meal.toDto
+import com.lazysyntax.nutron.data.remote.meal.toEntity
 import com.lazysyntax.nutron.domain.models.Food
 import com.lazysyntax.nutron.domain.models.Meal
 import com.lazysyntax.nutron.domain.repository.FoodRepository
@@ -23,8 +25,8 @@ import kotlin.time.Clock
 class MealRepositoryImpl(
     private val mealDao: MealDao,
     private val sessionManager: SessionManager,
-    private val foodRepository: FoodRepository,
-    private val mealRemoteDataSource: MealRemoteDataSource
+    private val mealRemoteDataSource: MealRemoteDataSource,
+    private val foodRemoteDataSource: FoodRemoteDataSource
 ) : MealRepository {
 
     override suspend fun createMeal(name: String, foods: List<Food>) {
@@ -33,7 +35,7 @@ class MealRepositoryImpl(
         mealDao.insertMeal(MealEntity(
             name = name,
             userId = userId,
-            date =  Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+            date = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
         ))
     }
 
@@ -68,5 +70,38 @@ class MealRepositoryImpl(
         if (isSynced) {
             mealDao.updateMeal(mealEntity.copy(isSynced = true))
         }
+    }
+
+    override suspend fun downloadAndSyncMeals(): Boolean {
+        return try {
+            val remoteMeals = mealRemoteDataSource.getMealsByUser()
+            remoteMeals.forEach { dto ->
+                // Convertimos DTO a Entidad y snapshots
+                val entity = dto.toEntity(isSynced = true)
+                val snapshots = dto.foods.map { it.toEntity(dto.id) }
+
+                mealDao.insertMealWithSnapshots(entity, snapshots)
+            }
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    override suspend fun syncPendingMeals(): Int {
+        val pending = mealDao.getUnsyncedMeals().first() // Necesitas añadir este query al DAO
+        var count = 0
+        pending.forEach { mealWithFoods ->
+            val isSynced = mealRemoteDataSource.saveMeal(mealWithFoods.toDto())
+            if (isSynced) {
+                mealDao.updateMeal(mealWithFoods.meal.copy(isSynced = true))
+                count++
+            }
+        }
+        return count
+    }
+
+    override fun getUnsyncedMealsCount(): Flow<Int> {
+        return mealDao.getUnsyncedMealsCount()
     }
 }

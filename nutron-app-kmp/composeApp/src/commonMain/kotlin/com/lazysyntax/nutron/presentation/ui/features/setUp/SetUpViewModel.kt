@@ -2,8 +2,8 @@ package com.lazysyntax.nutron.presentation.ui.features.setUp
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lazysyntax.nutron.domain.repository.UserRepository
 import com.lazysyntax.nutron.data.remote.authentication.SessionManager
+import com.lazysyntax.nutron.domain.repository.UserRepository
 import com.lazysyntax.nutron.presentation.ui.navigation.Navigator
 import com.lazysyntax.nutron.presentation.ui.navigation.Route
 import com.lazysyntax.nutron.presentation.utilities.validation.Validation
@@ -82,6 +82,7 @@ class SetUpViewModel(
             is SetUpEvent.WeightChanged -> {
                 onWeightChanged(setUpEvent.weight)
             }
+
             is SetUpEvent.HeightChanged -> onHeightChanged(setUpEvent.height)
             is SetUpEvent.GenderChanged -> onGenderChanged(setUpEvent.gender)
             is SetUpEvent.AgeChanged -> onAgeChanged(setUpEvent.age)
@@ -97,9 +98,10 @@ class SetUpViewModel(
     private fun markDirty(field: String) {
         _dirtyFields.update { it + field }
     }
+
     fun onWeightChanged(weight: String) {
-            _uiState.update { it.copy(weight = weight) }
-            markDirty("weight")
+        _uiState.update { it.copy(weight = weight) }
+        markDirty("weight")
     }
 
     fun onHeightChanged(height: String) {
@@ -107,7 +109,7 @@ class SetUpViewModel(
         markDirty("height")
     }
 
-    fun onGenderChanged(gender: String) {
+    fun onGenderChanged(gender: Gender) {
         _uiState.update { it.copy(gender = gender) }
         markDirty("gender")
     }
@@ -135,8 +137,7 @@ class SetUpViewModel(
     fun onSave() {
         val currentState = uiState.value
         val totalValidation = validator.validate(currentState)
-        if(totalValidation.error)
-        {
+        if (totalValidation.error) {
             _dirtyFields.update { it + "weight" + "height" + "age" + "gender" + "activity" + "goal" + "formula" }
             return
         }
@@ -144,11 +145,15 @@ class SetUpViewModel(
         viewModelScope.launch {
             sessionManager.saveUserProfile(currentState)
         }
-        println("ON Save: sManager...: ${sessionManager.authSession.value?.accessToken}")
+
 
         viewModelScope.launch {
+            /*Si el usuario está logueado como invitado, no sincronizamos los setings del usuario de forma remota
+             y navegamos directamente a profile */
+
+            println("ON Save: sManager...: ${sessionManager.authSession.value?.accessToken}")
             println("ON Save: IsLoggedIn...: ${sessionManager.authSession.value != null}")
-            if (sessionManager.authSession.value != null) {
+            if (sessionManager.authSession.value != null && !sessionManager.isGuestLogged.value) {
                 println("ON Save: Intentando actualizar en servidor...")
                 val success = userSetupRepository.updateUserSetup(currentState)
                 if (success) {
@@ -158,8 +163,8 @@ class SetUpViewModel(
                     // Podrías manejar el error aquí si fuera necesario
                 }
             }
-            navigator.resetTo(route = Route.Profile)
         }
+        navigator.resetTo(route = Route.Profile)
     }
 
     fun onBack(fromSignUp: Boolean) {
@@ -170,11 +175,10 @@ class SetUpViewModel(
         } else {
             println("FROM SETUP")
             navigator.goBack()
+
         }
 
     }
-
-
 
 
 }

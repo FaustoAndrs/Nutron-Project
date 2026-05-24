@@ -4,6 +4,7 @@ import com.lazysyntax.nutron.data.local.meal.MealEntity
 import com.lazysyntax.nutron.data.local.meal.MealFoodSnapshotEntity
 import com.lazysyntax.nutron.domain.models.Food
 import com.lazysyntax.nutron.domain.models.Meal
+import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.LocalDate
 
 interface MealRepository {
@@ -13,7 +14,16 @@ interface MealRepository {
 
     suspend fun getMealsByDate(date: LocalDate): List<Meal>
 
-    fun getMealsByDateRange(startDate: LocalDate, endDate: LocalDate): kotlinx.coroutines.flow.Flow<List<Meal>>
+    fun getMealsByDateRange(
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): Flow<List<Meal>>
 
     suspend fun insertMealWithFood(mealEntity: MealEntity, snapshots: List<MealFoodSnapshotEntity>)
+
+    // ... métodos existentes ...
+    suspend fun downloadAndSyncMeals(): Boolean
+    suspend fun syncPendingMeals(): Int // Retorna cuántas se sincronizaron
+
+    fun getUnsyncedMealsCount(): Flow<Int>
 }

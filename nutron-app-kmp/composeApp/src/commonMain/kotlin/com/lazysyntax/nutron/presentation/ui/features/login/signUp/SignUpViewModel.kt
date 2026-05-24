@@ -3,10 +3,12 @@ package com.lazysyntax.nutron.presentation.ui.features.login.signUp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lazysyntax.nutron.data.remote.authentication.AuthRepository
+import com.lazysyntax.nutron.data.remote.authentication.AuthResult
+import com.lazysyntax.nutron.data.remote.authentication.SessionManager
+import com.lazysyntax.nutron.data.remote.synchronization.toUserSetupEntity
 import com.lazysyntax.nutron.presentation.ui.navigation.Navigator
 import com.lazysyntax.nutron.presentation.ui.navigation.Route
 import com.lazysyntax.nutron.domain.models.User
-import com.lazysyntax.nutron.presentation.ui.features.setUp.SetUpUiStateValidation
 import com.lazysyntax.nutron.presentation.utilities.validation.Validation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,7 +21,8 @@ import kotlinx.coroutines.launch
 
 class SignUpViewModel(
     private val authRepository: AuthRepository,
-    private val navigator: Navigator
+    private val navigator: Navigator,
+    private  val sessionManager: SessionManager
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SignUpUiState())
     val uiState: StateFlow<SignUpUiState> = _uiState.asStateFlow()
@@ -55,7 +58,13 @@ class SignUpViewModel(
             is SignUpEvent.FullNameChanged -> onFullNameChanged(signUpEvent.fullName)
             is SignUpEvent.EmailChanged -> onEmailChanged(signUpEvent.email)
             is SignUpEvent.PasswordChanged -> onPasswordChanged(signUpEvent.password)
-            SignUpEvent.OnClickSignUp -> onSignUp(uiState.value.toNewUserEntity())
+            SignUpEvent.OnClickSignUp -> {
+                if(!sessionManager.isGuestLogged.value) {
+                    onSignUp(uiState.value.toNewUserEntity()) //<- Se genera un Uuid
+                }else{
+                    onSignUpGuest() //<- Se recupera el Uuid del usuario Invitado para vincular el invitado con un nuevo usuario.
+                }
+            }
             SignUpEvent.OnSignUpSuccess -> onSignUpSuccess()
             SignUpEvent.OnBack -> onBack()
         }
@@ -91,20 +100,51 @@ class SignUpViewModel(
             viewModelScope.launch {
                 _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-                val success = authRepository.register(newUser = newUser)
+                val result = authRepository.register(newUser = newUser)
 
                 _uiState.update {
-                    it.copy(isLoading = false, signUpSuccess = success)
+                    it.copy(
+                        isLoading = false,
+                        signUpSuccess = result is AuthResult.Success,
+                        errorMessage = when (result) {
+                            AuthResult.Success -> null
+                            AuthResult.UserAlreadyExists -> "El correo electrónico o nombre de usuario ya está registrado."
+                            AuthResult.InvalidCredentials -> "Error al crear la cuenta. Los datos pueden ser inválidos."
+                            AuthResult.NetworkError -> "Error de conexión. Revisa el servidor o tu internet."
+                            is AuthResult.UnknownError -> result.message ?: "Error desconocido"
+                        }
+                    )
                 }
 
-                if (success) {
+                if (result is AuthResult.Success) {
                     // LLAMAMOS AL ÉXITO AQUÍ, cuando ya tenemos la respuesta
                     onSignUpSuccess()
-                } else {
-                    _uiState.update { it.copy(errorMessage = "Error al crear la cuenta. Intente de nuevo.") }
                 }
             }
         }
+    }
+
+    fun onSignUpGuest(){
+        var currentGuestId = sessionManager.getUserId()
+        var guestState = uiState.value
+        var preferences = sessionManager.getUserPreferences()
+
+        if(currentGuestId != null){
+            var newUser = User(
+                id = currentGuestId,
+                userName = guestState.userName,
+                fullName = guestState.fullName,
+                email = guestState.email,
+                password = guestState.password,
+                userSetup = preferences.setupUiState.toUserSetupEntity()
+            )
+
+            sessionManager.setGuestLogin(logged = false)
+            onSignUp(newUser = newUser)
+        }else{
+            println("DEBUG SIGN UP (as GUEST): currentGuestId -> $currentGuestId is NULL, no data synced")
+        }
+
     }
 
     fun onBack() {
@@ -116,15 +156,22 @@ class SignUpViewModel(
             _uiState.update { it.copy(isLoading = true) }
 
             // ESPERAMOS a que el login termine
-            val loginSuccess = authRepository.login(uiState.value.email, uiState.value.password)
+            val loginResult = authRepository.login(uiState.value.email, uiState.value.password)
 
             _uiState.update { it.copy(isLoading = false) }
 
-            if (loginSuccess) {
+            if (loginResult is AuthResult.Success) {
                 // Navegamos solo después de confirmar que la sesión se guardó
                 navigator.resetTo(route = Route.SetUp(fromSignUp = true))
             } else {
-                _uiState.update { it.copy(errorMessage = "Cuenta creada, pero hubo un error al iniciar sesión automáticamente.") }
+                _uiState.update {
+                    it.copy(
+                        errorMessage = when (loginResult) {
+                            AuthResult.NetworkError -> "Error de conexión al iniciar sesión."
+                            else -> "Cuenta creada, pero hubo un error al iniciar sesión automáticamente."
+                        }
+                    )
+                }
             }
         }
     }

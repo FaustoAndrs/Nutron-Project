@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -31,9 +32,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import com.lazysyntax.nutron.presentation.theme.Theme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -51,6 +53,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.lazysyntax.nutron.domain.models.Food
+import com.lazysyntax.nutron.presentation.theme.Theme
 import com.lazysyntax.nutron.presentation.ui.features.diary.DiaryViewModel
 import com.lazysyntax.nutron.presentation.ui.features.diary.DiaryViewModel.SearchSource
 import com.lazysyntax.nutron.presentation.ui.features.diary.composables.LibrarySearchBar
@@ -61,6 +64,10 @@ import dev.icerock.moko.permissions.compose.BindEffect
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
 import nutron.composeapp.generated.resources.Res
 import nutron.composeapp.generated.resources.button_back
+import nutron.composeapp.generated.resources.library_error_barcode_not_found
+import nutron.composeapp.generated.resources.library_error_scanner_failed
+import nutron.composeapp.generated.resources.library_no_results
+import nutron.composeapp.generated.resources.library_search_placeholder
 import nutron.composeapp.generated.resources.title_library
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -100,7 +107,7 @@ fun LibraryScreen(
         }
     }
 
-    
+
     LibraryContent(
         uiState = uiState.libraryUiState,
         onBack = { viewModel.onLibraryEvent(LibraryEvent.OnClickBack) },
@@ -112,12 +119,10 @@ fun LibraryScreen(
         hasCameraPermission = hasCameraPermission,
         onShowScanner = { showScanner = !showScanner },
         onProductSelected = { viewModel.onLibraryEvent(LibraryEvent.ProductSelected(it)) },
-        onSearchSourceChanged = { viewModel.onLibraryEvent(LibraryEvent.SearchSourceChanged(it)) }
-
-
+        onSearchSourceChanged = { viewModel.onLibraryEvent(LibraryEvent.SearchSourceChanged(it)) },
+        onError = { viewModel.onLibraryEvent(LibraryEvent.OnError(it)) }
     )
 }
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -133,10 +138,28 @@ fun LibraryContent(
     hasCameraPermission: Boolean,
     onShowScanner: () -> Unit,
     onProductSelected: (Food) -> Unit,
-    onSearchSourceChanged: (SearchSource) -> Unit
+    onSearchSourceChanged: (SearchSource) -> Unit,
+    onError: (String) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     var showBarBarcodeSearch = rememberSaveable { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Manejo de errores mediante Snackbar
+    val barcodeNotFoundMsg = stringResource(Res.string.library_error_barcode_not_found)
+    val scannerFailedMsg = stringResource(Res.string.library_error_scanner_failed)
+
+    LaunchedEffect(uiState.error) {
+        if (uiState.error.isNotEmpty()) {
+            val message = when (uiState.error) {
+                "barcode_not_found" -> barcodeNotFoundMsg
+                "scanner_failed" -> scannerFailedMsg
+                else -> uiState.error
+            }
+            snackbarHostState.showSnackbar(message)
+            onError("") // Limpiar error tras mostrarlo
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -149,7 +172,9 @@ fun LibraryContent(
                 },
                 onCleanSearch = { onProductChanged("") },
             )
-        }) { padding ->
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { padding ->
         Column(
             modifier = Modifier.fillMaxHeight().padding(padding)
                 .pointerInput(Unit) {
@@ -165,9 +190,10 @@ fun LibraryContent(
                 onScanBarcode = onShowScanner,
                 onQueryChanged = onProductChanged,
                 onCleanQuery = { onProductChanged("") },
+                placeholder = "Search"
             )
 
-            if(showBarBarcodeSearch.value) {
+            if (showBarBarcodeSearch.value) {
                 LibrarySearchBar(
                     query = uiState.barcode,
                     onSearch = {
@@ -177,6 +203,7 @@ fun LibraryContent(
                     onScanBarcode = onShowScanner,
                     onQueryChanged = onBarcodeChanded,
                     onCleanQuery = { onBarcodeChanded("") },
+                    placeholder = "Search by Barcode"
                 )
             }
 
@@ -186,9 +213,12 @@ fun LibraryContent(
                     .padding(start = 32.dp, end = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-            FilterChip(
+                FilterChip(
                     selected = uiState.searchSource == SearchSource.LOCAL,
-                    onClick = { onSearchSourceChanged(SearchSource.LOCAL) },
+                    onClick = {
+                        onSearchSourceChanged(SearchSource.LOCAL)
+                        focusManager.clearFocus()
+                    },
                     label = { Text("Mi Librería") },
                     shape = RoundedCornerShape(20.dp),
                     leadingIcon = if (uiState.searchSource == SearchSource.LOCAL) {
@@ -203,7 +233,11 @@ fun LibraryContent(
 
                 FilterChip(
                     selected = uiState.searchSource == SearchSource.API,
-                    onClick = { onSearchSourceChanged(SearchSource.API) },
+                    onClick = {
+                        onSearchSourceChanged(SearchSource.API)
+                        if (uiState.productName.isNotBlank())onSearchProduct()
+                        focusManager.clearFocus()
+                    },
                     label = { Text("Buscar en la Red") },
                     shape = RoundedCornerShape(20.dp),
                     leadingIcon = if (uiState.searchSource == SearchSource.API) {
@@ -234,74 +268,110 @@ fun LibraryContent(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                if (uiState.isLoading) {
+                    Box(
+                        modifier = Modifier.fillMaxSize().weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                } else {
+                    val results = uiState.foodListResult
 
-                // Lista de resultados
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize()
-                        .weight(1f) // weight(1f) para que ocupe el espacio sobrante
-                ) {
-                    uiState.foodListResult?.let { products ->
-                        items(products) { product ->
-                            Column(modifier = Modifier.fillMaxWidth().clickable {
+                    if (results == null) {
+                        // Estado inicial: El usuario aún no ha realizado una búsqueda
+                        Box(
+                            modifier = Modifier.fillMaxSize().weight(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.library_search_placeholder),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    } else if (results.isEmpty()) {
+                        // Caso: Se realizó la búsqueda pero no hubo coincidencias
+                        Box(
+                            modifier = Modifier.fillMaxSize().weight(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.library_no_results),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    } else {
+                        // Lista de resultados
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize()
+                                .weight(1f) // weight(1f) para que ocupe el espacio sobrante
+                        ) {
+                            items(results) { product ->
+                                Column(modifier = Modifier.fillMaxWidth().clickable {
                                     onProductSelected(product)
                                     focusManager.clearFocus()
                                 }.padding(horizontal = 16.dp, vertical = 12.dp)) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.Top
-                                ) {
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = product.name ?: "Producto sin nombre",
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                        if (!product.brands.isNullOrBlank()) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.Top
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
                                             Text(
-                                                text = product.brands,
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.secondary
+                                                text = product.name ?: "Producto sin nombre",
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
                                             )
+                                            if (!product.brands.isNullOrBlank()) {
+                                                Text(
+                                                    text = product.brands,
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.secondary
+                                                )
+                                            }
                                         }
+
+                                        Text(
+                                            text = "${product.nutriments?.calories ?: 0.0} kcal",
+                                            style = MaterialTheme.typography.labelLarge,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Bold
+                                        )
                                     }
 
-                                    Text(
-                                        text = "${product.nutriments?.calories ?: 0.0} kcal",
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        fontWeight = FontWeight.Bold
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        MacroMiniItem(
+                                            "P",
+                                            "${product.nutriments?.proteins ?: 0.0}g",
+                                            Color(0xFFE57373)
+                                        )
+                                        MacroMiniItem(
+                                            "C",
+                                            "${product.nutriments?.carbs ?: 0.0}g",
+                                            Color(0xFFFFB74D)
+                                        )
+                                        MacroMiniItem(
+                                            "G",
+                                            "${product.nutriments?.fat ?: 0.0}g",
+                                            Color(0xFF81C784)
+                                        )
+                                    }
+
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(top = 12.dp),
+                                        thickness = 0.5.dp,
+                                        color = MaterialTheme.colorScheme.outlineVariant
                                     )
                                 }
-
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    MacroMiniItem(
-                                        "P",
-                                        "${product.nutriments?.proteins ?: 0.0}g",
-                                        Color(0xFFE57373)
-                                    )
-                                    MacroMiniItem(
-                                        "C",
-                                        "${product.nutriments?.carbs ?: 0.0}g",
-                                        Color(0xFFFFB74D)
-                                    )
-                                    MacroMiniItem(
-                                        "G", "${product.nutriments?.fat ?: 0.0}g", Color(0xFF81C784)
-                                    )
-                                }
-
-                                HorizontalDivider(
-                                    modifier = Modifier.padding(top = 12.dp),
-                                    thickness = 0.5.dp,
-                                    color = MaterialTheme.colorScheme.outlineVariant
-                                )
                             }
                         }
                     }
@@ -331,6 +401,7 @@ fun LibraryContent(
 
                 is BarcodeResult.OnFailed -> {
                     println("Error: ${result.exception.message}")
+                    onError("scanner_failed")
                 }
 
                 BarcodeResult.OnCanceled -> {
@@ -376,7 +447,8 @@ fun PreviewLibraryScafold() {
             hasCameraPermission = true,
             onShowScanner = {},
             onProductSelected = {},
-            onSearchSourceChanged = {}
+            onSearchSourceChanged = {},
+            onError = {}
         )
     }
 }

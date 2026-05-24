@@ -2,6 +2,7 @@ package com.lazysyntax.nutron.data.remote.authentication
 
 import com.lazysyntax.nutron.presentation.ui.features.setUp.SetUpUiState
 import com.lazysyntax.nutron.domain.models.Meal
+import com.lazysyntax.nutron.presentation.ui.features.targets.composables.Diet
 import com.russhwolf.settings.ExperimentalSettingsApi
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.serialization.decodeValue
@@ -12,16 +13,29 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.nullable
+import kotlinx.serialization.json.Json
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.launch
+import com.lazysyntax.nutron.data.local.NutronDatabase
 
 @OptIn(ExperimentalSettingsApi::class, ExperimentalSerializationApi::class)
 class SessionManager(
     private val encryptedSettings: Settings,
-    private val commonSettings: Settings
+    private val commonSettings: Settings,
+    private val database: NutronDatabase
 ) {
 
     companion object {
         private const val AUTH_SESSION_KEY = "auth_session"
         private const val USER_PREFERENCES_KEY = "user_preferences"
+    }
+
+    private val json = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+        isLenient = true
     }
 
     private val authSessionSerializer = AuthSession.serializer().nullable
@@ -45,6 +59,8 @@ class SessionManager(
     private val _mealTemplate = MutableStateFlow(initialPrefs.mealTemplate)
     val mealTemplate: StateFlow<List<Meal>> = _mealTemplate.asStateFlow()
 
+    private val _isGuestLogged = MutableStateFlow(initialPrefs.isGuestLogged)
+    val isGuestLogged: StateFlow<Boolean> = _isGuestLogged.asStateFlow()
     fun getAuthSession(): AuthSession? {
         return try {
             val session = encryptedSettings.decodeValue(
@@ -67,35 +83,43 @@ class SessionManager(
 
     fun getUserPreferences(): UserPreferences {
         return try {
-            commonSettings.decodeValue(
-                userPreferencesSerializer,
-                USER_PREFERENCES_KEY,
+            val jsonString = commonSettings.getString(USER_PREFERENCES_KEY, "")
+            if (jsonString.isEmpty()) {
                 UserPreferences()
-            )
+            } else {
+                json.decodeFromString(userPreferencesSerializer, jsonString)
+            }
         } catch (e: Exception) {
             println("SESSION ERROR: Error decoding user preferences: ${e.message}")
+            e.printStackTrace()
             UserPreferences()
         }
     }
 
-    fun saveSession(userId: String, email: String, accessToken: String, refreshToken: String) {
+    fun saveSession(userId: String, email: String?, accessToken: String?, refreshToken: String?) {
         val session = AuthSession(userId, email, accessToken, refreshToken)
         try {
             encryptedSettings.encodeValue(authSessionSerializer, AUTH_SESSION_KEY, session)
             _authSession.value = session
+
         } catch (e: Exception) {
             println("SESSION ERROR: Error saving auth session: ${e.message}")
         }
     }
 
-    fun saveUserProfile(state: SetUpUiState) {
+    fun saveUserProfile(state: SetUpUiState, lastSyncTime: Long? = null) {
         val currentPrefs = getUserPreferences()
-        val newPrefs = currentPrefs.copy(setupUiState = state)
+        val newPrefs = currentPrefs.copy(
+            setupUiState = state,
+            lastSyncTime = lastSyncTime ?: currentPrefs.lastSyncTime
+        )
         try {
-            commonSettings.encodeValue(userPreferencesSerializer, USER_PREFERENCES_KEY, newPrefs)
+            val jsonString = json.encodeToString(userPreferencesSerializer, newPrefs)
+            commonSettings.putString(USER_PREFERENCES_KEY, jsonString)
             _userData.value = state
         } catch (e: Exception) {
             println("SESSION ERROR: Error saving user profile: ${e.message}")
+            e.printStackTrace()
         }
     }
 
@@ -120,6 +144,23 @@ class SessionManager(
         commonSettings.encodeValue(userPreferencesSerializer, USER_PREFERENCES_KEY, newPrefs)
         _isDarkTheme.value = enabled
     }
+    fun setGuestLogin(logged: Boolean) {
+        val currentPrefs = getUserPreferences()
+        val newPrefs = currentPrefs.copy(isGuestLogged = logged)
+        commonSettings.encodeValue(userPreferencesSerializer, USER_PREFERENCES_KEY, newPrefs)
+        _isGuestLogged.value = logged
+    }
+
+    fun saveCustomDiet(diet: Diet) {
+        val currentPrefs = getUserPreferences()
+        if (currentPrefs.customDiets.none { it.name == diet.name }) {
+            val newPrefs = currentPrefs.copy(customDiets = currentPrefs.customDiets + diet)
+            val jsonString = json.encodeToString(userPreferencesSerializer, newPrefs)
+            commonSettings.putString(USER_PREFERENCES_KEY, jsonString)
+        }
+    }
+
+
     /**
      * Añade una nueva comida a la plantilla global
      */
@@ -149,6 +190,17 @@ class SessionManager(
         encryptedSettings.remove(AUTH_SESSION_KEY)
         commonSettings.remove(USER_PREFERENCES_KEY)
         clearAll()
+        
+        // Borrar base de datos local
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                database.foodDao().clearAll()
+                database.mealDao().clearAll()
+                println("SESSION DEBUG: Base de datos limpiada correctamente.")
+            } catch (e: Exception) {
+                println("SESSION ERROR: Error al limpiar la base de datos: ${e.message}")
+            }
+        }
     }
 
     fun clearAll() {
@@ -176,9 +228,9 @@ class SessionManager(
 @Serializable
 data class AuthSession(
     val userId: String,
-    val email: String,
-    val accessToken: String,
-    val refreshToken: String
+    val email: String?,
+    val accessToken: String?,
+    val refreshToken: String?
 )
 
 @Serializable
@@ -186,5 +238,8 @@ data class UserPreferences(
     val setupUiState: SetUpUiState = SetUpUiState(),
     val language: String = "es",
     val isDarkTheme: Boolean = false,
-    val mealTemplate: List<Meal> = listOf(Meal(name = "Meal 1"), Meal(name = "Meal 2"),Meal(name="Meal 3"))
+    val mealTemplate: List<Meal> = listOf(Meal(name = "Meal 1"), Meal(name = "Meal 2"),Meal(name="Meal 3")),
+    val lastSyncTime: Long = 0,
+    val isGuestLogged: Boolean = false,
+    val customDiets: List<Diet> = emptyList()
 )

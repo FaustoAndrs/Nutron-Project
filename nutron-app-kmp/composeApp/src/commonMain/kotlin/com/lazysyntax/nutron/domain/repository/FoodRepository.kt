@@ -14,4 +14,8 @@ FoodRepository {
     suspend fun getSavedFoodByCode(code: String): Food?
     suspend fun deleteFood(code: String)
     suspend fun searchSavedFoodByName(name: String): List<Food>
+
+    suspend fun downloadAndSyncFoods(): Boolean
+    suspend fun syncPendingFoods(): Int? // Retorna cuántas se sincronizaron
+    fun getUnsyncedFoodsCount(): Flow<Int>?
 }

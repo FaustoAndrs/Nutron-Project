@@ -28,9 +28,9 @@ class FoodRemoteDataSource(
         }
     }
 
-    suspend fun getFoodsByUser(userId: String): List<FoodDto> {
+    suspend fun getFoodsByUser(): List<FoodDto> {
         return try {
-            val response = client.get("$BASE_URL/user/$userId") {
+            val response = client.get("$BASE_URL/me") {
                 contentType(ContentType.Application.Json)
             }
             if (response.status == HttpStatusCode.OK) {

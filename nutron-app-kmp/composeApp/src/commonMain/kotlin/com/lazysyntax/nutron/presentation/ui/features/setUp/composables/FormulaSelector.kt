@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.lazysyntax.nutron.presentation.ui.features.setUp.Gender
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.pow
@@ -114,19 +115,21 @@ enum class LineMuscularMassFormula(val label: String) {
     }
 }
 object Calculator {
+
     // Ratio Metabolismo Basal
     fun calculateBMR(
         weight: Double,
         height: Double,
         age: Int,
-        gender: String,
+        gender: Gender,
         fatPercentage: Double = 0.0,
         formulaLabel: String
     ): Double {
         val formula = MetabolicFormula.fromLabel(formulaLabel)
+
         return when (formula) {
             MetabolicFormula.HARRIS_BENEDICT -> {
-                if (gender.lowercase() == "male") {
+                if (gender == Gender.MAN) {
                     66.47 + (13.75 * weight) + (5.003 * height) - (6.755 * age)
                 } else {
                     655.1 + (9.563 * weight) + (1.85 * height) - (4.676 * age)
@@ -134,16 +137,18 @@ object Calculator {
             }
 
             MetabolicFormula.MIFFLIN_ST_JEOR -> {
-                val s = if (gender.lowercase() == "male") 5 else -161
+                val s = if (gender == Gender.MAN) 5 else -161
                 (10 * weight) + (6.25 * height) - (5 * age) + s
             }
 
             MetabolicFormula.KATCH_MCARDLE -> {
-                // Esta requiere porcentaje de grasa, si no está definida, se devuelve Mifflin-St-Jeor
-                if (fatPercentage == 0.0) {
-                    370 + (21.6 * (fatPercentage * weight))
+                if (fatPercentage > 0.0) {
+                    val lbm = weight * (1 - fatPercentage / 100.0)
+                    370 + (21.6 * lbm)
                 } else {
-                    (10 * weight) + (6.25 * height) - (5 * age)
+                    // Fallback to Mifflin-St-Jeor if fat percentage is not available
+                    val s = if (gender == Gender.MAN) 5 else -161
+                    (10 * weight) + (6.25 * height) - (5 * age) + s
                 }
             }
         }
@@ -152,13 +157,13 @@ object Calculator {
     fun calculateIMMM(
         weight: Double,
         height: Double,
-        gender: String,
+        gender: Gender,
         formulaLabel: String
     ): Double {
         val formula = LineMuscularMassFormula.fromLabel(formulaLabel)
         return when (formula) {
             LineMuscularMassFormula.BOER -> {
-                if (gender.lowercase() == "male") {
+                if (gender == Gender.MAN) {
                     (1.10 * weight) - 128 * (weight / height).pow(2)
                 } else {
                     (1.07 * weight) - 148 * (weight / height).pow(2)
@@ -167,7 +172,7 @@ object Calculator {
             }
 
             LineMuscularMassFormula.JAMES -> {
-                if (gender.lowercase() == "male") {
+                if (gender == Gender.MAN) {
                     (0.407 * weight) + (0.267 * height) - 19.2//height en Cm
                 } else {
                     (0.252 * weight) + (0.473 * height) - 48.3
@@ -182,9 +187,9 @@ object Calculator {
         weight: Double,
         height: Double,
         age: Int,
-        gender: String,
+        gender: Gender,
     ): Double {
-        return if (gender.lowercase() == "male") {
+        return if (gender == Gender.MAN) {
             66.47 + (13.75 * weight) + (5.003 * height) - (6.755 * age)
         } else {
             655.1 + (9.563 * weight) + (1.85 * height) - (4.676 * age)
@@ -198,7 +203,7 @@ object Calculator {
         Obesidad: 30.0 o más
     */
     fun calculateBMI(weight: Double, heightCm: Double): Double {
-        val height = heightCm / 100
+        val height = if (heightCm > 0) heightCm / 100 else 1.0 // Evitar división por cero
         return weight / (height.pow(2))
     }
 
@@ -207,15 +212,15 @@ object Calculator {
         leanBodyMassKg: Double,
         totalWeightKg: Double
     ): Double {
-        return (leanBodyMassKg / totalWeightKg) * 100
+        return if (totalWeightKg > 0) (leanBodyMassKg / totalWeightKg) * 100 else 0.0
     }
 
     fun calculateFatPercentage(
         bmi: Double,
         age: Int,
-        gender: String
+        gender: Gender
     ): Double {
-        val genderFactor = if (gender.lowercase() == "male") 1.0 else 0.0
+        val genderFactor = if (gender == Gender.MAN) 1.0 else 0.0
         return (1.20 * bmi) + (0.23 * age) - (10.8 * genderFactor) - 5.4
     }
 
@@ -226,15 +231,8 @@ object Calculator {
         return bmr * activityFactor
     }
 
-    fun calculateEB(value: Double, goal: String): Double {
-        return when(goal){
-            "Lose weight" -> value * 0.8
-            "Gain weight" -> value * 1.2
-            "Maintain weight" -> value
-            else -> value
-        }
-
-
+    fun calculateEB(value: Double, goalFactor: Double): Double {
+        return value * goalFactor
     }
 
 }

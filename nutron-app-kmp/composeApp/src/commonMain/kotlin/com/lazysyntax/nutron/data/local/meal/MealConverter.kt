@@ -32,7 +32,7 @@ fun Meal.toSnapshotEntities(mealId: String = ""): List<MealFoodSnapshotEntity> {
 fun Food.toSnapshotEntity(mealId: String): MealFoodSnapshotEntity {
     return MealFoodSnapshotEntity(
         mealId = mealId,
-        foodId = id,
+        foodId = id!!,
         name = name ?: nameEs ?: nameEn,
         barcode = barcode,
         nutriments = nutriments?.toEntity()

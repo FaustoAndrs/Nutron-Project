@@ -6,13 +6,14 @@ import com.lazysyntax.nutron.presentation.ui.features.setUp.SetUpUiState
 import com.lazysyntax.nutron.presentation.ui.features.targets.TargetsUiState
 import com.lazysyntax.nutron.domain.models.TargetDto
 import com.lazysyntax.nutron.domain.models.UserSetup
+import com.lazysyntax.nutron.presentation.ui.features.setUp.Gender
 
 fun SetUpUiState.toUserSetupEntity(): UserSetup {
     return UserSetup(
         weight = weight,
         height = height,
         age = age,
-        gender = gender,
+        gender = gender.name,
         activity = activity.name,
         goal = goal.name,
         formula = formula,
@@ -32,7 +33,7 @@ fun UserSetupResponse.toSetupUiState(): SetUpUiState {
         weight = weight,
         height = height,
         age = age,
-        gender = gender,
+        gender = Gender.valueOf(gender),
         activity = getActivity(activity),
         goal = getGoal(goal),
         formula = formula,
@@ -43,6 +44,7 @@ fun UserSetupResponse.toSetupUiState(): SetUpUiState {
 sealed class SyncResult {
     object Success : SyncResult()     // 200 OK
     object NotFound : SyncResult()    // 404 - Usuario nuevo sin settings
+    object NetworkError : SyncResult() // Error de conexión
     object Error : SyncResult()       // Otros errores (Timeout, 500, etc)
 }
 

@@ -10,6 +10,7 @@ import com.lazysyntax.nutron.data.local.NutronDatabase
 import com.lazysyntax.nutron.data.remote.BASE_HOST
 import com.lazysyntax.nutron.data.remote.NetworkConstants
 import com.lazysyntax.nutron.data.remote.authentication.AuthRepository
+import com.lazysyntax.nutron.data.remote.authentication.RefreshTokenRequest
 import com.lazysyntax.nutron.data.remote.authentication.SessionManager
 import com.lazysyntax.nutron.data.remote.authentication.TokenResponse
 import com.lazysyntax.nutron.data.remote.openFoodFactsApi.OpenFoodFactService
@@ -62,7 +63,8 @@ val appModule = module {
     single { 
         SessionManager(
             encryptedSettings = get(named("encrypted")),
-            commonSettings = get(named("common"))
+            commonSettings = get(named("common")),
+            database = get()
         ) 
     }
 
@@ -108,8 +110,8 @@ val appModule = module {
                             // Usamos el cliente interno para la petición de refresh
                             val response = client.post("${NetworkConstants.AUTH_BASE_URL}/auth/refresh") {
                                 contentType(ContentType.Application.Json)
-                                setBody(oldTokens?.refreshToken)
-                                markAsRefreshTokenRequest() 
+                                setBody(RefreshTokenRequest(oldTokens?.refreshToken!!))
+                                markAsRefreshTokenRequest()
                             }
 
                             when (response.status) {
@@ -188,7 +190,7 @@ val appModule = module {
     single<MealRepository> { MealRepositoryImpl(get(), get(), get(), get()) }
     single<UserRepository> { UserRepositoryImpl(get(), get()) }
     single { AuthRepository(get(), get()) }
-    single { SyncRepositoryImpl(get(), get()) }
+    single { SyncRepositoryImpl(get(), get(), get(),get()) }
 
     // ViewModels
     viewModelOf(::LoginViewModel)

@@ -12,6 +12,7 @@ sealed interface LibraryEvent {
     object OnClickSearchProduct : LibraryEvent
     data class ProductSelected(val product: Food) : LibraryEvent
     data class SelectedMeal(val meal: Meal) : LibraryEvent
+    data class OnError(val message: String) : LibraryEvent
     object OnClickBack : LibraryEvent
 
 }
