@@ -428,10 +428,8 @@ fun SummaryCardsBox(
                 Spacer(Modifier.width(4.dp))
                 Text(
                     text = summaryLabel,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold
                 )
             }
             Row(
@@ -442,28 +440,24 @@ fun SummaryCardsBox(
                     Text(
                         "Media",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = MaterialTheme.typography.labelSmall.fontSize * 0.8
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
                         "${average.roundToInt()} $unit",
                         style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = MaterialTheme.typography.bodySmall.fontSize * 0.9
+                        fontWeight = FontWeight.Bold
                     )
                 }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(horizontalAlignment = Alignment.Start) {
                     Text(
                         "Total",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = MaterialTheme.typography.labelSmall.fontSize * 0.8
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
                         "${total.roundToInt()} $unit",
                         style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = MaterialTheme.typography.bodySmall.fontSize * 0.9
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
