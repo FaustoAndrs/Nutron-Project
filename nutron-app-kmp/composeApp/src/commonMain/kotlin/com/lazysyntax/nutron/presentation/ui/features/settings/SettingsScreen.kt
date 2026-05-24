@@ -294,7 +294,7 @@ fun SettingsScreen(
             }
             item {
                 SettingsSection {
-
+                        println("DEBUG GUEST STATUS : ${uiState.isGuestLogged}")
                     if (uiState.isGuestLogged) {
                         ListItem(
                             headlineContent = {

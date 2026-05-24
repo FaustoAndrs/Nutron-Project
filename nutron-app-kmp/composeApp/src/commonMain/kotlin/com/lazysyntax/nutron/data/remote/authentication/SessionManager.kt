@@ -133,22 +133,39 @@ class SessionManager(
     fun setLanguage(lang: String) {
         val currentPrefs = getUserPreferences()
         val newPrefs = currentPrefs.copy(language = lang)
-        commonSettings.encodeValue(userPreferencesSerializer, USER_PREFERENCES_KEY, newPrefs)
-        _language.value = lang
-        println("LANG: New language: ${language.value}")
+        try {
+            val jsonString = json.encodeToString(userPreferencesSerializer, newPrefs)
+            commonSettings.putString(USER_PREFERENCES_KEY, jsonString)
+            _language.value = lang
+            println("LANG: New language: ${language.value}")
+        } catch (e: Exception) {
+            println("SESSION ERROR: Error saving language: ${e.message}")
+        }
     }
 
     fun setDarkTheme(enabled: Boolean) {
         val currentPrefs = getUserPreferences()
         val newPrefs = currentPrefs.copy(isDarkTheme = enabled)
-        commonSettings.encodeValue(userPreferencesSerializer, USER_PREFERENCES_KEY, newPrefs)
-        _isDarkTheme.value = enabled
+        try {
+            val jsonString = json.encodeToString(userPreferencesSerializer, newPrefs)
+            commonSettings.putString(USER_PREFERENCES_KEY, jsonString)
+            _isDarkTheme.value = enabled
+        } catch (e: Exception) {
+            println("SESSION ERROR: Error saving dark theme: ${e.message}")
+        }
     }
+
     fun setGuestLogin(logged: Boolean) {
         val currentPrefs = getUserPreferences()
         val newPrefs = currentPrefs.copy(isGuestLogged = logged)
-        commonSettings.encodeValue(userPreferencesSerializer, USER_PREFERENCES_KEY, newPrefs)
-        _isGuestLogged.value = logged
+        try {
+            val jsonString = json.encodeToString(userPreferencesSerializer, newPrefs)
+            commonSettings.putString(USER_PREFERENCES_KEY, jsonString)
+            _isGuestLogged.value = logged
+            println("SESSION DEBUG: Guest login set to $logged and persisted.")
+        } catch (e: Exception) {
+            println("SESSION ERROR: Error saving guest login: ${e.message}")
+        }
     }
 
     fun saveCustomDiet(diet: Diet) {
@@ -183,8 +200,13 @@ class SessionManager(
     fun updateMealTemplate(template: List<Meal>) {
         val currentPrefs = getUserPreferences()
         val newPrefs = currentPrefs.copy(mealTemplate = template)
-        commonSettings.encodeValue(userPreferencesSerializer, USER_PREFERENCES_KEY, newPrefs)
-        _mealTemplate.value = template
+        try {
+            val jsonString = json.encodeToString(userPreferencesSerializer, newPrefs)
+            commonSettings.putString(USER_PREFERENCES_KEY, jsonString)
+            _mealTemplate.value = template
+        } catch (e: Exception) {
+            println("SESSION ERROR: Error updating meal template: ${e.message}")
+        }
     }
     fun logout() {
         encryptedSettings.remove(AUTH_SESSION_KEY)

@@ -160,11 +160,12 @@ val appModule = module {
         val sessionManager: SessionManager = get()
         val userData = sessionManager.getCurrentUserData()
         val isLoggedIn = sessionManager.isLoggedIn()
+        val isGuest = sessionManager.isGuestLogged.value
         
-        println("NAV DEBUG: isLoggedIn=$isLoggedIn, height='${userData.height}'")
+        println("NAV DEBUG: isLoggedIn=$isLoggedIn, isGuest=$isGuest, height='${userData.height}'")
 
         val initialRoute = when {
-            !isLoggedIn -> Route.Login
+            !isLoggedIn && !isGuest -> Route.Login
             else -> Route.Diary
         }
         println("NAV DEBUG: Ruta inicial decidida -> $initialRoute")
