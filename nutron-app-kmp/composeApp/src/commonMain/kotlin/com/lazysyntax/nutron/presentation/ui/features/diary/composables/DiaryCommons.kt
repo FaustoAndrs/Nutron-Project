@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -66,7 +68,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
-import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -74,6 +75,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.lazysyntax.nutron.domain.models.Food
 import com.lazysyntax.nutron.domain.models.Meal
+import com.lazysyntax.nutron.domain.models.Nutriments
+import com.lazysyntax.nutron.presentation.theme.CaloriesIndexColor
+import com.lazysyntax.nutron.presentation.theme.CarbohydratesIndexColor
+import com.lazysyntax.nutron.presentation.theme.FatsIndexColor
+import com.lazysyntax.nutron.presentation.theme.ProteinsIndexColor
 import com.lazysyntax.nutron.presentation.theme.Theme
 import com.lazysyntax.nutron.presentation.ui.features.diary.DiaryEvent
 import com.lazysyntax.nutron.presentation.ui.features.diary.DiaryUiState
@@ -442,45 +448,61 @@ fun MealCard(
                                                 modifier = Modifier.fillMaxWidth()
                                                     .padding(vertical = 4.dp),
                                                 horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
                                             ) {
                                                 Text(
                                                     text = product.name ?: "Producto desconocido",
                                                     style = MaterialTheme.typography.bodyMedium,
                                                     fontWeight = FontWeight.Bold,
                                                     modifier = Modifier.weight(1f),
-                                                    overflow = TextOverflow.Clip,
+                                                    overflow = TextOverflow.Ellipsis,
                                                     maxLines = 1
-
                                                 )
+                                                Spacer(Modifier.width(8.dp))
                                                 Text(
+                                                    color = CaloriesIndexColor,
                                                     textAlign = TextAlign.End,
                                                     text = "Cal:${product.nutriments?.calories?.toInt() ?: "Na"}",
-                                                    modifier = Modifier.weight(4f),
                                                     style = MaterialTheme.typography.bodyMedium,
-                                                    overflow = TextOverflow.Clip
+                                                    fontWeight = FontWeight.Bold,
+                                                    maxLines = 1
                                                 )
 
                                             }
                                             Row(
                                                 modifier = Modifier.fillMaxWidth()
                                                     .padding(vertical = 4.dp),
-                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                verticalAlignment = Alignment.CenterVertically
                                             ) {
                                                 Text(
-                                                    text = "${product.nutriments?.quantity ?: "Na"} ${product.nutriments?.quantityUnit}",
+                                                    text = "${product.brands} ${product.nutriments?.quantity ?: "Na"} ${product.nutriments?.quantityUnit}",
                                                     style = MaterialTheme.typography.bodySmall,
                                                     modifier = Modifier.weight(1f),
-                                                    overflow = TextOverflow.Clip
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    maxLines = 1
                                                 )
-                                                Text(
-                                                    textAlign = TextAlign.End,
-                                                    text = "C:${product.nutriments?.carbs ?: "Na"}  " +
-                                                            "P:${product.nutriments?.proteins ?: "Na"}  " +
-                                                            "F:${product.nutriments?.fat ?: "Na"}",
-                                                    style = MaterialTheme.typography.bodyMedium,
-                                                    modifier = Modifier.weight(4f),
-                                                    overflow = TextOverflow.Clip
-                                                )
+
+                                                Row(
+                                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    NutrientMiniText(
+                                                        label = "C",
+                                                        value = product.nutriments?.carbs,
+                                                        color = CarbohydratesIndexColor
+                                                    )
+                                                    NutrientMiniText(
+                                                        label = "P",
+                                                        value = product.nutriments?.proteins,
+                                                        color = ProteinsIndexColor
+                                                    )
+                                                    NutrientMiniText(
+                                                        label = "F",
+                                                        value = product.nutriments?.fat,
+                                                        color = FatsIndexColor
+                                                    )
+                                                }
                                             }
                                         }
                                     }
@@ -497,23 +519,35 @@ fun MealCard(
                 }
             }
 
-            Row(
+            @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+            FlowRow(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(shape = RoundedCornerShape(100.dp))
-                    .background(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                content = {
-                    MacroItem("Proteins", productCount.proteins.toInt(), Modifier.weight(1f))
-                    MacroItem(
-                        "Carbohydrates",
-                        productCount.carbohydrates.toInt(),
-                        Modifier.weight(1f)
-                    )
-                    MacroItem("Fats", productCount.fats.toInt(), Modifier.weight(1f))
-                    MacroItem("Calories", productCount.calories.toInt(), Modifier.weight(1f))
-                }
-            )
+                    .clip(shape = RoundedCornerShape(12.dp))
+                    .background(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)).padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.Center,
+                maxItemsInEachRow = 4
+            ) {
+                MacroItem(
+                    label = "Proteins",
+                    shortLabel = "Prot.",
+                    value = productCount.proteins.toInt(),
+                )
+                MacroItem(
+                    label = "Carbohydrates",
+                    shortLabel = "Carbs.",
+                    value = productCount.carbohydrates.toInt(),
+                )
+                MacroItem(
+                    label = "Fats",
+                    shortLabel = "Fats",
+                    value = productCount.fats.toInt(),
+                )
+                MacroItem(
+                    label = "Calories",
+                    shortLabel = "Kcal.",
+                    value = productCount.calories.toInt(),
+                )
+            }
             //Spacer( modifier = Modifier.height(16.dp))
             Button(
                 colors = ButtonDefaults.buttonColors().copy(
@@ -538,24 +572,47 @@ fun MealCard(
     }
 }
 
+@Composable
+fun NutrientMiniText(
+    label: String,
+    value: Double?,
+    color: Color
+) {
+    Text(
+        text = "$label:${value?.toInt() ?: "Na"}",
+        color = color,
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.Bold,
+        maxLines = 1,
+        overflow = TextOverflow.Visible,
+        softWrap = false
+    )
+}
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun MacroItem(label: String, value: Int, modifier: Modifier = Modifier) {
+fun MacroItem(
+    label: String,
+    value: Int,
+    modifier: Modifier = Modifier,
+    shortLabel: String? = null
+) {
     Column(
-        modifier = modifier.padding(vertical = 12.dp, horizontal = 4.dp),
+        modifier = modifier.padding(vertical = 8.dp, horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = "$value",
-            style = MaterialTheme.typography.bodySmall,
-            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
         Text(
             textAlign = TextAlign.Center,
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
+            text = shortLabel ?: label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -572,7 +629,7 @@ fun LibrarySearchBar(
     onQueryChanged: (String) -> Unit,
     onCleanQuery: () -> Unit,
     placeholder: String = ""
-    ) {
+) {
     // Controls expansion state of the search bar
     //var expanded by rememberSaveable { mutableStateOf(false) }
 
@@ -646,7 +703,18 @@ fun SearchBarPrev() {
             Food(
                 name = "Pan",
             ), Food(
-                name = "Leche",
+                name = "Leche semides natada de vaca",
+                nutriments = Nutriments(
+                    quantity = "200",
+                    quantityUnit = "g",
+                    calories = 1888.0,
+                    proteins =32.3,
+                    carbs = 400.2,
+                    fat = 398.22,
+                    saturatedFat = 9.3,
+                    sugars = 0.0,
+                    salt = 0.0
+                )
             )
         )
     )

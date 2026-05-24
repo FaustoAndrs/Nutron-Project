@@ -44,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.himanshoe.charty.color.ChartyColor
@@ -58,6 +59,7 @@ import com.lazysyntax.nutron.presentation.theme.ProteinsIndexColor
 import com.lazysyntax.nutron.presentation.ui.navigation.composables.NavBar
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -151,9 +153,11 @@ fun StatisticsScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)) {
 
                 SummaryCardsBox(
+                    modifier = Modifier.weight(1f),
                     summaryLabel = "Proteínas",
                     average = uiState.averageProteins,
                     total = uiState.totalProteins,
@@ -167,10 +171,9 @@ fun StatisticsScreen(
                             )
                         )
                     }
-
-
                 )
                 SummaryCardsBox(
+                    modifier = Modifier.weight(1f),
                     summaryLabel = "Carbohidratos",
                     average = uiState.averageCarbs,
                     total = uiState.totalCarbs,
@@ -186,6 +189,7 @@ fun StatisticsScreen(
                     }
                 )
                 SummaryCardsBox(
+                    modifier = Modifier.weight(1f),
                     summaryLabel = "Grasas",
                     average = uiState.averageFats,
                     total = uiState.totalFats,
@@ -251,7 +255,7 @@ fun StatisticsScreen(
                             ),
                             modifier = Modifier
                                 .width(chartWidth)
-                                .fillMaxHeight(),
+                                .fillMaxHeight().padding(16.dp),
                             data = { chartGroups },
                             lineConfig = LineChartConfig(
 
@@ -374,6 +378,7 @@ fun SummaryCards(
 
 @Composable
 fun SummaryCardsBox(
+    modifier: Modifier = Modifier,
     summaryLabel: String,
     average: Double,
     total: Double,
@@ -387,7 +392,7 @@ fun SummaryCardsBox(
 
     Card(
         shape = RoundedCornerShape(16.dp),
-        modifier = Modifier.clip(RoundedCornerShape(16.dp)).clickable {
+        modifier = modifier.clip(RoundedCornerShape(16.dp)).clickable {
             onNutrientToggled()
         },
 
@@ -406,48 +411,59 @@ fun SummaryCardsBox(
     ) {
         Column(
             modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = 8.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Box(
                     modifier = Modifier
-                        .size(10.dp)
+                        .size(8.dp)
                         .background(color, CircleShape)
                 )
-                Spacer(Modifier.width(12.dp))
+                Spacer(Modifier.width(4.dp))
                 Text(
                     text = summaryLabel,
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceAround,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         "Media",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = MaterialTheme.typography.labelSmall.fontSize * 0.8
                     )
                     Text(
                         "${average.roundToInt()} $unit",
                         style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontSize = MaterialTheme.typography.bodySmall.fontSize * 0.9
                     )
                 }
-                Column(horizontalAlignment = Alignment.Start) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         "Total",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = MaterialTheme.typography.labelSmall.fontSize * 0.8
                     )
                     Text(
                         "${total.roundToInt()} $unit",
                         style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontSize = MaterialTheme.typography.bodySmall.fontSize * 0.9
                     )
                 }
             }
