@@ -156,6 +156,7 @@
 
     <!-- Navigation Tabs -->
     <string name="nav_profile">Perfil</string>
+    <string name="nav_diet_plan">Dieta</string>
     <string name="nav_targets">Objetivos</string>
     <string name="nav_diary">Diario</string>
     <string name="nav_settings">Ajustes</string>

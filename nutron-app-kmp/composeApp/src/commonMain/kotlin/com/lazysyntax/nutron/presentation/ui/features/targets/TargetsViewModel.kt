@@ -74,6 +74,7 @@ class TargetsViewModel(
             }
 
             TargetsEvent.OnNavigateToStatistics -> navigator.navigateTo(Route.Statistics)
+            TargetsEvent.OnNavigateToProfile -> navigator.navigateTo(Route.Profile)
         }
     }
 

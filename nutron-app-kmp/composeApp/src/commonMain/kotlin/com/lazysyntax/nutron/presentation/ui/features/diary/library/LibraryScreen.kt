@@ -23,11 +23,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -173,7 +174,8 @@ fun LibraryContent(
                 onCleanSearch = { onProductChanged("") },
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier.fillMaxHeight().padding(padding)
@@ -306,71 +308,74 @@ fun LibraryContent(
                         // Lista de resultados
                         LazyColumn(
                             modifier = Modifier.fillMaxSize()
-                                .weight(1f) // weight(1f) para que ocupe el espacio sobrante
+                                .weight(1f),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(results) { product ->
-                                Column(modifier = Modifier.fillMaxWidth().clickable {
-                                    onProductSelected(product)
-                                    focusManager.clearFocus()
-                                }.padding(horizontal = 16.dp, vertical = 12.dp)) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.Top
-                                    ) {
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Text(
-                                                text = product.name ?: "Producto sin nombre",
-                                                style = MaterialTheme.typography.titleMedium,
-                                                fontWeight = FontWeight.Bold,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                            if (!product.brands.isNullOrBlank()) {
+                                Card(
+                                    modifier = Modifier.fillMaxWidth().clickable {
+                                        onProductSelected(product)
+                                        focusManager.clearFocus()
+                                    },
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                                ) {
+                                    Column(modifier = Modifier.padding(16.dp)) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.Top
+                                        ) {
+                                            Column(modifier = Modifier.weight(1f)) {
                                                 Text(
-                                                    text = product.brands,
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.secondary
+                                                    text = product.name ?: "Producto sin nombre",
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    fontWeight = FontWeight.Bold,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
                                                 )
+                                                if (!product.brands.isNullOrBlank()) {
+                                                    Text(
+                                                        text = product.brands,
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.secondary
+                                                    )
+                                                }
                                             }
+
+                                            Text(
+                                                text = "${product.nutriments?.calories ?: 0.0} kcal",
+                                                style = MaterialTheme.typography.labelLarge,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                fontWeight = FontWeight.Bold
+                                            )
                                         }
 
-                                        Text(
-                                            text = "${product.nutriments?.calories ?: 0.0} kcal",
-                                            style = MaterialTheme.typography.labelLarge,
-                                            color = MaterialTheme.colorScheme.primary,
-                                            fontWeight = FontWeight.Bold
-                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                        ) {
+                                            MacroMiniItem(
+                                                "P",
+                                                "${product.nutriments?.proteins ?: 0.0}g",
+                                                Color(0xFFE57373)
+                                            )
+                                            MacroMiniItem(
+                                                "C",
+                                                "${product.nutriments?.carbs ?: 0.0}g",
+                                                Color(0xFFFFB74D)
+                                            )
+                                            MacroMiniItem(
+                                                "G",
+                                                "${product.nutriments?.fat ?: 0.0}g",
+                                                Color(0xFF81C784)
+                                            )
+                                        }
                                     }
-
-                                    Spacer(modifier = Modifier.height(8.dp))
-
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                    ) {
-                                        MacroMiniItem(
-                                            "P",
-                                            "${product.nutriments?.proteins ?: 0.0}g",
-                                            Color(0xFFE57373)
-                                        )
-                                        MacroMiniItem(
-                                            "C",
-                                            "${product.nutriments?.carbs ?: 0.0}g",
-                                            Color(0xFFFFB74D)
-                                        )
-                                        MacroMiniItem(
-                                            "G",
-                                            "${product.nutriments?.fat ?: 0.0}g",
-                                            Color(0xFF81C784)
-                                        )
-                                    }
-
-                                    HorizontalDivider(
-                                        modifier = Modifier.padding(top = 12.dp),
-                                        thickness = 0.5.dp,
-                                        color = MaterialTheme.colorScheme.outlineVariant
-                                    )
                                 }
                             }
                         }

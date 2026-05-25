@@ -9,4 +9,5 @@ sealed interface TargetsEvent {
     object OnEditMealsDistribution : TargetsEvent
     data class OnClickBack(val fromSignUp: Boolean) : TargetsEvent
     object OnNavigateToStatistics : TargetsEvent
+    object OnNavigateToProfile : TargetsEvent
 }

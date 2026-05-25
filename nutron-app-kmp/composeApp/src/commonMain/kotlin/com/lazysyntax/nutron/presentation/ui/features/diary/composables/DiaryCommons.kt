@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DatePicker
@@ -244,7 +245,8 @@ fun MacroProgressBar(
     target: Double,
     unit: String,
     color: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showLabels: Boolean = true
 ) {
     val progressValue = if (target > 0) (current / target).toFloat().coerceIn(0f, 1.1f) else 0f
     val animatedProgress by animateFloatAsState(
@@ -254,23 +256,27 @@ fun MacroProgressBar(
     )
 
     Column(modifier = modifier.padding(4.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Bottom
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "${current.toInt()} / ${target.toInt()} $unit",
-                style = MaterialTheme.typography.labelSmall,
-                color = if (current > target) MaterialTheme.colorScheme.error else Color.Unspecified
-            )
+        androidx.compose.animation.AnimatedVisibility(visible = showLabels) {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "${current.toInt()} / ${target.toInt()} $unit",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (current > target) MaterialTheme.colorScheme.error else Color.Unspecified
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+            }
         }
-        Spacer(modifier = Modifier.height(4.dp))
         LinearProgressIndicator(
             progress = { animatedProgress.coerceIn(0f, 1f) },
             modifier = Modifier
@@ -329,11 +335,13 @@ fun MealCard(
     val productCount = meal.calculateMacros()
     var showNutriments = rememberSaveable { mutableStateOf(true) }
 
-    ElevatedCard(
-        modifier = modifier.fillMaxWidth().padding(8.dp),
-        colors = CardDefaults.cardColors().copy(
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
-        )
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {   // Título de la comida (ej. Desayuno)
         Column(
             modifier = Modifier.fillMaxWidth()

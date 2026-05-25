@@ -34,4 +34,6 @@ sealed interface Route : NavKey {
 
     @Serializable
     data object Statistics : Route
+    @Serializable
+    data object DietPlan : Route
 }

@@ -164,7 +164,7 @@ class SetUpViewModel(
                 }
             }
         }
-        navigator.resetTo(route = Route.Profile)
+        navigator.resetTo(route = Route.Targets)
     }
 
     fun onBack(fromSignUp: Boolean) {

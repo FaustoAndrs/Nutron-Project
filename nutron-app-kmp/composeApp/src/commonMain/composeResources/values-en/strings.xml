@@ -152,6 +152,7 @@
 
     <!-- Navigation Tabs -->
     <string name="nav_profile">Profile</string>
+    <string name="nav_diet_plan">Diet</string>
     <string name="nav_targets">Targets</string>
     <string name="nav_diary">Diary</string>
     <string name="nav_settings">Settings</string>

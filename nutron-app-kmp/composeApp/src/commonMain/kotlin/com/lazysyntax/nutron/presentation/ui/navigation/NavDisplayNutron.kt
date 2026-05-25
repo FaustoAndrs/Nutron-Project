@@ -10,6 +10,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.lazysyntax.nutron.presentation.ui.features.diary.DiaryScreen
 import com.lazysyntax.nutron.presentation.ui.features.diary.library.LibraryScreen
 import com.lazysyntax.nutron.presentation.ui.features.diary.macros.MacrosScreen
+import com.lazysyntax.nutron.presentation.ui.features.dietPlan.DietScreen
 import com.lazysyntax.nutron.presentation.ui.features.login.LoginScreen
 import com.lazysyntax.nutron.presentation.ui.features.login.signUp.SignUpScreen
 import com.lazysyntax.nutron.presentation.ui.features.profile.ProfileScreen
@@ -63,7 +64,7 @@ fun NavDisplayNutron() {
                     }
                 )
 
-
+                Route.DietPlan -> DietScreen()
             }
         }
     }

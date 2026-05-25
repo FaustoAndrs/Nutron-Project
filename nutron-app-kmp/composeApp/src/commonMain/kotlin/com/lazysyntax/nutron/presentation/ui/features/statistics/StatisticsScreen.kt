@@ -79,7 +79,8 @@ fun StatisticsScreen(
                 }
             )
         },
-        bottomBar = { NavBar() }
+        bottomBar = { NavBar() },
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -319,8 +320,9 @@ fun SummaryCards(
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            containerColor = MaterialTheme.colorScheme.surface
         ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(
@@ -391,14 +393,15 @@ fun SummaryCardsBox(
 
 
     Card(
-        shape = RoundedCornerShape(16.dp),
-        modifier = modifier.clip(RoundedCornerShape(16.dp)).clickable {
+        shape = RoundedCornerShape(12.dp),
+        modifier = modifier.clip(RoundedCornerShape(12.dp)).clickable {
             onNutrientToggled()
         },
 
-        colors = CardDefaults.cardColors().copy(
+        colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
 
         border = BorderStroke(
             width = if (isSelected) 2.dp else 0.dp,

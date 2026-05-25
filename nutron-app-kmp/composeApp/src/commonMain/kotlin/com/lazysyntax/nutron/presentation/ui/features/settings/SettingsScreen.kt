@@ -82,7 +82,7 @@ fun SettingsScreen(
     Scaffold(
         topBar = { TopAppBarCommon(stringResource(Res.string.title_settings)) },
         bottomBar = { NavBar() },
-        containerColor = MaterialTheme.colorScheme.background // Fondo neutro para resaltar las tarjetas
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         if (uiState.showLogoutConfirmation) {
             AlertDialog(
@@ -394,7 +394,7 @@ fun SettingsSection(
         Card(
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                containerColor = MaterialTheme.colorScheme.surface
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {

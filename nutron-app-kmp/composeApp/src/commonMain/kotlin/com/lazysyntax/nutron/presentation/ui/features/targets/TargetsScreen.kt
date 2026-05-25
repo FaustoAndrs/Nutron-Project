@@ -61,6 +61,7 @@ import com.lazysyntax.nutron.presentation.theme.ProteinsIndexColor
 import com.lazysyntax.nutron.presentation.ui.features.targets.composables.Diet
 import com.lazysyntax.nutron.presentation.ui.features.targets.composables.DietSelector
 import com.lazysyntax.nutron.presentation.ui.navigation.composables.NavBar
+import com.lazysyntax.nutron.presentation.ui.navigation.composables.TargetTopAppBar
 import com.lazysyntax.nutron.presentation.ui.navigation.composables.TopAppBarCommon
 import nutron.composeapp.generated.resources.Res
 import nutron.composeapp.generated.resources.label_carbs
@@ -92,7 +93,8 @@ fun TargetsScreen(
         onAddCustomDiet = { viewModel.onTargetsEvent(TargetsEvent.OnAddCustomDiet(it)) },
         diets = diets,
         selectedDiet = uiState.diet,
-        onNavigateToStatistics = { viewModel.onTargetsEvent(TargetsEvent.OnNavigateToStatistics)}
+        onNavigateToStatistics = { viewModel.onTargetsEvent(TargetsEvent.OnNavigateToStatistics)},
+        onNavigateToProfile = { viewModel.onTargetsEvent(TargetsEvent.OnNavigateToProfile)},
     )
 }
 
@@ -108,6 +110,7 @@ fun TargetsContent(
     proteins: Int?,
     carbs: Int?,
     onNavigateToStatistics: ()  -> Unit,
+    onNavigateToProfile: () -> Unit
 
     ) {
     val scope = rememberCoroutineScope()
@@ -117,8 +120,9 @@ fun TargetsContent(
 
 
     Scaffold(
-        topBar = { TopAppBarCommon(stringResource(Res.string.title_targets)) },
-        bottomBar = { NavBar() }
+        topBar = { TargetTopAppBar(stringResource(Res.string.title_targets), onNavigateToProfile) },
+        bottomBar = { NavBar() },
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -142,10 +146,10 @@ fun TargetsContent(
 
             Card(
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                        alpha = 0.35f
-                    )
+                    containerColor = MaterialTheme.colorScheme.surface
                 ),
+                shape = RoundedCornerShape(12.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                 modifier = Modifier.fillMaxWidth().padding(8.dp),
             ) {
                 Column(
@@ -297,11 +301,11 @@ fun CardDietStat(
             .clickable(
                 onClick = onClick
             ),
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                alpha = 0.45f
-            )
+            containerColor = MaterialTheme.colorScheme.surface
         ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         content = {
 
             Row(
@@ -365,11 +369,11 @@ fun CardTargetStat(
 
         Card(
             modifier = modifier.fillMaxWidth().padding(8.dp),
+            shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                    alpha = 0.45f
-                )
+                containerColor = MaterialTheme.colorScheme.surface
             ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
             content = {
 
                 Row(

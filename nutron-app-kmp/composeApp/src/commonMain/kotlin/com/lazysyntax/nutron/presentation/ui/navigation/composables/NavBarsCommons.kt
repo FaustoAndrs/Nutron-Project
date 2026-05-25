@@ -21,6 +21,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.lazysyntax.nutron.domain.repository.MealRepository
@@ -29,7 +32,9 @@ import com.lazysyntax.nutron.presentation.ui.navigation.Route
 import nutron.composeapp.generated.resources.Res
 import nutron.composeapp.generated.resources.button_back
 import nutron.composeapp.generated.resources.diary
+import nutron.composeapp.generated.resources.diet
 import nutron.composeapp.generated.resources.nav_diary
+import nutron.composeapp.generated.resources.nav_diet_plan
 import nutron.composeapp.generated.resources.nav_profile
 import nutron.composeapp.generated.resources.nav_settings
 import nutron.composeapp.generated.resources.nav_targets
@@ -51,14 +56,16 @@ fun NavBar() { // Sin parámetros
 
     val items = remember {
         listOf(
-            Triple(Route.Profile, Res.string.nav_profile, Res.drawable.profile),
+            //Triple(Route.Profile, Res.string.nav_profile, Res.drawable.profile),
             Triple(Route.Targets, Res.string.nav_targets, Res.drawable.targets),
+            Triple(Route.DietPlan, Res.string.nav_diet_plan, Res.drawable.diet),
             Triple(Route.Diary, Res.string.nav_diary, Res.drawable.diary),
             Triple(Route.Settings, Res.string.nav_settings, Res.drawable.settings)
         )
     }
 
     NavigationBar(
+        modifier = Modifier.shadow(elevation = 12.dp),
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp
     ) {
@@ -122,4 +129,25 @@ fun TopAppBarWhitBackButtonCommon(
             }
         },
         scrollBehavior = scrollBehavior
+    )
+
+@Composable
+fun TargetTopAppBar(
+    title: String,
+    onNavigate: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+) =
+    CenterAlignedTopAppBar(
+
+        title = { Text(text = title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+        navigationIcon = {
+            IconButton(onClick = onNavigate) {
+                Icon(
+                    imageVector = vectorResource(Res.drawable.profile),
+                    contentDescription = stringResource(Res.string.button_back)
+                )
+            }
+        },
+        scrollBehavior = scrollBehavior
+
     )

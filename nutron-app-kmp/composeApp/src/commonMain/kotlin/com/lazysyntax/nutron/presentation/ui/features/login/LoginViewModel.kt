@@ -101,7 +101,7 @@ class LoginViewModel(
                 when (syncResult) {
                     SyncResult.Success -> {
                         // El usuario ya tiene perfil -> Ir al Home
-                        navigator.navigateTo(Route.Profile)
+                        navigator.navigateTo(Route.Targets)
                         println("SYNC: Usuario ya tiene perfil")
                     }
                      SyncResult.NotFound -> {
@@ -128,7 +128,7 @@ class LoginViewModel(
     }
 
     fun onLoginSucces(){
-        navigator.resetTo(route = Route.Profile)
+        navigator.resetTo(route = Route.Targets)
     }
     fun onGoToSignUp(){
         navigator.navigateTo(route = Route.SignUp)
