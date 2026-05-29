@@ -1,8 +1,8 @@
 package com.lazysyntax.nutron.auth.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.lazysyntax.nutron.auth.model.User;
-import com.lazysyntax.nutron.auth.model.UserSetup;
+import com.lazysyntax.nutron.auth.model.entity.User;
+import com.lazysyntax.nutron.auth.model.entity.UserSetup;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,6 +11,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegisterRequest {
+
+    @JsonProperty("id")
+    private String uuid;
 
     @JsonProperty("userName")
     private String userName;
@@ -25,12 +28,12 @@ public class RegisterRequest {
     private String password;
 
     @JsonProperty("userSetup")
-    private UserSetupDTO userSetup;
+    private UserSetupDto userSetup;
 
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class UserSetupDTO {
+    public static class UserSetupDto {
         private String weight;
         private String height;
         private String gender;
@@ -42,6 +45,7 @@ public class RegisterRequest {
 
     public User toEntity() {
         User user = User.builder()
+                .id(this.uuid)
                 .userName(this.userName)
                 .fullName(this.fullName)
                 .email(this.email)

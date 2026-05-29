@@ -1,4 +1,4 @@
-package com.lazysyntax.nutron.auth.model;
+package com.lazysyntax.nutron.auth.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class UserSetup {
 
     @Id
-    private Long id;
+    private String id;
 
     @OneToOne // Relación uno a uno con User
     @MapsId // Indica que el ID de esta entidad es también la clave foránea de la entidad User

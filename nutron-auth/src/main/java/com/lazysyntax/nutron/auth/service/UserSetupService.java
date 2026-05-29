@@ -1,7 +1,8 @@
 package com.lazysyntax.nutron.auth.service;
 
-import com.lazysyntax.nutron.auth.model.User;
-import com.lazysyntax.nutron.auth.model.UserSetup;
+import com.lazysyntax.nutron.auth.converter.UserSetupConverter;
+import com.lazysyntax.nutron.auth.model.entity.User;
+import com.lazysyntax.nutron.auth.model.entity.UserSetup;
 import com.lazysyntax.nutron.auth.model.dto.UserSetupRequest;
 import com.lazysyntax.nutron.auth.model.dto.UserSetupResponse;
 import com.lazysyntax.nutron.auth.repository.UserRepository;
@@ -10,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.lazysyntax.nutron.auth.converter.UserSetupConverter.*;
+
 @Service
 @RequiredArgsConstructor
 public class UserSetupService {
@@ -17,58 +20,44 @@ public class UserSetupService {
     private final UserSetupRepository userSetupRepository;
     private final UserRepository userRepository;
 
+
     @Transactional
     public UserSetupResponse saveOrUpdateSetup(String userIdStr, UserSetupRequest request) {
-        Long userId = Long.parseLong(userIdStr);
-        User user = userRepository.findById(userId)
+
+        User user = userRepository.findById(userIdStr)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         UserSetup setup = user.getUserSetup();
         if (setup == null) {
-            setup = UserSetup.builder()
-                    .user(user)
-                    .weight(request.weight())
-                    .height(request.height())
-                    .gender(request.gender())
-                    .age(request.age())
-                    .activity(request.activity())
-                    .goal(request.goal())
-                    .formula(request.formula())
-                    .diet(request.diet()) // Added diet
-                    .build();
+            setup = toEntity(request, user);
             user.setUserSetup(setup);
         } else {
-            setup.setWeight(request.weight());
-            setup.setHeight(request.height());
-            setup.setGender(request.gender());
-            setup.setAge(request.age());
-            setup.setActivity(request.activity());
-            setup.setGoal(request.goal());
-            setup.setFormula(request.formula());
-            setup.setDiet(request.diet()); // Added diet
+            setup = toEntity(request, setup);
         }
 
         // Guardamos el usuario, que por cascada guardará el setup
         User savedUser = userRepository.save(user);
-        return UserSetupResponse.fromEntity(savedUser.getUserSetup());
+        return toResponse(savedUser.getUserSetup());
     }
 
     public UserSetupResponse getSetup(String userIdStr) {
-        Long userId = Long.parseLong(userIdStr);
-        User user = userRepository.findById(userId)
+
+        User user = userRepository
+                .findById(userIdStr)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         
         if (user.getUserSetup() == null) {
             return null;
         }
 
-        return UserSetupResponse.fromEntity(user.getUserSetup());
+        return toResponse(user.getUserSetup());
     }
 
     @Transactional
     public UserSetupResponse updateDiet(String userIdStr, String newDiet) {
-        Long userId = Long.parseLong(userIdStr);
-        User user = userRepository.findById(userId)
+
+        User user = userRepository
+                .findById(userIdStr)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         UserSetup setup = user.getUserSetup();
@@ -77,10 +66,7 @@ public class UserSetupService {
         }
 
         setup.setDiet(newDiet);
-        userRepository.save(user); // Save user, which cascades to UserSetup
-        return UserSetupResponse.fromEntity(setup);
+        userRepository.save(user);
+        return toResponse(setup);
     }
-
-
-
 }

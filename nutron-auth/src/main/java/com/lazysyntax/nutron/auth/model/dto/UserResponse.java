@@ -1,21 +1,24 @@
 package com.lazysyntax.nutron.auth.model.dto;
 
-import com.lazysyntax.nutron.auth.model.User;
+import com.lazysyntax.nutron.auth.converter.UserSetupConverter;
+import com.lazysyntax.nutron.auth.model.entity.User;
+import lombok.Builder;
 
+@Builder
 public record UserResponse(
-    Long id,
+    String id,
     String userName,
     String fullName,
     String email,
     UserSetupResponse userSetup
 ) {
-    public static UserResponse fromEntity(User entity) {
-        return new UserResponse(
-            entity.getId(),
-            entity.getUserName(),
-            entity.getFullName(),
-            entity.getEmail(),
-            UserSetupResponse.fromEntity(entity.getUserSetup())
-        );
+    public static UserResponse toResponse(User entity) {
+        return UserResponse.builder()
+                .id(entity.getId())
+                .userName(entity.getUserName())
+                .fullName(entity.getFullName())
+                .email(entity.getEmail())
+                .userSetup(UserSetupConverter.toResponse(entity.getUserSetup()))
+                .build();
     }
 }

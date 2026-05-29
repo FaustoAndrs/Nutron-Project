@@ -19,18 +19,19 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    @Value("${jwt.access-token-expiration:3600000}") // 1 hour
+    //@Value("${jwt.access-token-expiration:3600000}") // 1 hour
+    @Value("${jwt.access-token-expiration:120000}") // 2min DEBUG
     private long accessTokenExpiration;
 
     @Value("${jwt.refresh-token-expiration:604800000}") // 7 days
     private long refreshTokenExpiration;
 
-    public String generateAccessToken(Long userId) {
-        return buildToken(new HashMap<>(), userId.toString(), accessTokenExpiration);
+    public String generateAccessToken(String userId) {
+        return buildToken(new HashMap<>(), userId, accessTokenExpiration);
     }
 
-    public String generateRefreshToken(Long userId) {
-        return buildToken(new HashMap<>(), userId.toString(), refreshTokenExpiration);
+    public String generateRefreshToken(String userId) {
+        return buildToken(new HashMap<>(), userId, refreshTokenExpiration);
     }
 
     private String buildToken(Map<String, Object> extraClaims, String subject, long expiration) {
@@ -47,6 +48,10 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
+    private Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
@@ -61,23 +66,13 @@ public class JwtService {
     }
 
     private SecretKey getSignInKey() {
-        byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
-        return Keys.hmacShaKeyFor(keyBytes);
+
+        return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    public boolean isTokenValid(String token) {
-        try {
-            return !isTokenExpired(token);
-        } catch (Exception e) {
-            return false;
-        }
-    }
+    public boolean isTokenValid(String token) {return !isTokenExpired(token);}
 
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
-    }
-
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
     }
 }
