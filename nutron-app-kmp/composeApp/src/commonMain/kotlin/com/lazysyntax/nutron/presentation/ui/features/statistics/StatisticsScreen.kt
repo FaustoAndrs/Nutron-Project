@@ -44,7 +44,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.himanshoe.charty.color.ChartyColor
@@ -56,7 +55,22 @@ import com.lazysyntax.nutron.presentation.theme.CaloriesIndexColor
 import com.lazysyntax.nutron.presentation.theme.CarbohydratesIndexColor
 import com.lazysyntax.nutron.presentation.theme.FatsIndexColor
 import com.lazysyntax.nutron.presentation.theme.ProteinsIndexColor
-import com.lazysyntax.nutron.presentation.ui.navigation.composables.NavBar
+import com.lazysyntax.nutron.presentation.ui.navigation.composables.BottomNavBar
+import nutron.composeapp.generated.resources.Res
+import nutron.composeapp.generated.resources.label_calories
+import nutron.composeapp.generated.resources.label_carbs
+import nutron.composeapp.generated.resources.label_fats
+import nutron.composeapp.generated.resources.label_proteins
+import nutron.composeapp.generated.resources.statistics_average
+import nutron.composeapp.generated.resources.statistics_caloric_consumption
+import nutron.composeapp.generated.resources.statistics_month
+import nutron.composeapp.generated.resources.statistics_no_data
+import nutron.composeapp.generated.resources.statistics_nutritional_consumption
+import nutron.composeapp.generated.resources.statistics_three_months
+import nutron.composeapp.generated.resources.statistics_title
+import nutron.composeapp.generated.resources.statistics_total
+import nutron.composeapp.generated.resources.statistics_week
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
 
@@ -71,7 +85,7 @@ fun StatisticsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Estadísticas de Progreso") },
+                title = { Text(stringResource(Res.string.statistics_title)) },
                 navigationIcon = {
                     IconButton(onClick = { viewModel.onEvent(StatisticsEvent.OnClickBack) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -79,7 +93,7 @@ fun StatisticsScreen(
                 }
             )
         },
-        bottomBar = { NavBar() },
+        bottomBar = { BottomNavBar() },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
@@ -100,12 +114,12 @@ fun StatisticsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                "Consumo calórico",
+                stringResource(Res.string.statistics_caloric_consumption),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.align(Alignment.Start).padding(top = 16.dp)
             )
             SummaryCards(
-                summaryLabel = "Calorías",
+                summaryLabel = stringResource(Res.string.label_calories),
                 average = uiState.averageCalories,
                 total = uiState.totalCalories,
                 unit = "kcal",
@@ -138,7 +152,7 @@ fun StatisticsScreen(
             } else {
                 Box(modifier = Modifier.height(300.dp), contentAlignment = Alignment.Center) {
                     Text(
-                        "No hay datos para este periodo",
+                        stringResource(Res.string.statistics_no_data),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -147,7 +161,7 @@ fun StatisticsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                "Consumo nutricional",
+                stringResource(Res.string.statistics_nutritional_consumption),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.align(Alignment.Start)
             )
@@ -159,7 +173,7 @@ fun StatisticsScreen(
 
                 SummaryCardsBox(
                     modifier = Modifier.weight(1f),
-                    summaryLabel = "Proteínas",
+                    summaryLabel = stringResource(Res.string.label_proteins),
                     average = uiState.averageProteins,
                     total = uiState.totalProteins,
                     unit = "g",
@@ -175,7 +189,7 @@ fun StatisticsScreen(
                 )
                 SummaryCardsBox(
                     modifier = Modifier.weight(1f),
-                    summaryLabel = "Carbohidratos",
+                    summaryLabel = stringResource(Res.string.label_carbs),
                     average = uiState.averageCarbs,
                     total = uiState.totalCarbs,
                     unit = "g",
@@ -191,7 +205,7 @@ fun StatisticsScreen(
                 )
                 SummaryCardsBox(
                     modifier = Modifier.weight(1f),
-                    summaryLabel = "Grasas",
+                    summaryLabel = stringResource(Res.string.label_fats),
                     average = uiState.averageFats,
                     total = uiState.totalFats,
                     unit = "g",
@@ -271,7 +285,7 @@ fun StatisticsScreen(
             } else {
                 Box(modifier = Modifier.height(300.dp), contentAlignment = Alignment.Center) {
                     Text(
-                        "No hay datos para este periodo",
+                        stringResource(Res.string.statistics_no_data),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -289,9 +303,9 @@ fun RangeSelector(
     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
         TimeRange.entries.forEachIndexed { index, range ->
             val label = when (range) {
-                TimeRange.WEEK -> "Semana"
-                TimeRange.MONTH -> "Mes"
-                TimeRange.THREE_MONTHS -> "3 Meses"
+                TimeRange.WEEK -> stringResource(Res.string.statistics_week)
+                TimeRange.MONTH -> stringResource(Res.string.statistics_month)
+                TimeRange.THREE_MONTHS -> stringResource(Res.string.statistics_three_months)
             }
             SegmentedButton(
                 shape = SegmentedButtonDefaults.itemShape(
@@ -351,7 +365,7 @@ fun SummaryCards(
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        "Media",
+                        stringResource(Res.string.statistics_average),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -363,7 +377,7 @@ fun SummaryCards(
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        "Total",
+                        stringResource(Res.string.statistics_total),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -441,7 +455,7 @@ fun SummaryCardsBox(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        "Media",
+                        stringResource(Res.string.statistics_average),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -453,7 +467,7 @@ fun SummaryCardsBox(
                 }
                 Column(horizontalAlignment = Alignment.Start) {
                     Text(
-                        "Total",
+                        stringResource(Res.string.statistics_total),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

@@ -34,12 +34,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.lazysyntax.nutron.presentation.ui.features.setUp.Gender
-import com.lazysyntax.nutron.presentation.ui.navigation.composables.NavBar
+import com.lazysyntax.nutron.presentation.ui.navigation.composables.BottomNavBar
 import com.lazysyntax.nutron.presentation.ui.navigation.composables.TopAppBarCommon
 import kotlinx.coroutines.launch
 import nutron.composeapp.generated.resources.Res
@@ -84,7 +83,7 @@ fun ProfileContent(
 ) {
     Scaffold(
         topBar = { TopAppBarCommon(stringResource(Res.string.title_profile)) },
-        bottomBar = { NavBar() },
+        bottomBar = { BottomNavBar() },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         LazyColumn(

@@ -45,6 +45,8 @@ import nutron.composeapp.generated.resources.login_button_signup
 import nutron.composeapp.generated.resources.login_button_skip
 import nutron.composeapp.generated.resources.login_headline
 import nutron.composeapp.generated.resources.login_signup_text
+import nutron.composeapp.generated.resources.login_subline
+import nutron.composeapp.generated.resources.signup_email_field
 import nutron.composeapp.generated.resources.title_welcome
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -117,7 +119,7 @@ fun LoginContent(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Introduce tus credenciales para continuar",
+                    text = stringResource(Res.string.login_subline),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.outline
                 )
@@ -125,7 +127,7 @@ fun LoginContent(
 
             Spacer(modifier = Modifier.height(32.dp))
                 OutlinedTextFieldEmail(
-                    label = "Email",
+                    label = stringResource(Res.string.signup_email_field),
                     emailState = uiState.email,
                     validacionState = validationState.emailValidation,
                     onValueChange = emailChanged,

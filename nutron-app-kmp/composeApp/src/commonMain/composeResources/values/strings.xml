@@ -7,6 +7,7 @@
     <string name="login_signup_text">No tengo cuenta, </string>
     <string name="login_button_signup">Registrarme</string>
     <string name="login_button_skip">Continuar sin cuenta</string>
+    <string name="login_subline">Introduce tus credenciales para continuar</string>
 
     <!-- SignUp Screen -->
     <string name="title_signup">REGISTRO</string>
@@ -166,6 +167,51 @@
     <string name="button_back_start">Volver al Inicio</string>
 
     <!-- Validation -->
+    <!-- Statistics Screen -->
+    <string name="statistics_title">Estadísticas de Progreso</string>
+    <string name="statistics_caloric_consumption">Consumo calórico</string>
+    <string name="statistics_nutritional_consumption">Consumo nutricional</string>
+    <string name="statistics_average">Media</string>
+    <string name="statistics_total">Total</string>
+    <string name="statistics_no_data">No hay datos para este periodo</string>
+    <string name="statistics_week">Semana</string>
+    <string name="statistics_month">Mes</string>
+    <string name="statistics_three_months">3 Meses</string>
+
+    <!-- Diet Plan Screen -->
+    <string name="title_diet_plan">Plan de Dieta</string>
+    <string name="diet_planned_meals">Comidas Planificadas</string>
+    <string name="diet_user_profile">Perfil del Usuario</string>
+    <string name="diet_age_label">Edad</string>
+    <string name="diet_activity_label">Actividad</string>
+    <string name="diet_objective_label">Objetivo</string>
+    <string name="diet_bmr_label">BMR</string>
+    <string name="diet_nutritionist_note_title">Nota del Nutricionista</string>
+    <string name="diet_nutritionist_note_content">Este plan está diseñado para maximizar la síntesis proteica y proporcionar energía suficiente para tus entrenamientos moderados. Asegúrate de mantenerte hidratado.</string>
+
+    <string name="label_calories">Calorías</string>
+    <string name="label_proteins_short">Prot</string>
+    <string name="label_carbs_short">Carbs</string>
+
+    <string name="breakfast">Desayuno</string>
+    <string name="mid_morning">Media Mañana</string>
+    <string name="lunch">Almuerzo</string>
+    <string name="snack">Merienda</string>
+    <string name="dinner">Cena</string>
+    <string name="post_workout">Post-entreno/Resena</string>
+    <string name="pre_workout">PreEntreno</string>
+
+    <string name="diary_prev_day">Día anterior</string>
+    <string name="diary_next_day">Día siguiente</string>
+    <string name="diary_change_date">Cambiar fecha</string>
+    <string name="more_options">Más opciones</string>
+    <string name="no_name">Sin nombre</string>
+    <string name="delete">Eliminar</string>
+    <string name="unknown_product">Producto desconocido</string>
+    <string name="search">Buscar</string>
+    <string name="scan_code">Escanear código</string>
+    <string name="clean_search">Limpiar búsqueda</string>
+
     <string name="no_empty_text_string_validation">El campo no puede estar vacío</string>
 
 </resources>

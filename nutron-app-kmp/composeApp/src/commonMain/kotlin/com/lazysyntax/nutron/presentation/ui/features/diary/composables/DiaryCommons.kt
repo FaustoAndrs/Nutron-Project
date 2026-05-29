@@ -89,8 +89,24 @@ import nutron.composeapp.generated.resources.Res
 import nutron.composeapp.generated.resources.add_check
 import nutron.composeapp.generated.resources.barcode_scanner_24px
 import nutron.composeapp.generated.resources.button_back
+import nutron.composeapp.generated.resources.clean_search
+import nutron.composeapp.generated.resources.delete
+import nutron.composeapp.generated.resources.diary_change_date
+import nutron.composeapp.generated.resources.diary_next_day
+import nutron.composeapp.generated.resources.diary_prev_day
 import nutron.composeapp.generated.resources.empty_meal
+import nutron.composeapp.generated.resources.label_calories
+import nutron.composeapp.generated.resources.label_carbs
+import nutron.composeapp.generated.resources.label_fats
+import nutron.composeapp.generated.resources.label_proteins
 import nutron.composeapp.generated.resources.library_button_add_product
+import nutron.composeapp.generated.resources.library_button_search_barcode
+import nutron.composeapp.generated.resources.more_options
+import nutron.composeapp.generated.resources.no_name
+import nutron.composeapp.generated.resources.scan_code
+import nutron.composeapp.generated.resources.search
+import nutron.composeapp.generated.resources.unknown_product
+import nutron.composeapp.generated.resources.pre_workout
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 
@@ -123,7 +139,7 @@ fun LibraryTopAppBar(
         }, actions = {
             IconButton(onClick = {}) {
                 Icon(
-                    imageVector = Icons.Filled.MoreVert, contentDescription = "More options"
+                    imageVector = Icons.Filled.MoreVert, contentDescription = stringResource(Res.string.more_options)
                 )
             }
 
@@ -149,7 +165,7 @@ fun DiaryTopAppBar(
                     IconButton(onClick = { onEvent(DiaryEvent.OnClickPreviousDay) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
-                            contentDescription = "Día anterior"
+                            contentDescription = stringResource(Res.string.diary_prev_day)
                         )
                     }
                     Column(
@@ -163,7 +179,7 @@ fun DiaryTopAppBar(
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(
-                            text = "Cambiar fecha",
+                            text = stringResource(Res.string.diary_change_date),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -171,17 +187,18 @@ fun DiaryTopAppBar(
                     IconButton(onClick = { onEvent(DiaryEvent.OnClickNextDay) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                            contentDescription = "Día siguiente"
+                            contentDescription = stringResource(Res.string.diary_next_day)
                         )
                     }
                 }
             )
         },
         actions = {
-            IconButton(onClick = { onEvent(DiaryEvent.OnAddMeal(Meal(name = "PreEntreno"))) }) {
+            val preWorkoutName = stringResource(Res.string.pre_workout)
+            IconButton(onClick = { onEvent(DiaryEvent.OnAddMeal(Meal(name = preWorkoutName))) }) {
                 Icon(
                     imageVector = Icons.Default.MoreVert,
-                    contentDescription = "Más opciones"
+                    contentDescription = stringResource(Res.string.more_options)
                 )
             }
         },
@@ -354,7 +371,7 @@ fun MealCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     content = {
                         Text(
-                            text = meal.name ?: "Sin nombre",
+                            text = meal.name ?: stringResource(Res.string.no_name),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -441,7 +458,7 @@ fun MealCard(
                                         ) {
                                             Icon(
                                                 Icons.Default.Delete,
-                                                contentDescription = "Eliminar",
+                                                contentDescription = stringResource(Res.string.delete),
                                                 tint = Color.White
                                             )
                                         }
@@ -459,7 +476,7 @@ fun MealCard(
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
                                                 Text(
-                                                    text = product.name ?: "Producto desconocido",
+                                                    text = product.name ?: stringResource(Res.string.unknown_product),
                                                     style = MaterialTheme.typography.bodyMedium,
                                                     fontWeight = FontWeight.Bold,
                                                     modifier = Modifier.weight(1f),
@@ -536,27 +553,27 @@ fun MealCard(
                 maxItemsInEachRow = 4
             ) {
                 MacroItem(
-                    label = "Proteins",
+                    label = stringResource(Res.string.label_proteins),
                     shortLabel = "Prot.",
                     value = productCount.proteins.toInt(),
                 )
                 MacroItem(
-                    label = "Carbohydrates",
+                    label = stringResource(Res.string.label_carbs),
                     shortLabel = "Carbs.",
                     value = productCount.carbohydrates.toInt(),
                 )
                 MacroItem(
-                    label = "Fats",
+                    label = stringResource(Res.string.label_fats),
                     shortLabel = "Fats",
                     value = productCount.fats.toInt(),
                 )
                 MacroItem(
-                    label = "Calories",
+                    label = stringResource(Res.string.label_calories),
                     shortLabel = "Kcal.",
                     value = productCount.calories.toInt(),
                 )
             }
-            //Spacer( modifier = Modifier.height(16.dp))
+
             Button(
                 colors = ButtonDefaults.buttonColors().copy(
                     containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
@@ -672,7 +689,7 @@ fun LibrarySearchBar(
                         IconButton(onClick = onSearch) {
                             Icon(
                                 imageVector = Icons.Default.Search,
-                                contentDescription = "Escanear código"
+                                contentDescription = stringResource(Res.string.scan_code)
                             )
                         }
                     },
@@ -682,14 +699,14 @@ fun LibrarySearchBar(
                                 IconButton(onClick = onCleanQuery, content = {
                                     Icon(
                                         imageVector = Icons.Default.Close,
-                                        contentDescription = "Limpiar búsqueda"
+                                        contentDescription = stringResource(Res.string.clean_search)
                                     )
                                 })
                             }
                             IconButton(onClick = onScanBarcode) {
                                 Icon(
                                     imageVector = vectorResource(Res.drawable.barcode_scanner_24px),
-                                    contentDescription = "Escanear código"
+                                    contentDescription = stringResource(Res.string.scan_code)
                                 )
                             }
                         }

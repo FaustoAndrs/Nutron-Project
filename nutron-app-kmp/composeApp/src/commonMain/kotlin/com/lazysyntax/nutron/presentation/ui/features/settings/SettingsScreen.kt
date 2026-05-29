@@ -42,10 +42,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.lazysyntax.nutron.presentation.ui.navigation.composables.NavBar
+import com.lazysyntax.nutron.presentation.ui.navigation.composables.BottomNavBar
 import com.lazysyntax.nutron.presentation.ui.navigation.composables.TopAppBarCommon
 import nutron.composeapp.generated.resources.Res
-import nutron.composeapp.generated.resources.barcode_scanner_24px
 import nutron.composeapp.generated.resources.create_account
 import nutron.composeapp.generated.resources.diary
 import nutron.composeapp.generated.resources.settings_button_language
@@ -81,7 +80,7 @@ fun SettingsScreen(
 
     Scaffold(
         topBar = { TopAppBarCommon(stringResource(Res.string.title_settings)) },
-        bottomBar = { NavBar() },
+        bottomBar = { BottomNavBar() },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         if (uiState.showLogoutConfirmation) {

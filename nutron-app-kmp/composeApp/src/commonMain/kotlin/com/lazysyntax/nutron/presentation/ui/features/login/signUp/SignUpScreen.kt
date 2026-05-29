@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.lazysyntax.nutron.presentation.ui.composables.OutlinedTextFieldEmail
 import com.lazysyntax.nutron.presentation.ui.composables.OutlinedTextFieldPassword
 import com.lazysyntax.nutron.presentation.ui.composables.OutlinedTextFieldWithErrorState
-import com.lazysyntax.nutron.presentation.ui.navigation.composables.TopAppBarWhitBackButtonCommon
+import com.lazysyntax.nutron.presentation.ui.navigation.composables.TopAppBarWithBack
 import nutron.composeapp.generated.resources.Res
 import nutron.composeapp.generated.resources.signup_button_continue
 import nutron.composeapp.generated.resources.signup_email_field
@@ -39,7 +39,6 @@ import nutron.composeapp.generated.resources.signup_name_field
 import nutron.composeapp.generated.resources.signup_passwd_field
 import nutron.composeapp.generated.resources.signup_subline
 import org.jetbrains.compose.resources.InternalResourceApi
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -77,7 +76,7 @@ fun SignUpContent(
     val scrollState = rememberScrollState()
     val focusManager = LocalFocusManager.current
     Scaffold(
-        topBar = { TopAppBarWhitBackButtonCommon("", onBack) },
+        topBar = { TopAppBarWithBack("", onBack) },
         containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
     ) { padding ->
         Column(
@@ -150,7 +149,7 @@ fun SignUpContent(
                 )
 
                 OutlinedTextFieldEmail(
-                    label = "Email",
+                    label = stringResource(Res.string.signup_email_field),
                     emailState = uiState.email,
                     validacionState = validationState.emailValidation,
                     onValueChange = emailChangeded,
@@ -164,7 +163,7 @@ fun SignUpContent(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 OutlinedTextFieldPassword(
-                    label = "Contraseña",
+                    label = stringResource(Res.string.signup_passwd_field),
                     passwordState = uiState.password,
                     validacionState = validationState.passwordValidation,
                     onValueChange = passwordChanged,

@@ -218,7 +218,7 @@ class SessionManager(
             try {
                 database.foodDao().clearAll()
                 database.mealDao().clearAll()
-                println("SESSION DEBUG: Base de datos limpiada correctamente.")
+                println("SESSION DEBUG: Base de datos borrada correctamente.")
             } catch (e: Exception) {
                 println("SESSION ERROR: Error al limpiar la base de datos: ${e.message}")
             }

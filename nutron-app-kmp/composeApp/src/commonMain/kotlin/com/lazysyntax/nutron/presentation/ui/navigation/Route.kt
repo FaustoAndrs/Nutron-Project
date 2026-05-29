@@ -3,6 +3,10 @@ package com.lazysyntax.nutron.presentation.ui.navigation
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 
+/**
+ * **NAVIGATION:** Definición de destinos de la aplicación.
+ * Implementa NavKey para ser compatible con Navigation 3 y @Serializable para el manejo de argumentos.
+ */
 @Serializable
 sealed interface Route : NavKey {
     @Serializable

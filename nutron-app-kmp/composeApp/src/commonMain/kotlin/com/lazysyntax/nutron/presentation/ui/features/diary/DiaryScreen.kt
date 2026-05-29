@@ -1,8 +1,6 @@
 package com.lazysyntax.nutron.presentation.ui.features.diary
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,10 +12,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -26,9 +22,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.lazysyntax.nutron.presentation.theme.CaloriesIndexColor
 import com.lazysyntax.nutron.presentation.theme.CarbohydratesIndexColor
@@ -41,7 +34,13 @@ import com.lazysyntax.nutron.presentation.ui.features.diary.composables.MealCard
 import com.lazysyntax.nutron.presentation.ui.features.diary.composables.calculateMacros
 import com.lazysyntax.nutron.presentation.ui.features.diary.composables.calculateTargetGrams
 
-import com.lazysyntax.nutron.presentation.ui.navigation.composables.NavBar
+import com.lazysyntax.nutron.presentation.ui.navigation.composables.BottomNavBar
+import nutron.composeapp.generated.resources.Res
+import nutron.composeapp.generated.resources.label_calories
+import nutron.composeapp.generated.resources.label_carbs_short
+import nutron.composeapp.generated.resources.label_fats
+import nutron.composeapp.generated.resources.label_proteins_short
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 
@@ -76,7 +75,7 @@ fun DiaryContent(
                 onEvent = onDiaryEvent
             )
         },
-        bottomBar = { NavBar() },
+        bottomBar = { BottomNavBar() },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
@@ -103,7 +102,7 @@ fun DiaryContent(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     MacroProgressBar(
-                        label = "Calorías",
+                        label = stringResource(Res.string.label_calories),
                         current = totalMacros.calories,
                         target = targetMacros.calories,
                         unit = "kcal",
@@ -116,7 +115,7 @@ fun DiaryContent(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         MacroProgressBar(
-                            label = "Prot",
+                            label = stringResource(Res.string.label_proteins_short),
                             current = totalMacros.proteins,
                             target = targetMacros.proteins,
                             unit = "g",
@@ -125,7 +124,7 @@ fun DiaryContent(
                             showLabels = showLabels
                         )
                         MacroProgressBar(
-                            label = "Carbs",
+                            label = stringResource(Res.string.label_carbs_short),
                             current = totalMacros.carbohydrates,
                             target = targetMacros.carbohydrates,
                             unit = "g",
@@ -134,7 +133,7 @@ fun DiaryContent(
                             showLabels = showLabels
                         )
                         MacroProgressBar(
-                            label = "Grasas",
+                            label = stringResource(Res.string.label_fats),
                             current = totalMacros.fats,
                             target = targetMacros.fats,
                             unit = "g",

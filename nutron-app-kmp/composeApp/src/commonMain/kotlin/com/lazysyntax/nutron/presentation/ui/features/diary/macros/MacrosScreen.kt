@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -35,9 +34,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.lazysyntax.nutron.presentation.ui.features.diary.DiaryViewModel
 import com.lazysyntax.nutron.presentation.ui.features.diary.composables.MacroProgressBar
-import com.lazysyntax.nutron.presentation.ui.navigation.composables.TopAppBarWhitBackButtonCommon
-import nutron.composeapp.generated.resources.Res
-import org.jetbrains.compose.resources.stringResource
+import com.lazysyntax.nutron.presentation.ui.navigation.composables.TopAppBarWithBack
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,9 +48,9 @@ fun MacrosScreen(
 
     Scaffold(
         topBar = {
-            TopAppBarWhitBackButtonCommon(
+            TopAppBarWithBack(
                 title = uiState.selectedMeal?.name ?: "Detalle del Producto",
-                onBack = { viewModel.onMacrosEvent(MacrosEvent.OnClickBack) }
+                onNavigationClick = { viewModel.onMacrosEvent(MacrosEvent.OnClickBack) }
             )
         }) { padding ->
         Column(

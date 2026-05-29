@@ -30,15 +30,21 @@ import com.lazysyntax.nutron.presentation.ui.navigation.Route.Statistics
 import com.lazysyntax.nutron.presentation.ui.navigation.Route.Targets
 import org.koin.compose.koinInject
 
+/**
+ * **NAVIGATION:** Componente principal de visualización.
+ * Conecta el estado del Navigator con el componente NavDisplay de Navigation 3.
+ */
 @Composable
 fun NavDisplayNutron() {
     val navigator: Navigator = koinInject()
 
+    // NavDisplay observa el backstack y gestiona las transiciones entre pantallas.
     NavDisplay(backStack = navigator.backstack, transitionSpec = {
         fadeIn(animationSpec = tween(200)) togetherWith fadeOut(animationSpec = tween(200))
     }, popTransitionSpec = {
         fadeIn(animationSpec = tween(200)) togetherWith fadeOut(animationSpec = tween(200))
     }) { route ->
+        // NavEntry mapea cada objeto de ruta a su Screen correspondiente.
         NavEntry(route) {
             when (route) {
                 Login -> LoginScreen()

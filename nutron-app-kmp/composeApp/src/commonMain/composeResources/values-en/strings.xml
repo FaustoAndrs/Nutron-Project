@@ -7,6 +7,7 @@
     <string name="login_signup_text">No account?</string>
     <string name="login_button_signup">Sign Up</string>
     <string name="login_button_skip">Continue as Guest</string>
+    <string name="login_subline">Enter your credentials to continue</string>
 
     <!-- SignUp Screen -->
     <string name="title_signup">SIGN UP</string>
@@ -162,6 +163,51 @@
     <string name="button_back_start">Back to Start</string>
 
     <!-- Validation -->
+    <!-- Statistics Screen -->
+    <string name="statistics_title">Progress Statistics</string>
+    <string name="statistics_caloric_consumption">Caloric Consumption</string>
+    <string name="statistics_nutritional_consumption">Nutritional Consumption</string>
+    <string name="statistics_average">Average</string>
+    <string name="statistics_total">Total</string>
+    <string name="statistics_no_data">No data for this period</string>
+    <string name="statistics_week">Week</string>
+    <string name="statistics_month">Month</string>
+    <string name="statistics_three_months">3 Months</string>
+
+    <!-- Diet Plan Screen -->
+    <string name="title_diet_plan">Diet Plan</string>
+    <string name="diet_planned_meals">Planned Meals</string>
+    <string name="diet_user_profile">User Profile</string>
+    <string name="diet_age_label">Age</string>
+    <string name="diet_activity_label">Activity</string>
+    <string name="diet_objective_label">Objective</string>
+    <string name="diet_bmr_label">BMR</string>
+    <string name="diet_nutritionist_note_title">Nutritionist Note</string>
+    <string name="diet_nutritionist_note_content">This plan is designed to maximize protein synthesis and provide enough energy for your moderate workouts. Make sure to stay hydrated.</string>
+
+    <string name="label_calories">Calories</string>
+    <string name="label_proteins_short">Prot</string>
+    <string name="label_carbs_short">Carbs</string>
+
+    <string name="breakfast">Breakfast</string>
+    <string name="mid_morning">Mid Morning</string>
+    <string name="lunch">Lunch</string>
+    <string name="snack">Snack</string>
+    <string name="dinner">Dinner</string>
+    <string name="post_workout">Post-workout</string>
+    <string name="pre_workout">Pre-Workout</string>
+
+    <string name="diary_prev_day">Previous day</string>
+    <string name="diary_next_day">Next day</string>
+    <string name="diary_change_date">Change date</string>
+    <string name="more_options">More options</string>
+    <string name="no_name">No name</string>
+    <string name="delete">Delete</string>
+    <string name="unknown_product">Unknown product</string>
+    <string name="search">Search</string>
+    <string name="scan_code">Scan code</string>
+    <string name="clean_search">Clear search</string>
+
     <string name="no_empty_text_string_validation">The field cannot be empty</string>
 
 </resources>

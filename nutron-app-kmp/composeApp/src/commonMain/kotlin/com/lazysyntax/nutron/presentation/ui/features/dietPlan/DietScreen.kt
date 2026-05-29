@@ -30,10 +30,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.lazysyntax.nutron.presentation.ui.navigation.composables.NavBar
+import com.lazysyntax.nutron.presentation.ui.navigation.composables.BottomNavBar
 import com.lazysyntax.nutron.presentation.ui.navigation.composables.TopAppBarCommon
 import nutron.composeapp.generated.resources.Res
+import nutron.composeapp.generated.resources.breakfast
 import nutron.composeapp.generated.resources.diet
+import nutron.composeapp.generated.resources.diet_activity_label
+import nutron.composeapp.generated.resources.diet_age_label
+import nutron.composeapp.generated.resources.diet_bmr_label
+import nutron.composeapp.generated.resources.diet_nutritionist_note_content
+import nutron.composeapp.generated.resources.diet_nutritionist_note_title
+import nutron.composeapp.generated.resources.diet_objective_label
+import nutron.composeapp.generated.resources.diet_planned_meals
+import nutron.composeapp.generated.resources.diet_user_profile
+import nutron.composeapp.generated.resources.dinner
+import nutron.composeapp.generated.resources.lunch
+import nutron.composeapp.generated.resources.mid_morning
+import nutron.composeapp.generated.resources.post_workout
+import nutron.composeapp.generated.resources.profile_height_label
+import nutron.composeapp.generated.resources.profile_weight_label
+import nutron.composeapp.generated.resources.snack
+import nutron.composeapp.generated.resources.title_diet_plan
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,9 +59,9 @@ import org.jetbrains.compose.resources.vectorResource
 fun DietScreen() {
     Scaffold(
         topBar = {
-            TopAppBarCommon(title = "Plan de Dieta")
+            TopAppBarCommon(title = stringResource(Res.string.title_diet_plan))
         },
-        bottomBar = { NavBar() },
+        bottomBar = { BottomNavBar() },
         containerColor = MaterialTheme.colorScheme.background // iOS background color (SystemGroupedBackground)
     ) { padding ->
         LazyColumn(
@@ -59,7 +77,7 @@ fun DietScreen() {
 
             item {
                 Text(
-                    text = "Comidas Planificadas",
+                    text = stringResource(Res.string.diet_planned_meals),
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Bold,
                         fontSize = 22.sp
@@ -98,7 +116,7 @@ fun UserProfileHeader() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Perfil del Usuario",
+                    text = stringResource(Res.string.diet_user_profile),
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
                 Box(
@@ -120,15 +138,15 @@ fun UserProfileHeader() {
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             
             Row(modifier = Modifier.fillMaxWidth()) {
-                InfoColumn(label = "Peso", value = "89 kg", modifier = Modifier.weight(1f))
-                InfoColumn(label = "Altura", value = "193 cm", modifier = Modifier.weight(1f))
-                InfoColumn(label = "Edad", value = "34 años", modifier = Modifier.weight(1f))
+                InfoColumn(label = stringResource(Res.string.profile_weight_label), value = "89 kg", modifier = Modifier.weight(1f))
+                InfoColumn(label = stringResource(Res.string.profile_height_label), value = "193 cm", modifier = Modifier.weight(1f))
+                InfoColumn(label = stringResource(Res.string.diet_age_label), value = "34 años", modifier = Modifier.weight(1f))
             }
             
             Row(modifier = Modifier.fillMaxWidth()) {
-                InfoColumn(label = "Actividad", value = "Moderado", modifier = Modifier.weight(1f))
-                InfoColumn(label = "Objetivo", value = "Ganar músculo", modifier = Modifier.weight(1f))
-                InfoColumn(label = "BMR", value = "2026 kcal", modifier = Modifier.weight(1f))
+                InfoColumn(label = stringResource(Res.string.diet_activity_label), value = "Moderado", modifier = Modifier.weight(1f))
+                InfoColumn(label = stringResource(Res.string.diet_objective_label), value = "Ganar músculo", modifier = Modifier.weight(1f))
+                InfoColumn(label = stringResource(Res.string.diet_bmr_label), value = "2026 kcal", modifier = Modifier.weight(1f))
             }
         }
     }
@@ -170,7 +188,7 @@ fun MealItem(meal: DemoMeal) {
                     color = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    text = meal.name,
+                    text = stringResource(meal.name),
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
@@ -204,11 +222,11 @@ fun NutritionistNote() {
             .padding(8.dp)
     ) {
         Text(
-            text = "Nota del Nutricionista",
+            text = stringResource(Res.string.diet_nutritionist_note_title),
             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
         )
         Text(
-            text = "Este plan está diseñado para maximizar la síntesis proteica y proporcionar energía suficiente para tus entrenamientos moderados. Asegúrate de mantenerte hidratado.",
+            text = stringResource(Res.string.diet_nutritionist_note_content),
             style = MaterialTheme.typography.bodySmall,
             color = Color.Gray
         )
@@ -217,7 +235,7 @@ fun NutritionistNote() {
 
 data class DemoMeal(
     val time: String,
-    val name: String,
+    val name: org.jetbrains.compose.resources.StringResource,
     val description: String,
     val calories: Int,
     val protein: Int,
@@ -226,10 +244,10 @@ data class DemoMeal(
 )
 
 val demoMeals = listOf(
-    DemoMeal("08:00", "Desayuno", "Gachas de avena con proteína en polvo y arándanos", 450, 30, 50, 10),
-    DemoMeal("11:00", "Media Mañana", "Yogur griego con nueces y miel", 250, 20, 15, 12),
-    DemoMeal("14:00", "Almuerzo", "Pechuga de pollo a la plancha con arroz integral y brócoli", 600, 45, 60, 15),
-    DemoMeal("17:00", "Merienda", "Batido de proteínas y una manzana", 200, 25, 20, 2),
-    DemoMeal("20:00", "Cena", "Salmón al horno con boniato y espárragos", 550, 40, 40, 20),
-    DemoMeal("23:00", "Post-entreno/Resena", "Queso cottage con almendras", 200, 25, 5, 8)
+    DemoMeal("08:00", Res.string.breakfast, "Gachas de avena con proteína en polvo y arándanos", 450, 30, 50, 10),
+    DemoMeal("11:00", Res.string.mid_morning, "Yogur griego con nueces y miel", 250, 20, 15, 12),
+    DemoMeal("14:00", Res.string.lunch, "Pechuga de pollo a la plancha con arroz integral y brócoli", 600, 45, 60, 15),
+    DemoMeal("17:00", Res.string.snack, "Batido de proteínas y una manzana", 200, 25, 20, 2),
+    DemoMeal("20:00", Res.string.dinner, "Salmón al horno con boniato y espárragos", 550, 40, 40, 20),
+    DemoMeal("23:00", Res.string.post_workout, "Queso cottage con almendras", 200, 25, 5, 8)
 )

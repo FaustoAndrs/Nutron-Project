@@ -66,7 +66,7 @@ import androidx.compose.ui.unit.dp
 import com.lazysyntax.nutron.presentation.ui.features.setUp.composables.ActivitySelector
 import com.lazysyntax.nutron.presentation.ui.features.setUp.composables.BMRSelector
 import com.lazysyntax.nutron.presentation.ui.features.setUp.composables.GoalSelector
-import com.lazysyntax.nutron.presentation.ui.navigation.composables.TopAppBarWhitBackButtonCommon
+import com.lazysyntax.nutron.presentation.ui.navigation.composables.TopAppBarWithBack
 import com.lazysyntax.nutron.presentation.utilities.validation.Validation
 import nutron.composeapp.generated.resources.Res
 import nutron.composeapp.generated.resources.setup_age_label
@@ -135,9 +135,9 @@ fun SetupContent(
     val focusManager = LocalFocusManager.current
     Scaffold(
         topBar = {
-            TopAppBarWhitBackButtonCommon(
+            TopAppBarWithBack(
                 title = stringResource(Res.string.title_setup),
-                onBack = onClickBack
+                onNavigationClick = onClickBack
             )
         }
     ) { padding ->

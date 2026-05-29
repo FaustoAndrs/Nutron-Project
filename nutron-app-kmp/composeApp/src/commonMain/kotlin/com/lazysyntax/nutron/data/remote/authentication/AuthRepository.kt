@@ -18,8 +18,7 @@ class AuthRepository(
     private val client: HttpClient,
     private val sessionManager: SessionManager
 ) {
-
-    private val BASE_URL = "${NetworkConstants.AUTH_BASE_URL}/auth" // para el emulador de Android
+    private val BASE_URL = "${NetworkConstants.AUTH_BASE_URL}/auth"
 
     suspend fun login(email: String, password: String): AuthResult {
         return try {

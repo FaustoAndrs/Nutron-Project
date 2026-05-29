@@ -26,7 +26,6 @@ class MealRepositoryImpl(
     private val mealDao: MealDao,
     private val sessionManager: SessionManager,
     private val mealRemoteDataSource: MealRemoteDataSource,
-    private val foodRemoteDataSource: FoodRemoteDataSource
 ) : MealRepository {
 
     override suspend fun createMeal(name: String, foods: List<Food>) {
@@ -59,10 +58,10 @@ class MealRepositoryImpl(
         mealEntity: MealEntity,
         snapshots: List<MealFoodSnapshotEntity>
     ) {
-        // 1. Local insert
+        // 1. Insert en Local
         mealDao.insertMealWithSnapshots(mealEntity, snapshots)
 
-        // 2. Remote sync
+        // 2. Insert en Remoto
         val mealWithFoods = MealWithFoods(mealEntity, snapshots)
         val isSynced = mealRemoteDataSource.saveMeal(mealWithFoods.toDto())
 

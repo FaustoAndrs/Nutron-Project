@@ -65,10 +65,14 @@ import dev.icerock.moko.permissions.compose.BindEffect
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
 import nutron.composeapp.generated.resources.Res
 import nutron.composeapp.generated.resources.button_back
+import nutron.composeapp.generated.resources.label_calories
+import nutron.composeapp.generated.resources.library_button_search_barcode
 import nutron.composeapp.generated.resources.library_error_barcode_not_found
 import nutron.composeapp.generated.resources.library_error_scanner_failed
 import nutron.composeapp.generated.resources.library_no_results
 import nutron.composeapp.generated.resources.library_search_placeholder
+import nutron.composeapp.generated.resources.nav_diary
+import nutron.composeapp.generated.resources.search
 import nutron.composeapp.generated.resources.title_library
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -192,7 +196,7 @@ fun LibraryContent(
                 onScanBarcode = onShowScanner,
                 onQueryChanged = onProductChanged,
                 onCleanQuery = { onProductChanged("") },
-                placeholder = "Search"
+                placeholder = stringResource(Res.string.search)
             )
 
             if (showBarBarcodeSearch.value) {
@@ -205,7 +209,7 @@ fun LibraryContent(
                     onScanBarcode = onShowScanner,
                     onQueryChanged = onBarcodeChanded,
                     onCleanQuery = { onBarcodeChanded("") },
-                    placeholder = "Search by Barcode"
+                    placeholder = stringResource(Res.string.library_button_search_barcode)
                 )
             }
 
@@ -221,7 +225,7 @@ fun LibraryContent(
                         onSearchSourceChanged(SearchSource.LOCAL)
                         focusManager.clearFocus()
                     },
-                    label = { Text("Mi Librería") },
+                    label = { Text(stringResource(Res.string.nav_diary)) },
                     shape = RoundedCornerShape(20.dp),
                     leadingIcon = if (uiState.searchSource == SearchSource.LOCAL) {
                         {
@@ -240,7 +244,7 @@ fun LibraryContent(
                         if (uiState.productName.isNotBlank())onSearchProduct()
                         focusManager.clearFocus()
                     },
-                    label = { Text("Buscar en la Red") },
+                    label = { Text(stringResource(Res.string.search)) },
                     shape = RoundedCornerShape(20.dp),
                     leadingIcon = if (uiState.searchSource == SearchSource.API) {
                         {
@@ -346,7 +350,7 @@ fun LibraryContent(
                                             }
 
                                             Text(
-                                                text = "${product.nutriments?.calories ?: 0.0} kcal",
+                                                text = "${product.nutriments?.calories ?: 0.0} ${stringResource(Res.string.label_calories).lowercase()}",
                                                 style = MaterialTheme.typography.labelLarge,
                                                 color = MaterialTheme.colorScheme.primary,
                                                 fontWeight = FontWeight.Bold

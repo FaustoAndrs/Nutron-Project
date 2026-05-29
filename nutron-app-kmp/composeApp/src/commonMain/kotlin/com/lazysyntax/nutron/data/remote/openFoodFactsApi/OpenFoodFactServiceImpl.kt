@@ -7,7 +7,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 
 class OpenFoodFactsServiceImpl(private val client: HttpClient) : OpenFoodFactService {
-    private val userAgent = "NutronApp - Android - Version 1.0 - Contact: fausto1884@gmail.com"
+    private val userAgent = "NutronApp - Android - Version 1.0 - Contact: fauchicar@alu.edu.gva.es"
     private val fields = "code,product_name,product_name_es,product_name_en,nutriments,nutriscore_grade,brands"
 
     override suspend fun fetchFoodByBarcode(barcode: String): Food? {

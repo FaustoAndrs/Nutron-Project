@@ -22,9 +22,7 @@ import kotlin.time.Clock
 @Preview
 fun App() {
     val sessionManager: SessionManager = koinInject()
-    // Observamos un estado que cambie al hacer logout
     val authSession by sessionManager.authSession.collectAsState()
-
     val language by sessionManager.language.collectAsState()
     val isDarkTheme by sessionManager.isDarkTheme.collectAsState()
 
@@ -38,7 +36,7 @@ fun App() {
     }
 
     Theme(darkTheme = isDarkTheme) {
-        key(sessionKey) { // Importa androidx.compose.runtime.key
+        key(sessionKey) {
             NavDisplayNutron()
         }
     }

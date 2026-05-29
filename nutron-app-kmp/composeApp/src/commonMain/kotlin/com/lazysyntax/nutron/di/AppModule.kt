@@ -5,7 +5,7 @@ import com.lazysyntax.nutron.data.repository.FoodRepositoryImpl
 import com.lazysyntax.nutron.domain.repository.MealRepository
 import com.lazysyntax.nutron.data.repository.MealRepositoryImpl
 import com.lazysyntax.nutron.domain.repository.UserRepository
-import com.lazysyntax.nutron.data.repository.UserRepositoryImpl
+import com.lazysyntax.nutron.data.repository.UserSetupRepositoryImpl
 import com.lazysyntax.nutron.data.local.NutronDatabase
 import com.lazysyntax.nutron.data.remote.BASE_HOST
 import com.lazysyntax.nutron.data.remote.NetworkConstants
@@ -72,7 +72,7 @@ val appModule = module {
         val sessionManager: SessionManager = get()
 
         HttpClient {
-            install(Logging) {
+            install(Logging)     {
                 logger = object : Logger {
                     override fun log(message: String) {
                         println("HTTP Client: $message")
@@ -94,7 +94,6 @@ val appModule = module {
                         val accessToken = sessionManager.getAccessToken()
                         val refreshToken = sessionManager.getRefreshToken()
 
-                        // DEBUG: Esto te dirá qué usuario cree la app que está activo justo antes de enviar
                         val userId = sessionManager.getUserId()
                         println("AUTH DEBUG: Cargando token para el usuario ID: $userId")
 
@@ -150,7 +149,7 @@ val appModule = module {
             }
             defaultRequest {
                 url {
-                    protocol = URLProtocol.HTTP // Cambiado a HTTP para desarrollo local si es necesario, o manten HTTPS
+                    protocol = URLProtocol.HTTP
                 }
             }
         }
@@ -158,17 +157,16 @@ val appModule = module {
     //Navigation
     single<Navigator> {
         val sessionManager: SessionManager = get()
-        val userData = sessionManager.getCurrentUserData()
         val isLoggedIn = sessionManager.isLoggedIn()
         val isGuest = sessionManager.isGuestLogged.value
         
-        println("NAV DEBUG: isLoggedIn=$isLoggedIn, isGuest=$isGuest, height='${userData.height}'")
+        println("NAV DEBUG: isLoggedIn=$isLoggedIn, isGuest=$isGuest")
 
         val initialRoute = when {
             !isLoggedIn && !isGuest -> Route.Login
             else -> Route.Diary
         }
-        println("NAV DEBUG: Ruta inicial decidida -> $initialRoute")
+        println("NAV DEBUG: Ruta inicial -> $initialRoute")
         DefaultNavigator(initialRoute = initialRoute)
     }
 
@@ -188,8 +186,8 @@ val appModule = module {
 
     // Repositories
     single<FoodRepository> { FoodRepositoryImpl(get(), get(), get(), get()) }
-    single<MealRepository> { MealRepositoryImpl(get(), get(), get(), get()) }
-    single<UserRepository> { UserRepositoryImpl(get(), get()) }
+    single<MealRepository> { MealRepositoryImpl(get(), get(), get()) }
+    single<UserRepository> { UserSetupRepositoryImpl(get(), get()) }
     single { AuthRepository(get(), get()) }
     single { SyncRepositoryImpl(get(), get(), get(),get()) }
 
@@ -200,8 +198,6 @@ val appModule = module {
     viewModelOf(::ProfileViewModel)
     viewModelOf(::TargetsViewModel)
     viewModelOf(::DiaryViewModel)
-    //viewModelOf(::LibraryViewModel)
-    //viewModelOf(::MacrosViewModel)
     viewModelOf(::SettingsViewModel)
     viewModelOf(::StatisticsViewModel)
 }

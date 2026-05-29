@@ -8,7 +8,7 @@ import com.lazysyntax.nutron.domain.models.TargetDto
 import com.lazysyntax.nutron.domain.models.UserSetup
 import com.lazysyntax.nutron.presentation.ui.features.setUp.Gender
 
-fun SetUpUiState.toUserSetupEntity(): UserSetup {
+fun SetUpUiState.toUserSetupDto(): UserSetup {
     return UserSetup(
         weight = weight,
         height = height,
@@ -21,12 +21,7 @@ fun SetUpUiState.toUserSetupEntity(): UserSetup {
     )
 }
 
-fun TargetsUiState.toTargetDto(): TargetDto {
-    return TargetDto(
-        diet = diet.name
-    )
-}
-
+fun TargetsUiState.toTargetDto(): TargetDto = TargetDto(diet = diet.name)
 
 fun UserSetupResponse.toSetupUiState(): SetUpUiState {
     return SetUpUiState(
@@ -34,34 +29,9 @@ fun UserSetupResponse.toSetupUiState(): SetUpUiState {
         height = height,
         age = age,
         gender = Gender.valueOf(gender),
-        activity = getActivity(activity),
-        goal = getGoal(goal),
+        activity = Activity.valueOf(activity),
+        goal = Goal.valueOf(goal),
         formula = formula,
         diet = diet
     )
-}
-
-sealed class SyncResult {
-    object Success : SyncResult()     // 200 OK
-    object NotFound : SyncResult()    // 404 - Usuario nuevo sin settings
-    object NetworkError : SyncResult() // Error de conexión
-    object Error : SyncResult()       // Otros errores (Timeout, 500, etc)
-}
-
-fun getActivity(activity: String): Activity {
-    return try {
-        Activity.valueOf(activity)
-    } catch (e: IllegalArgumentException) {
-        println("ERROR: GET ACTIVITY [valor = low] $e")
-        Activity.LOW
-    }
-}
-
-fun getGoal(goal: String): Goal {
-    return try {
-        Goal.valueOf(goal)
-    } catch (e: IllegalArgumentException) {
-        println("ERROR: GET GOAL por defecto [valor = maintain] $e")
-        Goal.MAINTAIN
-    }
 }

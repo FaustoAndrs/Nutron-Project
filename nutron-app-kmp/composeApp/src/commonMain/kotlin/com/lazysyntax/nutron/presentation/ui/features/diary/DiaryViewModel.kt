@@ -2,11 +2,15 @@ package com.lazysyntax.nutron.presentation.ui.features.diary
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lazysyntax.nutron.domain.repository.FoodRepository
-import com.lazysyntax.nutron.domain.repository.MealRepository
 import com.lazysyntax.nutron.data.local.meal.toEntity
 import com.lazysyntax.nutron.data.local.meal.toSnapshotEntities
 import com.lazysyntax.nutron.data.remote.authentication.SessionManager
+import com.lazysyntax.nutron.domain.models.Food
+import com.lazysyntax.nutron.domain.models.Meal
+import com.lazysyntax.nutron.domain.models.Nutriments
+import com.lazysyntax.nutron.domain.models.round
+import com.lazysyntax.nutron.domain.repository.FoodRepository
+import com.lazysyntax.nutron.domain.repository.MealRepository
 import com.lazysyntax.nutron.presentation.ui.features.diary.library.LibraryEvent
 import com.lazysyntax.nutron.presentation.ui.features.diary.macros.MacrosEvent
 import com.lazysyntax.nutron.presentation.ui.features.setUp.SetUpUiState
@@ -15,10 +19,6 @@ import com.lazysyntax.nutron.presentation.ui.features.targets.DietPreset
 import com.lazysyntax.nutron.presentation.ui.features.targets.TargetsUiState
 import com.lazysyntax.nutron.presentation.ui.navigation.Navigator
 import com.lazysyntax.nutron.presentation.ui.navigation.Route
-import com.lazysyntax.nutron.domain.models.Food
-import com.lazysyntax.nutron.domain.models.Meal
-import com.lazysyntax.nutron.domain.models.Nutriments
-import com.lazysyntax.nutron.domain.models.round
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -37,6 +37,7 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
+import kotlin.uuid.Uuid
 
 
 class DiaryViewModel(
@@ -103,8 +104,7 @@ class DiaryViewModel(
         val ebValue = Calculator.calculateEB(getValue, goal.factor)
 
         return TargetsUiState(
-            dailyKcal = "${ebValue.toInt()}",
-            diet = DietPreset.fromLabel(this.diet).toDiet()
+            dailyKcal = "${ebValue.toInt()}", diet = DietPreset.fromLabel(this.diet).toDiet()
         )
     }
 
@@ -126,8 +126,8 @@ class DiaryViewModel(
     }
 
     enum class SearchSource { LOCAL, API }
-    
-    
+
+
     fun onLibraryEvent(libraryEvent: LibraryEvent) {
         when (libraryEvent) {
             is LibraryEvent.BarcodeChanged -> onBarcodeFieldChange(libraryEvent.barcode)
@@ -145,6 +145,7 @@ class DiaryViewModel(
                     )
                 }
             }
+
             LibraryEvent.OnClickBack -> {
                 onBack()
                 _uiState.update {
@@ -175,7 +176,7 @@ class DiaryViewModel(
             }
 
             MacrosEvent.OnclickSave -> {
-                addFood()
+                addFoodToMeal()
                 navigator.resetTo(Route.Diary)
             }
         }
@@ -272,7 +273,6 @@ class DiaryViewModel(
     }
 
 
-
     fun onProductNameFieldChange(productName: String) {
         _uiState.update {
             it.copy(
@@ -319,7 +319,7 @@ class DiaryViewModel(
                 if (product != null) {
                     // Aseguramos que el barcode esté presente en el objeto y generamos un ID si no lo tiene
                     val productWithId = product.copy(
-                        id = product.id ?: kotlin.uuid.Uuid.random().toString(),
+                        id = product.id ?: Uuid.random().toString(),
                         barcode = product.barcode ?: barcode,
                         nutriments = product.nutriments?.copy(
                             quantity = product.nutriments.quantity ?: "100",
@@ -330,12 +330,9 @@ class DiaryViewModel(
                     _uiState.update {
                         it.copy(
                             libraryUiState = it.libraryUiState.copy(
-                                foodResult = productWithId,
-                                isLoading = false
-                            ),
-                            macrosUiState = it.macrosUiState.copy(
-                                food = productWithId,
-                                editedFood = productWithId
+                                foodResult = productWithId, isLoading = false
+                            ), macrosUiState = it.macrosUiState.copy(
+                                food = productWithId, editedFood = productWithId
                             )
                         )
                     }
@@ -346,8 +343,7 @@ class DiaryViewModel(
                     _uiState.update {
                         it.copy(
                             libraryUiState = it.libraryUiState.copy(
-                                error = "barcode_not_found",
-                                isLoading = false
+                                error = "barcode_not_found", isLoading = false
                             )
                         )
                     }
@@ -356,8 +352,7 @@ class DiaryViewModel(
                 _uiState.update {
                     it.copy(
                         libraryUiState = it.libraryUiState.copy(
-                            error = e.message ?: "error",
-                            isLoading = false
+                            error = e.message ?: "error", isLoading = false
                         )
                     )
                 }
@@ -380,8 +375,7 @@ class DiaryViewModel(
                 _uiState.update {
                     it.copy(
                         libraryUiState = it.libraryUiState.copy(
-                            foodListResult = foods,
-                            isLoading = false
+                            foodListResult = foods, isLoading = false
                         )
                     )
                 }
@@ -389,8 +383,7 @@ class DiaryViewModel(
                 _uiState.update {
                     it.copy(
                         libraryUiState = it.libraryUiState.copy(
-                            error = e.message ?: "error",
-                            isLoading = false
+                            error = e.message ?: "error", isLoading = false
                         )
                     )
                 }
@@ -403,8 +396,9 @@ class DiaryViewModel(
             foods
         } else {
             foods.filter {
-                it.name?.contains(query, ignoreCase = true) == true ||
-                        it.brands?.contains(query, ignoreCase = true) == true
+                it.name?.contains(query, ignoreCase = true) == true || it.brands?.contains(
+                    query, ignoreCase = true
+                ) == true
             }
         }
         return filtered.sortedBy { it.name?.lowercase() ?: "" }
@@ -418,17 +412,16 @@ class DiaryViewModel(
             val localFood = food.barcode?.let { foodRepository.getSavedFoodByCode(it) }
 
             val foodWithId = food.copy(
-                id = food.id ?: localFood?.id ?: kotlin.uuid.Uuid.random().toString(),
+                id = food.id ?: localFood?.id ?: Uuid.random().toString(),
                 nutriments = food.nutriments?.copy(
-                    quantity = food.nutriments.quantity ,
+                    quantity = food.nutriments.quantity,
                     quantityUnit = food.nutriments.quantityUnit
                 ) ?: Nutriments()
             )
             _uiState.update {
                 it.copy(
                     macrosUiState = it.macrosUiState.copy(
-                        food = foodWithId,
-                        editedFood = foodWithId
+                        food = foodWithId, editedFood = foodWithId
                     )
                 )
             }
@@ -475,8 +468,7 @@ class DiaryViewModel(
                 fat = baseNutriments.fat?.let { (it * factor).round(2) },
                 saturatedFat = baseNutriments.saturatedFat?.let { (it * factor).round(2) },
                 sugars = baseNutriments.sugars?.let { (it * factor).round(2) },
-                salt = baseNutriments.salt?.let { (it * factor).round(2) }
-            )
+                salt = baseNutriments.salt?.let { (it * factor).round(2) })
 
             // Actualizamos editedFood dentro de macrosUiState
             state.copy(
@@ -506,13 +498,12 @@ class DiaryViewModel(
             userId = sessionManager.getUserId() ?: "no_user_id",
             date = _uiState.value.date,
         )
-        
+
         // 3. Persistimos (el DAO ya maneja el borrado de snapshots antiguos en la transacción)
         mealRepository.insertMealWithFood(
-            mealEntity = mealEntity,
-            snapshots = mealToSave.toSnapshotEntities(mealEntity.id)
+            mealEntity = mealEntity, snapshots = mealToSave.toSnapshotEntities(mealEntity.id)
         )
-        
+
         // 4. Refrescamos los datos
         loadMealsForDate(_uiState.value.date)
     }
@@ -520,32 +511,31 @@ class DiaryViewModel(
     /**
      * Añade el alimento actual a la lista de alimentos de la comida.
      */
-    fun addFood() {
+    fun addFoodToMeal() {
         val currentState = _uiState.value
         val selectedMeal = currentState.selectedMeal ?: return
         val selectedFood = currentState.macrosUiState.editedFood
         val foodOriginal = currentState.macrosUiState.food
 
-        // 1. Obtener la comida actual del estado de la UI (que ya tiene los alimentos anteriores)
+        // 1. Obtiene el "Meal" actual del estado de la UI
         val currentMealInList = currentState.meals?.find { it.name == selectedMeal.name }
-        
-        // 2. Combinar la lista de alimentos (los que ya tenía + el nuevo)
+
+        // 2. Combina la lista de alimentos para el "Meal" seleccionado
         val updatedFoods = (currentMealInList?.foods ?: emptyList()) + selectedFood
         val updatedMeal = (currentMealInList ?: selectedMeal).copy(foods = updatedFoods)
 
-        // 3. Actualizamos el estado de la UI de forma optimista
+        // 3. Actualiza el estado de la UI
         val updatedMeals = currentState.meals?.map { meal ->
             if (meal.name == updatedMeal.name) updatedMeal else meal
         }
 
         _uiState.update {
             it.copy(
-                meals = updatedMeals,
-                selectedMeal = null
+                meals = updatedMeals, selectedMeal = null
             )
         }
 
-        // 4. Persistir en la base de datos (onSaveMealWithFood se encargará de usar el ID correcto)
+        // 4. Persistir en la base de datos
         viewModelScope.launch {
             onSaveFood(foodOriginal!!)
             onSaveMealWithFood(updatedMeal)

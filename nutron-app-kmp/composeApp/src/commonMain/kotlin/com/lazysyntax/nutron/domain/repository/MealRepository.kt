@@ -21,9 +21,8 @@ interface MealRepository {
 
     suspend fun insertMealWithFood(mealEntity: MealEntity, snapshots: List<MealFoodSnapshotEntity>)
 
-    // ... métodos existentes ...
     suspend fun downloadAndSyncMeals(): Boolean
-    suspend fun syncPendingMeals(): Int // Retorna cuántas se sincronizaron
+    suspend fun syncPendingMeals(): Int
 
     fun getUnsyncedMealsCount(): Flow<Int>
 }

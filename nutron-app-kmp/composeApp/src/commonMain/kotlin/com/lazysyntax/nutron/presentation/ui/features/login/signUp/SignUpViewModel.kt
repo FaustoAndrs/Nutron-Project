@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.lazysyntax.nutron.data.remote.authentication.AuthRepository
 import com.lazysyntax.nutron.data.remote.authentication.AuthResult
 import com.lazysyntax.nutron.data.remote.authentication.SessionManager
-import com.lazysyntax.nutron.data.remote.synchronization.toUserSetupEntity
+import com.lazysyntax.nutron.data.remote.synchronization.toUserSetupDto
 import com.lazysyntax.nutron.presentation.ui.navigation.Navigator
 import com.lazysyntax.nutron.presentation.ui.navigation.Route
 import com.lazysyntax.nutron.domain.models.User
@@ -94,13 +94,13 @@ class SignUpViewModel(
     }
 
 
-    fun onSignUp(newUser: User) {
+    fun onSignUp(newUserDto: User) {
         val validation = validator.validate(_uiState.value)
         if (!validation.error) {
             viewModelScope.launch {
                 _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-                val result = authRepository.register(newUser = newUser)
+                val result = authRepository.register(newUser = newUserDto)
 
                 _uiState.update {
                     it.copy(
@@ -136,11 +136,11 @@ class SignUpViewModel(
                 fullName = guestState.fullName,
                 email = guestState.email,
                 password = guestState.password,
-                userSetup = preferences.setupUiState.toUserSetupEntity()
+                userSetup = preferences.setupUiState.toUserSetupDto()
             )
 
             sessionManager.setGuestLogin(logged = false)
-            onSignUp(newUser = newUser)
+            onSignUp(newUserDto = newUser)
         }else{
             println("DEBUG SIGN UP (as GUEST): currentGuestId -> $currentGuestId is NULL, no data synced")
         }
