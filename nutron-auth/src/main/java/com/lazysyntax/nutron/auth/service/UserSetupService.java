@@ -1,12 +1,10 @@
 package com.lazysyntax.nutron.auth.service;
 
-import com.lazysyntax.nutron.auth.converter.UserSetupConverter;
 import com.lazysyntax.nutron.auth.model.entity.User;
 import com.lazysyntax.nutron.auth.model.entity.UserSetup;
 import com.lazysyntax.nutron.auth.model.dto.UserSetupRequest;
 import com.lazysyntax.nutron.auth.model.dto.UserSetupResponse;
 import com.lazysyntax.nutron.auth.repository.UserRepository;
-import com.lazysyntax.nutron.auth.repository.UserSetupRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,26 +15,28 @@ import static com.lazysyntax.nutron.auth.converter.UserSetupConverter.*;
 @RequiredArgsConstructor
 public class UserSetupService {
 
-    private final UserSetupRepository userSetupRepository;
     private final UserRepository userRepository;
 
-
     @Transactional
-    public UserSetupResponse saveOrUpdateSetup(String userIdStr, UserSetupRequest request) {
+    public UserSetupResponse saveSetup(String userUuid, UserSetupRequest request) {
 
-        User user = userRepository.findById(userIdStr)
+        //Se comprueba que existe el usuario
+        User user = userRepository.findById(userUuid)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
 
         UserSetup setup = user.getUserSetup();
         if (setup == null) {
-            setup = toEntity(request, user);
+            setup = toEntity(request, user); // Cuando el usuario configura sus parametros
             user.setUserSetup(setup);
         } else {
-            setup = toEntity(request, setup);
+            setup = toEntity(request); // Cuando el usuario actualiza sus parametros
         }
 
-        // Guardamos el usuario, que por cascada guardará el setup
+        // Guardamos en el usuario el setup.
         User savedUser = userRepository.save(user);
+
+        //UserSetup mapeado como Response
         return toResponse(savedUser.getUserSetup());
     }
 

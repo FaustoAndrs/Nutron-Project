@@ -1,4 +1,4 @@
-    package com.lazysyntax.nutron.nutrition.security.jwt;
+    package com.lazysyntax.nutron.nutrition.service;
 
     import io.jsonwebtoken.Claims;
     import io.jsonwebtoken.Jwts;
@@ -11,14 +11,10 @@
     import java.util.function.Function;
 
     @Component
-    public class JwtUtil {
+    public class JwtService {
 
         @Value("${jwt.secret}")
-        private String secret;
-
-        private SecretKey getSigningKey() {
-            return Keys.hmacShaKeyFor(secret.getBytes());
-        }
+        private String secretKey;
 
         public String extractUserId(String token) {
             return extractClaim(token, Claims::getSubject);
@@ -34,14 +30,21 @@
         }
 
         private Claims extractAllClaims(String token) {
-            return Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
+            return Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        }
+        private SecretKey getSigningKey() {
+            return Keys.hmacShaKeyFor(secretKey.getBytes());
         }
 
         private Boolean isTokenExpired(String token) {
             return extractExpiration(token).before(new Date());
         }
 
-        public Boolean validateToken(String token) {
+        public Boolean isTokenValid(String token) {
             return !isTokenExpired(token);
         }
     }

@@ -16,6 +16,9 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
+    /**
+    * Clave de cifrado JWT genearado en PowerShell con Opensssl comando: openssl rand -base64 48
+     * **/
     @Value("${jwt.secret}")
     private String secretKey;
 
@@ -26,10 +29,17 @@ public class JwtService {
     @Value("${jwt.refresh-token-expiration:604800000}") // 7 days
     private long refreshTokenExpiration;
 
+    /**
+     * Genear un token de acceso con un tiempo de expiracion de 1h (2min para DEBUG)
+     */
+
     public String generateAccessToken(String userId) {
         return buildToken(new HashMap<>(), userId, accessTokenExpiration);
     }
 
+    /**
+     * Genear un token de actualización con un tiempo de expiracion de 7 días
+     */
     public String generateRefreshToken(String userId) {
         return buildToken(new HashMap<>(), userId, refreshTokenExpiration);
     }
@@ -44,6 +54,10 @@ public class JwtService {
                 .compact();
     }
 
+   /*
+    * Los Calim son informacion útil definida en el token (Payload)
+    *  que permite identificar al usuario y validar sus tokens (id, tiempo de expiracion, rol,...).
+    */
     public String extractUserId(String token) {
         return extractClaim(token, Claims::getSubject);
     }

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-@Service //Marca esta lase como un componente de servicio en Spring
+@Service //Marca esta clase como un componente de servicio en Spring
 public class UserService {
     @Autowired // Inyecta una instancia de UserRepository
     private UserRepository userRepository;

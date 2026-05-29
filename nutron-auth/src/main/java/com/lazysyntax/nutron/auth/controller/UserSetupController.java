@@ -21,7 +21,7 @@ public class UserSetupController {
             @AuthenticationPrincipal String userId,
             @RequestBody UserSetupRequest request
     ) {
-        return ResponseEntity.ok(userSetupService.saveOrUpdateSetup(userId, request));
+        return ResponseEntity.ok(userSetupService.saveSetup(userId, request));
     }
 
     @GetMapping

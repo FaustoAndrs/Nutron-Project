@@ -23,7 +23,7 @@ public class UserSetupConverter {
                 .build();
     }
 
-    public static UserSetup toEntity(UserSetupRequest request, UserSetup existingSetup) {
+    public static UserSetup toEntity(UserSetupRequest request) {
         return UserSetup.builder()
                 .weight(request.weight())
                 .height(request.height())

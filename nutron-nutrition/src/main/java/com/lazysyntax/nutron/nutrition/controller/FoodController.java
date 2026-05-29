@@ -1,16 +1,17 @@
 package com.lazysyntax.nutron.nutrition.controller;
 
-import com.lazysyntax.nutron.nutrition.model.dto.MealRequest.FoodDto;
+import com.lazysyntax.nutron.nutrition.model.dto.FoodDto;
 import com.lazysyntax.nutron.nutrition.model.entity.Food;
 import com.lazysyntax.nutron.nutrition.service.FoodService;
-import com.lazysyntax.nutron.nutrition.util.FoodConverters;
+import com.lazysyntax.nutron.nutrition.converter.FoodConverters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/foods")
@@ -29,36 +30,23 @@ public class FoodController {
         return new ResponseEntity<>(FoodConverters.toDto(createdFood), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<FoodDto> updateFood(@PathVariable String id, @RequestBody FoodDto foodDto) {
-        Food updatedFood = foodService.updateFood(id, foodDto);
-        if (updatedFood != null) {
-            return ResponseEntity.ok(FoodConverters.toDto(updatedFood));
+    @GetMapping("/me")
+    public ResponseEntity<List<FoodDto>> getFoodsForAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userId;
+        if (authentication != null && authentication.isAuthenticated()) {
+            userId = (String) authentication.getPrincipal();
+        } else {
+            return ResponseEntity.status(401).build(); // Unauthorized
         }
-        return ResponseEntity.notFound().build();
-    }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteFood(@PathVariable String id) {
-        foodService.deleteFood(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<FoodDto> getFoodById(@PathVariable String id) {
-        Food food = foodService.getFoodById(id);
-        if (food != null) {
-            return ResponseEntity.ok(FoodConverters.toDto(food));
+        List<FoodDto> foods = foodService.getFoodsByUserId(userId);
+        if(foods != null && !foods.isEmpty()) {
+            return ResponseEntity.ok(foods);
         }
-        return ResponseEntity.notFound().build();
-    }
+        else {
+            return ResponseEntity.notFound().build();
+        }
 
-    @GetMapping
-    public ResponseEntity<List<FoodDto>> getAllFoods() {
-        List<Food> foods = foodService.getAllFoods();
-        List<FoodDto> foodDtos = foods.stream()
-                .map(FoodConverters::toDto)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(foodDtos);
     }
 }

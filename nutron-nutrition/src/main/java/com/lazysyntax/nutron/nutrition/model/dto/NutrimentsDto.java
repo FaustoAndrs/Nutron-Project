@@ -1,19 +1,16 @@
-package com.lazysyntax.nutron.nutrition.model.entity;
+package com.lazysyntax.nutron.nutrition.model.dto;
 
-import jakarta.persistence.Embeddable;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Objects;
-
-@Embeddable
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Nutriments {
+public class NutrimentsDto {
     private String quantity = "100";
     private String quantityUnit = "g";
     private Double calories;
@@ -23,4 +20,5 @@ public class Nutriments {
     private Double saturatedFat;
     private Double sugars;
     private Double salt;
+
 }

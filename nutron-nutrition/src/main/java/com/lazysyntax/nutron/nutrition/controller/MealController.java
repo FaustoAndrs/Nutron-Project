@@ -1,12 +1,14 @@
 package com.lazysyntax.nutron.nutrition.controller;
 
-import com.lazysyntax.nutron.nutrition.model.dto.MealRequest.MealDto;
+import com.lazysyntax.nutron.nutrition.model.dto.MealDto;
 import com.lazysyntax.nutron.nutrition.service.MealService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/meals")
@@ -23,48 +25,37 @@ public class MealController {
     public ResponseEntity<MealDto> createMeal(@RequestBody MealDto mealDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userId = null;
+
+        // Si el usuario esta autorizado y validado, se extrae el Uuid y se vincula al nuevo registro "Meal".
         if (authentication != null && authentication.isAuthenticated()) {
             userId = (String) authentication.getPrincipal();
-            mealDto.setUserId(userId); // Set the userId from the authenticated user
+            mealDto.setUserId(userId);
         } else {
-            // Handle case where user is not authenticated, though JwtRequestFilter should prevent this
-            return ResponseEntity.status(401).build(); // Unauthorized
+            return ResponseEntity.status(401).build();
         }
 
-        // Use the service to create the meal
         MealDto createdMeal = mealService.createMeal(mealDto);
 
         return ResponseEntity.ok(createdMeal);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<MealDto> updateMeal(@PathVariable String id, @RequestBody MealDto mealDto) {
+    @GetMapping("/me") // Endpoint para obtener las comidas "Meals" del usuario autenticado
+    public ResponseEntity<List<MealDto>> getMealsForAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userId = null;
+
         if (authentication != null && authentication.isAuthenticated()) {
             userId = (String) authentication.getPrincipal();
-            // Ensure the meal being updated belongs to the authenticated user, or handle authorization
-            // For now, we'll just set the userId in the DTO if it's not already set,
-            // but a more robust solution would involve checking ownership in the service layer.
-            if (mealDto.getUserId() == null) {
-                mealDto.setUserId(userId);
-            }
         } else {
-            return ResponseEntity.status(401).build(); // Unauthorized
+            return ResponseEntity.status(401).build();
         }
 
-        MealDto updatedMeal = mealService.updateMeal(id, mealDto);
+        List<MealDto> meals = mealService.getMealsByUserId(userId);
 
-        if (updatedMeal != null) {
-            return ResponseEntity.ok(updatedMeal);
+        if (meals != null && !meals.isEmpty()) {
+            return ResponseEntity.ok(meals);
         } else {
             return ResponseEntity.notFound().build();
         }
-    }
-
-    // Example of a public endpoint (no authentication required)
-    @GetMapping("/public/hello")
-    public ResponseEntity<String> publicHello() {
-        return ResponseEntity.ok("Hello from public endpoint!");
     }
 }
