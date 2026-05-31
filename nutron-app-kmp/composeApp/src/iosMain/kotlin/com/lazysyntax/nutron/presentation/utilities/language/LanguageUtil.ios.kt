@@ -6,6 +6,5 @@ import platform.Foundation.setValue
 
 actual fun changeLanguage(lang: String) {
     NSUserDefaults.standardUserDefaults.setValue(listOf(lang), forKey = "AppleLanguages")
-    // Nota: En iOS, los cambios de AppleLanguages suelen requerir reiniciar la app
-    // o manejar la reactividad manualmente en el root.
+    // Nota: En iOS, el cambio de idioma requerir reiniciar la app
 }

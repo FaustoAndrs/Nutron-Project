@@ -27,7 +27,6 @@ abstract class NutronDatabase : RoomDatabase() {
     abstract fun mealDao(): MealDao
     //abstract fun recipeDao(): RecipeDao
 }
-    // The Room compiler generates the implementation for this class.
     @Suppress("KotlinNoActualForExpect")
     expect object NutronDatabaseConstructor : RoomDatabaseConstructor<NutronDatabase> {
         override fun initialize(): NutronDatabase

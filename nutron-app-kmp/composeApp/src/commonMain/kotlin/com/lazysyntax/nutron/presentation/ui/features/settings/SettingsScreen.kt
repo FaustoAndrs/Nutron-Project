@@ -276,14 +276,6 @@ fun SettingsScreen(
                                 tint = MaterialTheme.colorScheme.secondary
                             )
                         },
-                        /*trailingContent = {
-                            if (uiState.isGeneratingTestData) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
-                                    strokeWidth = 2.dp
-                                )
-                            }
-                        },*/
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                         modifier = Modifier.clickable(enabled = !uiState.isGeneratingTestData) {
                             viewModel.onSettingsEvent(SettingsEvent.GenerateTestData)

@@ -36,7 +36,6 @@ class AuthRepository(
 
                 println("Token decodificado - UserId: $userId")
 
-                // Llamada corregida sin el parámetro isLoggedIn
                 sessionManager.saveSession(
                     userId = userId ?: "",
                     email = email,

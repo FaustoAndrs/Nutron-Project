@@ -12,8 +12,8 @@ services:
       - TZ=Europe/Madrid # Sincroniza la zona horaria en MySQL
     volumes:
       - /etc/localtime:/etc/localtime:ro # Lee la hora del host
-      #- ./scripts-db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro #Script de inicialización
-      #- auth-data:/var/lib/mysql # <-- Persistencia para auth
+      - ./scripts-db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro #Script de inicialización
+      - auth-data:/var/lib/mysql # <-- Persistencia para auth
     ports:
       - "3306:3306"
     networks:

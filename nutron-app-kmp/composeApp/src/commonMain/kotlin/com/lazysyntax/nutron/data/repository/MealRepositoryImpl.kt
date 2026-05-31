@@ -29,7 +29,7 @@ class MealRepositoryImpl(
 ) : MealRepository {
 
     override suspend fun createMeal(name: String, foods: List<Food>) {
-        // 1. Insert the meal and get its ID
+        // 1. Inserta un nuevo registro Meal vinculado al Usuario
         val userId = sessionManager.getUserId() ?: throw Exception()
         mealDao.insertMeal(MealEntity(
             name = name,
@@ -65,7 +65,7 @@ class MealRepositoryImpl(
         val mealWithFoods = MealWithFoods(mealEntity, snapshots)
         val isSynced = mealRemoteDataSource.saveMeal(mealWithFoods.toDto())
 
-        // 3. Update local sync status if successful
+        // 3. Si se ha sincronizado con la base de datos remota, se actualiza el flag de sincronización
         if (isSynced) {
             mealDao.updateMeal(mealEntity.copy(isSynced = true))
         }
@@ -88,7 +88,7 @@ class MealRepositoryImpl(
     }
 
     override suspend fun syncPendingMeals(): Int {
-        val pending = mealDao.getUnsyncedMeals().first() // Necesitas añadir este query al DAO
+        val pending = mealDao.getUnsyncedMeals().first()
         var count = 0
         pending.forEach { mealWithFoods ->
             val isSynced = mealRemoteDataSource.saveMeal(mealWithFoods.toDto())

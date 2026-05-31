@@ -8,6 +8,10 @@ import com.lazysyntax.nutron.domain.models.Nutriments
 import com.lazysyntax.nutron.domain.models.round
 import com.lazysyntax.nutron.domain.repository.FoodRepository
 import com.lazysyntax.nutron.domain.repository.MealRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
@@ -174,57 +178,62 @@ class TestDataGenerator(
 
     )
 
-    suspend fun generateData(months: Int = 2) {
+    suspend fun generateData(months: Int = 2) = coroutineScope {
         val userId = sessionManager.getUserId() ?: "dev_user_id"
         // Usamos Clock de kotlinx.datetime explícitamente
         val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
         val startDate = today.minus(months, DateTimeUnit.MONTH)
 
-        // 1. Asegurar que los alimentos base existen en la biblioteca
-        sampleFoods.forEach { food ->
-            val foodWithId = food.copy(id = Uuid.random().toString())
-            foodRepository.saveFood(foodWithId)
-        }
+        // 1. Asegurar que los alimentos base existen en la biblioteca en paralelo
+        sampleFoods.map { food ->
+            async {
+                val foodWithId = food.copy(id = Uuid.random().toString())
+                foodRepository.saveFood(foodWithId)
+            }
+        }.awaitAll()
 
         // 2. Poblar días
         var currentDate = startDate
         while (currentDate <= today) {
             val template = sessionManager.mealTemplate.value
+            val dateForMeal = currentDate // Captura para la corrutina
 
             template.forEach { templateMeal ->
                 // Decidimos aleatoriamente si esta comida tiene alimentos (80% de probabilidad)
                 if (Random.nextFloat() > 0.2f) {
-                    val numFoods = Random.nextInt(2, 6)
-                    val mealFoods = mutableListOf<Food>()
+                    launch {
+                        val numFoods = Random.nextInt(2, 6)
+                        val mealFoods = mutableListOf<Food>()
 
-                    repeat(numFoods) {
-                        val baseFood = sampleFoods.random()
-                        val quantity = Random.nextDouble(30.0, 150.0).round(1) ?: 100.0
-                        val factor = quantity / 100.0
+                        repeat(numFoods) {
+                            val baseFood = sampleFoods.random()
+                            val quantity = Random.nextDouble(30.0, 150.0).round(1) ?: 100.0
+                            val factor = quantity / 100.0
 
-                        val snapshotFood = baseFood.copy(
-                            id = Uuid.random().toString(),
-                            nutriments = baseFood.nutriments?.copy(
-                                quantity = quantity.toString(),
-                                calories = baseFood.nutriments.calories?.let { (it * factor).round(2) },
-                                proteins = baseFood.nutriments.proteins?.let { (it * factor).round(2) },
-                                carbs = baseFood.nutriments.carbs?.let { (it * factor).round(2) },
-                                fat = baseFood.nutriments.fat?.let { (it * factor).round(2) }
+                            val snapshotFood = baseFood.copy(
+                                id = Uuid.random().toString(),
+                                nutriments = baseFood.nutriments?.copy(
+                                    quantity = quantity.toString(),
+                                    calories = baseFood.nutriments.calories?.let { (it * factor).round(2) },
+                                    proteins = baseFood.nutriments.proteins?.let { (it * factor).round(2) },
+                                    carbs = baseFood.nutriments.carbs?.let { (it * factor).round(2) },
+                                    fat = baseFood.nutriments.fat?.let { (it * factor).round(2) }
+                                )
                             )
+                            mealFoods.add(snapshotFood)
+                        }
+
+                        val meal = templateMeal.copy(
+                            id = Uuid.random().toString(),
+                            foods = mealFoods
                         )
-                        mealFoods.add(snapshotFood)
+
+                        val mealEntity = meal.toEntity(userId, dateForMeal)
+                        mealRepository.insertMealWithFood(
+                            mealEntity = mealEntity,
+                            snapshots = meal.toSnapshotEntities(mealEntity.id)
+                        )
                     }
-
-                    val meal = templateMeal.copy(
-                        id = Uuid.random().toString(),
-                        foods = mealFoods
-                    )
-
-                    val mealEntity = meal.toEntity(userId, currentDate)
-                    mealRepository.insertMealWithFood(
-                        mealEntity = mealEntity,
-                        snapshots = meal.toSnapshotEntities(mealEntity.id)
-                    )
                 }
             }
             currentDate = currentDate.plus(1, DateTimeUnit.DAY)

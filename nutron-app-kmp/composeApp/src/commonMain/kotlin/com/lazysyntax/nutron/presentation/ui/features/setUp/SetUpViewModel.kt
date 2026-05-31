@@ -25,7 +25,7 @@ class SetUpViewModel(
     private val _uiState = MutableStateFlow(sessionManager.getCurrentUserData())
     val uiState: StateFlow<SetUpUiState> = _uiState.asStateFlow()
 
-    // 1. Añadimos un Set para rastrear los campos interactuados
+    // 1. Añadimos un Set para los campos con los que interactúe el usuario y monitorizar los cambios
     private val _dirtyFields = MutableStateFlow<Set<String>>(emptySet())
 
 
@@ -33,11 +33,11 @@ class SetUpViewModel(
         // Observamos los cambios en el SessionManager
         viewModelScope.launch {
             sessionManager.userData.collect { freshData ->
-                // Solo actualizamos si el estado actual está vacío (o según tu lógica)
+                // Solo actualiza si el estado actual está vacío
                 // para no sobreescribir lo que el usuario esté escribiendo
                 if (freshData == SetUpUiState() || _uiState.value == SetUpUiState() || _dirtyFields.value.isEmpty()) {
                     _uiState.value = freshData
-                    // Si estamos recibiendo un estado vacío (logout), reseteamos también los campos interactuados
+                    // Si se recibe un estado vacío, reseteamos también los campos interactuados
                     if (freshData == SetUpUiState()) {
                         _dirtyFields.value = emptySet()
                     }
@@ -160,7 +160,6 @@ class SetUpViewModel(
                     println("Server update success")
                 } else {
                     println("Server update failed")
-                    // Podrías manejar el error aquí si fuera necesario
                 }
             }
         }

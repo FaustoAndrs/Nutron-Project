@@ -40,7 +40,7 @@ class ProfileViewModel(
 
     private fun checkAndSyncProfile() {
         viewModelScope.launch {
-            // Estrategia Offline-First: syncUserSetUpIfNeeded solo irá a la red si es estrictamente necesario
+            // Estrategia Offline-First: syncUserSetUpIfNeeded solo irá a la red si es necesario
             when (syncRepository.syncUserSetUpIfNeeded()) {
                 is SyncResult.Success -> {
                     println("PROFILE: Datos verificados correctamente.")

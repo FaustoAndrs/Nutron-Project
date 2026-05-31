@@ -39,7 +39,7 @@ actual fun platformModule(): Module = module {
         )
     }
 
-    // ... resto de tus settings
+    // el REsto de settings de tus settings
     single<Settings>(named("encrypted")) {
         KeychainSettings(service = "com.lazysyntax.nutron")
     }

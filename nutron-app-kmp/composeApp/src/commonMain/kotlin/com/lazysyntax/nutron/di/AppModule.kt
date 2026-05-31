@@ -32,6 +32,7 @@ import com.lazysyntax.nutron.presentation.ui.navigation.Navigator
 import com.lazysyntax.nutron.presentation.ui.navigation.Route
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BasicAuthCredentials
 import io.ktor.client.plugins.auth.providers.BearerTokens
@@ -72,6 +73,11 @@ val appModule = module {
         val sessionManager: SessionManager = get()
 
         HttpClient {
+            install(HttpTimeout) {
+                requestTimeoutMillis = 10000 // 10 segundos para toda la petición
+                connectTimeoutMillis = 5000  // 5 segundos para establecer conexión
+                socketTimeoutMillis = 5000   // 5 segundos de inactividad entre paquetes
+            }
             install(Logging)     {
                 logger = object : Logger {
                     override fun log(message: String) {

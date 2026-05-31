@@ -35,13 +35,16 @@ class SettingsViewModel(
         )
     )
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
+
+    // Mantener el estado de la UI sincronizado con el SessionManager
     init {
-        // Mantener el estado de la UI sincronizado con el SessionManager
+        // Observa el idioma seleccionado
         viewModelScope.launch {
             sessionManager.language.collect { lang ->
                 _uiState.update { it.copy(language = lang) }
             }
         }
+
         viewModelScope.launch {
             sessionManager.isDarkTheme.collect { isDark ->
                 _uiState.update { it.copy(isDarkTheme = isDark) }
@@ -53,6 +56,8 @@ class SettingsViewModel(
                 _uiState.update { it.copy(unsyncedMealsCount = count) }
             }
         }
+
+        //Observa si el usuario actual ha accedido a la aplicación como invitado
         viewModelScope.launch {
             sessionManager.isGuestLogged.collect { isGuest ->
                 _uiState.update { it.copy(isGuestLogged = isGuest) }
@@ -68,7 +73,6 @@ class SettingsViewModel(
             }
 
             OnClickLanguage -> {
-                // Aquí podrías mostrar un diálogo, por ahora alternamos entre "es" y "en"
                 val current = sessionManager.language.value
                 val next = if (current == "es") "en" else "es"
 

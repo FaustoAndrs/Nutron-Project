@@ -19,7 +19,7 @@ data class FoodEntity(
     @PrimaryKey
     val foodId: String = Uuid.random().toString(),
     val barcode: String?,
-    val userId: String?,// ID que se comparará con el JWToken en MongoDB
+    val userId: String?,
     val name: String?,
     val lastUpdate: Long = Clock.System.now().toEpochMilliseconds(),
     val isSynced: Boolean = false,

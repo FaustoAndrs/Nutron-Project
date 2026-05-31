@@ -71,8 +71,8 @@ class SyncRepositoryImpl(
     override suspend fun syncUserSetUpIfNeeded(force: Boolean): SyncResult {
 
         val setupState = sessionManager.getCurrentUserData()
-
-        // Comprobamos si hay datos reales
+        //To-do,implementar nueva logica mediante el uuid de usuario.
+        // Comprobamos si hay datos de setup
         val hasData = setupState.height.isNotEmpty() && setupState.weight.isNotEmpty()
 
         println("SYNC: DEBUG -> hasData=$hasData, height='${setupState.height}', weight='${setupState.weight}'")

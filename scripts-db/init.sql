@@ -1,8 +1,5 @@
 -- init.sql
-/*USE auth_db;*z/
-
--- Asegúrate de que la tabla exista antes de insertar si tu Hibernate/JPA no la crea primero,
--- o simplemente confía en las sentencias de inserción si mapeas bien el orden.
+USE auth_db;
 
 CREATE TABLE `users` (
   `id` varchar(255) NOT NULL,
@@ -31,12 +28,16 @@ CREATE TABLE `users_settings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
--- Inserta tus usuarios de prueba
--- NOTA: Si usas Spring Security, la contraseña debería estar ya encriptada (BCrypt)
+-- Usuarios de prueba
 INSERT INTO auth_db.users (id, email, full_name, password, user_name)
-VALUES ('d0398b43-14f5-43ec-962b-1bf5998d2c01', 'usu01@mail.com',	'Usuario De Prueba',	'$2a$10$Ovg3hiORKMAyL0RJeeUATOxvbSFGrtnaoeYQY4sBeh3f3JO6CKSBu',	'UsuPrueba01');
+VALUES
+('08fb6649-7978-4860-8e17-82e6a3b3efa2', 'usu01@mail.com', 'usuario cero uno', '$2a$10$cua.pD95aV6NbMFdFV20.O4qdT0hxk16HqrAKh4zRb81W2O5TKhwW', 'usuario 1'),
+('477d87e6-a7d5-47cc-b6b7-af8776ef6e18', 'usu02@mail.com', 'usuario cero dos', '$2a$10$5PwW/DtoP/OZZg0LqQWtluCeinyyEr3PhZ6Id/GIfOOCSzfSmCzfm', 'usuario 2');
+
 
 INSERT INTO users_settings (user_id, activity, age, diet, formula, gender, goal, height, weight) 
-VALUES ('d0398b43-14f5-43ec-962b-1bf5998d2c01', 'MODERATE', '54', 'standard', 'Harris-Benedict', 'Hombre', 'GAIN_MUSCLE', '194', '83'
-)
-*/
+VALUES
+('08fb6649-7978-4860-8e17-82e6a3b3efa2', 'LOW', '25', 'standard', 'Harris-Benedict', 'MAN', 'MAINTAIN', '180', '75'),
+('477d87e6-a7d5-47cc-b6b7-af8776ef6e18', 'LOW', '39', 'standard', 'Harris-Benedict', 'MAN', 'MAINTAIN', '199', '89');
+
+
