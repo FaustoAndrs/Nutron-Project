@@ -1,23 +1,5 @@
 services:
-
-# --- CAPA DE RED Y DNS ---
-  dns-server:
-    image: jpillora/dnsmasq
-    container_name: nutron-dns
-    restart: always
-    ports:
-      - "53:53/udp"
-      - "53:53/tcp"
-    environment:
-      - USER=admin
-      - PASS=admin_password # Interfaz web opcional para ver logs en el puerto 8080 si lo mapeas
-    volumes:
-      - ./dnsmasq.conf:/etc/dnsmasq.conf:ro
-      - ./dnsmasq.hosts:/etc/dnsmasq.hosts:ro
-    networks:
-      - backend-net
   # --- CAPA DE DATOS ---
-  
   # Base de datos relacional para Usuarios
   mysql-db:
     image: mysql:8.0

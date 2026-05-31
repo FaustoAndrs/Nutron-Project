@@ -1,6 +1,0 @@
-# Solo cambias esta IP cuando cambies drásticamente de red (Wifi Casa vs Punto de acceso)
-
-#192.168.1.45  auth.nutron.local nutrition.nutron.local #En mac wifi casa
-# 192.168.1.38  auth.nutron.local nutrition.nutron.local #En windows con wifi casa
- 172.20.10.2  auth.nutron.local nutrition.nutron.local # En mac con punto de acceso iphone
-# 10.0.2.2 auth.nutron.local nutrition.nutron.local #Emulador Android
